@@ -18,6 +18,7 @@ services:
       start_period: 40s
     networks:
       - parselmonitor-network
+      - nginx-proxy-manager
 
   frontend:
     container_name: parselmonitor-frontend
@@ -45,10 +46,14 @@ services:
       start_period: 40s
     networks:
       - parselmonitor-network
+      - nginx-proxy-manager
 
 networks:
   parselmonitor-network:
     driver: bridge
+  nginx-proxy-manager:
+    external: true
+    name: npm_network
 
 volumes:
   node_modules:
