@@ -17,8 +17,7 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - parselmonitor-network
-      - nginx-proxy-manager
+      - default
 
   frontend:
     container_name: parselmonitor-frontend
@@ -45,15 +44,12 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - parselmonitor-network
-      - nginx-proxy-manager
+      - default
 
 networks:
-  parselmonitor-network:
-    driver: bridge
-  nginx-proxy-manager:
+  default:
     external: true
-    name: npm_network
+    name: bridge
 
 volumes:
   node_modules:
