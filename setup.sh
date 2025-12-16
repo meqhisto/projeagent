@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# ParselMonitor Setup Script
+# Bu script projeyi Docker üzerinde otomatik olarak kurar ve başlatır.
+
+echo "🚀 ParselMonitor Kurulumu Başlatılıyor..."
+
+# 1. Docker Kontrolü
+if ! command -v docker &> /dev/null; then
+    echo "❌ Docker bulunamadı! Lütfen önce Docker'ı yükleyin."
+    exit 1
+fi
+
+if ! command -v docker-compose &> /dev/null; then
+    echo "❌ docker-compose bulunamadı! Lütfen yükleyin."
+    exit 1
+fi
+
+# 2. .env Dosyası Kontrolü
+if [ ! -f .env ]; then
+    echo "⚠️ .env dosyası bulunamadı. Varsayılan ayarlarla oluşturuluyor..."
+    cat <<EOT >> .env
+DATABASE_URL="file:/app/prisma/dev.db"
+AUTH_SECRET="fc83539cfs734346_generated_secret_key_12345"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="fc83539cfs734346_generated_secret_key_12345"
+EOT
+    echo "✅ .env oluşturuldu."
+else
+    echo "✅ .env dosyası mevcut."
+fi
+
+# 3. Docker Konteynerlerini Başlatma
+echo "📦 Konteynerler derleniyor ve başlatılıyor (bu işlem biraz sürebilir)..."
+docker-compose up --build -d
+
+if [ $? -eq 0 ]; then
+    echo "✅ Konteynerler başarıyla başlatıldı."
+else
+    echo "❌ Konteynerler başlatılamadı."
+    exit 1
+fi
+
+# 4. Veritabanı Hazırlığı (Opsiyonel: Eğer volume boşsa)
+echo "🗄️ Veritabanı kontrol ediliyor..."
+# Docker içinde migration ve seed işlemini tetikleyebiliriz
+docker-compose exec -T frontend npx prisma migrate deploy
+docker-compose exec -T frontend npx prisma generate
+
+# Kullanıcı oluşturma (Seed)
+echo "👤 Varsayılan kullanıcılar oluşturuluyor..."
+docker-compose exec -T frontend npx tsx prisma/seed.ts
+
+echo "----------------------------------------------------------------"
+echo "🎉 Kurulum Tamamlandı!"
+echo "👉 Frontend: http://localhost:3000"
+echo "👉 Backend:  http://localhost:8000"
+echo "----------------------------------------------------------------"
