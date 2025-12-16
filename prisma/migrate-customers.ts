@@ -27,7 +27,7 @@ async function migrateCustomers() {
 
         // 2. Count customers without owner
         const orphanedCustomers = await prisma.customer.count({
-            where: { ownerId: null }
+            where: { ownerId: null as any }
         });
 
         console.log(`📊 Found ${orphanedCustomers} customers without owner\n`);
@@ -39,7 +39,7 @@ async function migrateCustomers() {
 
         // 3. Update customers to assign to admin
         const result = await prisma.customer.updateMany({
-            where: { ownerId: null },
+            where: { ownerId: null as any },
             data: { ownerId: adminUser.id }
         });
 
@@ -47,7 +47,7 @@ async function migrateCustomers() {
 
         // 4. Verify migration
         const remainingOrphans = await prisma.customer.count({
-            where: { ownerId: null }
+            where: { ownerId: null as any }
         });
 
         if (remainingOrphans === 0) {
