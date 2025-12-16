@@ -12,7 +12,7 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/login");
-        } else if (status === "authenticated" && session?.user?.role !== "ADMIN") {
+        } else if (status === "authenticated" && (session?.user as any)?.role !== "ADMIN") {
             router.push("/");
         }
     }, [status, session, router]);
@@ -25,7 +25,7 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
         );
     }
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || (session.user as any).role !== "ADMIN") {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
