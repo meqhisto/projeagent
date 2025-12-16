@@ -21,7 +21,7 @@ export default function RootLayout({
   const isLoginPage = pathname === "/login";
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body className={`${inter.className} ${isLoginPage ? '' : 'bg-gray-50 text-gray-900'}`}>
         <AuthProvider>
           {isLoginPage ? (

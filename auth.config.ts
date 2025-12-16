@@ -10,11 +10,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
+                console.log("Authorize called with:", credentials?.email);
                 if (!credentials?.email || !credentials?.password) {
                     return null;
                 }
 
                 // Call API endpoint for password verification
+                console.log("Fetching verify endpoint...");
                 const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/verify`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
