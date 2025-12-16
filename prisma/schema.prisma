@@ -1,0 +1,171 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Parcel {
+  id           Int         @id @default(autoincrement())
+  city         String
+  district     String
+  neighborhood String
+  island       String      // Ada
+  parsel       String      // Parsel
+  area         Float?
+  latitude     Float?      // Coordinate for map
+  longitude    Float?      // Coordinate for map
+  status       String      @default("PENDING") // PENDING, RESEARCHING, COMPLETED
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  crmStage     String      @default("NEW_LEAD") // "NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"
+  
+  ownerId      Int         // User who owns this parcel
+  owner        User        @relation("OwnedParcels", fields: [ownerId], references: [id])
+  assignedTo   Int?        // Optional: assigned to another user
+  assignee     User?       @relation("AssignedParcels", fields: [assignedTo], references: [id])
+  
+  images       Image[]
+  documents    Document[]
+  zoning       ZoningInfo?
+  notes        Note[]
+  interactions Interaction[]
+  stakeholders Customer[]
+
+  @@unique([ownerId, city, district, neighborhood, island, parsel])
+}
+
+// ... (Image, ZoningInfo, Note, ZoningPrecedent models remain unchanged)
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  type      String   // "MAP", "SATELLITE", "TKGM_PARCEL", "TKGM_NEIGHBORHOOD", "UPLOADED"
+  source    String?  // "AUTO" or "USER" - optional for backward compatibility
+  isDefault Boolean  @default(false) // Main image for display
+  parcelId  Int
+  parcel    Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+model ZoningInfo {
+  id          Int      @id @default(autoincrement())
+  parcelId    Int      @unique
+  parcel      Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  ks          Float?   // Kaks (Emsal)
+  taks        Float?   // Taks
+  maxHeight   Float?   // Hmax
+  zoningType  String?  // Konut, Ticaret, Sanayi
+  notes       String?  // AI/Agent research summary
+  sourceUrl   String?
+  retrievedAt DateTime @default(now())
+}
+model Note {
+  id        Int      @id @default(autoincrement())
+  content   String
+  parcelId  Int
+  parcel    Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+model ZoningPrecedent {
+  id           Int      @id @default(autoincrement())
+  city         String
+  district     String
+  neighborhood String
+  type         String   // "RESIDENTIAL", "COMMERCIAL", "MIXED"
+  
+  ks           Float?   // Emsal
+  taks         Float?   // Taks
+  maxHeight    Float?   // Hmax
+  notes        String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([city, district, neighborhood, type])
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      String   // "Land Owner", "Investor", "Agent", "Other"
+  phone     String?
+  email     String?
+  notes     String?
+  
+  ownerId      Int      // User who owns this customer
+  owner        User     @relation("OwnedCustomers", fields: [ownerId], references: [id])
+  
+  parcels      Parcel[]
+  interactions Interaction[]
+  createdAt DateTime @default(now())
+}
+
+model Interaction {
+  id         Int      @id @default(autoincrement())
+  parcelId   Int
+  parcel     Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  customerId Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  
+  type       String   // "Call", "Meeting", "Offer", "Note"
+  content    String
+  date       DateTime @default(now())
+  
+  // Task specific
+  dueDate    DateTime?
+  isCompleted Boolean @default(false)
+
+  createdAt  DateTime @default(now())
+}
+
+model Document {
+  id          Int      @id @default(autoincrement())
+  parcelId    Int
+  parcel      Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  name        String   // User-provided name
+  fileName    String   // Actual filename on server
+  filePath    String   // Path to file
+  fileType    String   // MIME type
+  fileSize    Int      // Size in bytes
+  description String?  // Optional description
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  type        String   // PARCEL_ADDED, RESEARCH_COMPLETED, STAGE_CHANGED, etc.
+  title       String
+  message     String
+  relatedId   Int?     // ParcelId, DocumentId, etc.
+  relatedType String?  // "PARCEL", "DOCUMENT", etc.
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String    // Hashed with bcrypt
+  name      String
+  role      String    @default("USER") // USER, ADMIN
+  isActive  Boolean   @default(true)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  
+  parcels         Parcel[]   @relation("OwnedParcels")
+  assignedParcels Parcel[]   @relation("AssignedParcels")
+  customers       Customer[] @relation("OwnedCustomers")
+  sessions  Session[]
+}
+
+model Session {
+  id        String   @id
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
