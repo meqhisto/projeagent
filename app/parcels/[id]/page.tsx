@@ -118,6 +118,9 @@ export default function ParcelDetailPage() {
     const defaultImage = images.find(img => img.isDefault);
     const mainImage = defaultImage?.url || (images.length > 0 ? images[0].url : null);
 
+    // Fallback to placeholder if no image
+    const displayImage = mainImage || '/placeholder-parcel.jpg';
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20 relative">
             {/* PRINTABLE REPORT TEMPLATE (Hidden normally, visible on print) */}
@@ -180,21 +183,18 @@ export default function ParcelDetailPage() {
                             {/* Main Info Card */}
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative group">
                                 <div className="h-[300px] md:h-[400px] w-full bg-gray-100 relative group-hover:shadow-inner transition-all">
-                                    {mainImage ? (
-                                        <img
-                                            src={mainImage}
-                                            alt="Parcel View"
-                                            className="w-full h-full object-cover"
-                                            crossOrigin="anonymous"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 pattern-grid-lg">
-                                            <div className="flex flex-col items-center">
-                                                <Layers className="h-12 w-12 opacity-20 mb-2" />
-                                                <span className="text-sm font-medium opacity-50">Görüntü Alınıyor...</span>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <img
+                                        src={displayImage}
+                                        alt="Parcel View"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            // Fallback if image fails to load
+                                            const target = e.target as HTMLImageElement;
+                                            if (target.src !== '/placeholder-parcel.jpg') {
+                                                target.src = '/placeholder-parcel.jpg';
+                                            }
+                                        }}
+                                    />
                                     <div className="absolute bottom-4 left-4 flex gap-2">
                                         <span className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-200 flex items-center gap-1">
                                             <Maximize2 className="w-3 h-3" /> {parcel.area ? `${parcel.area} m²` : 'Alan Yok'}
