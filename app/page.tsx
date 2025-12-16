@@ -195,7 +195,7 @@ export default function Home() {
                 city={parcel.city}
                 district={parcel.district}
                 island={parcel.island}
-                parcel={parcel.parcel}
+                parcel={parcel.parsel}
                 status={parcel.status}
                 imageUrl={parcel.images && parcel.images.length > 0 ? parcel.images[0].url : undefined}
                 zoning={parcel.zoning}

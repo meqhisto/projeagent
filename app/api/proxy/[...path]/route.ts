@@ -6,7 +6,10 @@ export async function POST(request: Request, props: { params: Promise<{ path: st
     try {
         const body = await request.json();
         const path = params.path.join("/");
-        const targetUrl = `http://127.0.0.1:8000/${path}`;
+
+        // Use environment variable for Docker compatibility
+        const backendUrl = process.env.INTERNAL_BACKEND_URL || "http://127.0.0.1:8000";
+        const targetUrl = `${backendUrl}/${path}`;
 
         console.log(`[PROXY] Forwarding to: ${targetUrl}`);
 
