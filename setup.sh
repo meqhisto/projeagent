@@ -11,10 +11,17 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
-    echo "❌ docker-compose bulunamadı! Lütfen yükleyin."
+# Docker Compose komutunu belirle (v1 vs v2)
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    echo "❌ docker-compose veya 'docker compose' bulunamadı! Lütfen Docker Compose eklentisini yükleyin."
+    echo "Ubuntu için: sudo apt-get install docker-compose-plugin"
     exit 1
 fi
+echo "✅ Kullanılan Docker Compose komutu: $DOCKER_COMPOSE_CMD"
 
 # 2. .env Dosyası Kontrolü
 if [ ! -f .env ]; then
@@ -32,7 +39,7 @@ fi
 
 # 3. Docker Konteynerlerini Başlatma
 echo "📦 Konteynerler derleniyor ve başlatılıyor (bu işlem biraz sürebilir)..."
-docker-compose up --build -d
+$DOCKER_COMPOSE_CMD up --build -d
 
 if [ $? -eq 0 ]; then
     echo "✅ Konteynerler başarıyla başlatıldı."
@@ -44,12 +51,12 @@ fi
 # 4. Veritabanı Hazırlığı (Opsiyonel: Eğer volume boşsa)
 echo "🗄️ Veritabanı kontrol ediliyor..."
 # Docker içinde migration ve seed işlemini tetikleyebiliriz
-docker-compose exec -T frontend npx prisma migrate deploy
-docker-compose exec -T frontend npx prisma generate
+$DOCKER_COMPOSE_CMD exec -T frontend npx prisma migrate deploy
+$DOCKER_COMPOSE_CMD exec -T frontend npx prisma generate
 
 # Kullanıcı oluşturma (Seed)
 echo "👤 Varsayılan kullanıcılar oluşturuluyor..."
-docker-compose exec -T frontend npx tsx prisma/seed.ts
+$DOCKER_COMPOSE_CMD exec -T frontend npx tsx prisma/seed.ts
 
 echo "----------------------------------------------------------------"
 echo "🎉 Kurulum Tamamlandı!"
