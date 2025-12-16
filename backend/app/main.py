@@ -69,92 +69,28 @@ def calculate_basic(req: CalculationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- RAG ENDPOINTS ---
+# --- RAG ENDPOINTS (DISABLED - Heavy dependencies removed) ---
+# Uncomment and install chromadb, sentence-transformers if needed
 
-@app.post("/rag/upload")
-async def upload_document(file: UploadFile = File(...)):
-    try:
-        from .rag import KnowledgeBase
-    except ImportError:
-        raise HTTPException(status_code=503, detail="RAG Engine could not be loaded.")
+# @app.post("/rag/upload")
+# async def upload_document(file: UploadFile = File(...)):
+#     raise HTTPException(status_code=501, detail="RAG features disabled in minimal build")
 
-    try:
-        # Save temp file
-        if not os.path.exists("temp_uploads"):
-            os.makedirs("temp_uploads")
-            
-        file_path = f"temp_uploads/{file.filename}"
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-            
-        # Ingest
-        num_chunks = KnowledgeBase.ingest_document(file_path, source_name=file.filename)
-        
-        # Cleanup
-        os.remove(file_path)
-        
-        return {"status": "success", "chunks_added": num_chunks, "filename": file.filename}
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=str(e))
+# @app.post("/rag/query")
+# def query_knowledge_base(req: QueryRequest):
+#     raise HTTPException(status_code=501, detail="RAG features disabled in minimal build")
 
-@app.post("/rag/query")
-def query_knowledge_base(req: QueryRequest):
-    try:
-        from .rag import KnowledgeBase
-    except ImportError:
-        raise HTTPException(status_code=503, detail="RAG Engine could not be loaded.")
-        
-    answer = KnowledgeBase.generate_answer(req.question)
-    return {"answer": answer}
+# @app.post("/rag/feasibility")
+# def generate_feasibility(req: FeasibilityRequest):
+#     raise HTTPException(status_code=501, detail="RAG features disabled in minimal build")
 
-class FeasibilityRequest(BaseModel):
-    arsa_m2: float
-    emsal_orani: float
-    taks_orani: float
-    kat_adedi: float
-    on_cekme: str = "-"
-    yan_cekme: str = "-"
-    arka_cekme: str = "-"
+# --- VISION ENDPOINTS (DISABLED - Heavy dependencies removed) ---
 
-@app.post("/rag/feasibility")
-def generate_feasibility(req: FeasibilityRequest):
-    try:
-        from .rag import KnowledgeBase
-    except ImportError:
-        raise HTTPException(status_code=503, detail="RAG Engine could not be loaded.")
-    
-    report_json = KnowledgeBase.generate_feasibility_report(req.dict())
-    return {"report": report_json}
+# @app.post("/vision/analyze")
+# async def analyze_image(file: UploadFile = File(...)):
+#     raise HTTPException(status_code=501, detail="Vision features disabled in minimal build")
 
-# --- VISION ENDPOINTS ---
-
-@app.post("/vision/analyze")
-async def analyze_image(file: UploadFile = File(...)):
-    try:
-        from .vision import VisionEngine
-    except ImportError:
-        raise HTTPException(status_code=503, detail="Vision Engine could not be loaded.")
-
-    try:
-        # Save temp file
-        if not os.path.exists("temp_uploads"):
-            os.makedirs("temp_uploads")
-            
-        file_path = f"temp_uploads/{file.filename}"
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-            
-        # Analyze
-        text = VisionEngine.extract_text_from_image(file_path)
-        
-        # Cleanup
-        os.remove(file_path)
-        
-        return {"status": "success", "extracted_text": text}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+# --- STRICT CALCULATION (KEPT) ---
 
 class StrictCalculationRequest(BaseModel):
     arsa_m2: float

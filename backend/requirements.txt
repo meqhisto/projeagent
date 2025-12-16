@@ -1,8 +1,8 @@
+# Minimal Backend Dependencies
+# Total size: ~100-200 MB (vs 3+ GB with AI packages)
+
 fastapi
 uvicorn
 pydantic
 python-multipart
-pymupdf
-chromadb
-sentence-transformers
 requests
