@@ -5,8 +5,9 @@ import { requireAdmin } from "@/lib/auth/roleCheck";
 
 const prisma = new PrismaClient();
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
+        const params = await props.params;
         await requireAdmin();
 
         const userId = parseInt(params.id);
@@ -41,15 +42,16 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
+        const params = await props.params;
         await requireAdmin();
 
         const userId = parseInt(params.id);
 
         // Prevent deleting yourself
         const currentUser = await requireAdmin();
-        if (parseInt(currentUser.id) === userId) {
+        if (currentUser.id && parseInt(currentUser.id) === userId) {
             return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
         }
 
