@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+    container_name: parselmonitor-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app # Hot reload for dev (optional)
+      - ./backend/temp_uploads:/app/temp_uploads
+    environment:
+      - PORT=8000
+
+  frontend:
+    build: 
+      context: .
+    container_name: parselmonitor-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/app/prisma/dev.db
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=fc83539cfs734346_generated_secret_key_12345
+      - AUTH_SECRET=fc83539cfs734346_generated_secret_key_12345
+      # In Docker, backend is accessed internally by service name for server-side calls?
+      # But standard fetch in Next.js might be client-side.
+      # If using Proxy or Server Actions, we might need internal URL.
+      # For now assuming client-side browser access mainly, but let's see.
+    volumes:
+      - ./prisma:/app/prisma # Persist SQLite DB
+    depends_on:
+      - backend
+
+# Note: Backend URL handling
+# If frontend makes API calls from the BROWSER, it uses localhost:8000.
+# If frontend makes API calls from the SERVER (SSR), it should use http://backend:8000.
+# You may need to configure an environment variable for BACKEND_URL similar to:
+# NEXT_PUBLIC_API_URL=http://localhost:8000 (Client)
+# INTERNAL_API_URL=http://backend:8000 (Server)
