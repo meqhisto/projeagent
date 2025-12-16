@@ -171,7 +171,7 @@ export default function PipelinePage() {
                                                             </div>
                                                             <div className="text-xs text-gray-500 mb-3 space-y-1">
                                                                 <p>{parcel.city} / {parcel.district}</p>
-                                                                <p>Ada: {parcel.island} | Parsel: {parcel.parcel}</p>
+                                                                <p>Ada: {parcel.island} | Parsel: {parcel.parsel}</p>
                                                             </div>
 
                                                             <div className="flex items-center justify-between pt-2 border-t border-gray-50">

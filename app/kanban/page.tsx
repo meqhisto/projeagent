@@ -167,7 +167,7 @@ export default function KanbanPage() {
                                         <div className="space-y-2 mb-3">
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-gray-500">Ada / Parsel</span>
-                                                <span className="font-medium text-gray-900">{parcel.island} / {parcel.parcel}</span>
+                                                <span className="font-medium text-gray-900">{parcel.island} / {parcel.parsel}</span>
                                             </div>
                                             {parcel.area && (
                                                 <div className="flex justify-between text-sm">
@@ -179,8 +179,8 @@ export default function KanbanPage() {
 
                                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                             <span className={`px-2 py-1 rounded text-[10px] font-bold ${parcel.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
-                                                    parcel.status === 'RESEARCHING' ? 'bg-amber-100 text-amber-700' :
-                                                        'bg-gray-100 text-gray-600'
+                                                parcel.status === 'RESEARCHING' ? 'bg-amber-100 text-amber-700' :
+                                                    'bg-gray-100 text-gray-600'
                                                 }`}>
                                                 {parcel.status}
                                             </span>

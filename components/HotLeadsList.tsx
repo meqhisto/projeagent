@@ -42,7 +42,7 @@ export default function HotLeadsList({ parcels }: HotLeadsListProps) {
                                         {parcel.city} / {parcel.district}
                                     </h4>
                                     <p className="text-xs text-gray-600 mt-1">
-                                        Ada: {parcel.island} | Parsel: {parcel.parcel}
+                                        Ada: {parcel.island} | Parsel: {parcel.parsel}
                                     </p>
                                     {parcel.area && (
                                         <p className="text-xs text-gray-500 mt-1">

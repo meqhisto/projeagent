@@ -216,7 +216,7 @@ export default function MapPage() {
                                                 {parcel.neighborhood}
                                             </p>
                                             <p className="text-xs text-gray-500 mb-2">
-                                                Ada: {parcel.island} | Parsel: {parcel.parcel}
+                                                Ada: {parcel.island} | Parsel: {parcel.parsel}
                                             </p>
                                             {parcel.area && (
                                                 <p className="text-xs text-gray-600 mb-2">

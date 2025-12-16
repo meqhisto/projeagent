@@ -88,7 +88,7 @@ export default function ParcelDetailPage() {
 
     const handleDownloadReport = () => {
         const originalTitle = document.title;
-        document.title = `Parsel_Rapor_${parcel.city}_${parcel.parcel}`;
+        document.title = `Parsel_Rapor_${parcel.city}_${parcel.parsel}`;
         window.print();
         document.title = originalTitle;
     };
@@ -142,7 +142,7 @@ export default function ParcelDetailPage() {
                                 <MapPin className="h-5 w-5 text-purple-600 hidden md:block" />
                                 {parcel.district}, {parcel.neighborhood}
                             </h1>
-                            <p className="text-xs text-gray-500 mt-0.5 md:ml-7">Ada: {parcel.island} | Parsel: {parcel.parcel}</p>
+                            <p className="text-xs text-gray-500 mt-0.5 md:ml-7">Ada: {parcel.island} | Parsel: {parcel.parsel}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function ParcelDetailPage() {
                                     </div>
                                     <div className="absolute bottom-4 right-4 print:hidden">
                                         <a
-                                            href={`https://www.google.com/maps/search/?api=1&query=${parcel.city}+${parcel.district}+Ada+${parcel.island}+Parsel+${parcel.parcel}`}
+                                            href={`https://www.google.com/maps/search/?api=1&query=${parcel.city}+${parcel.district}+Ada+${parcel.island}+Parsel+${parcel.parsel}`}
                                             target="_blank"
                                             rel="noreferrer"
                                             className="bg-white/90 backdrop-blur-sm text-gray-700 font-medium text-xs px-3 py-2 rounded-lg shadow-sm hover:bg-white flex items-center transition-colors"
@@ -277,7 +277,7 @@ export default function ParcelDetailPage() {
                                     </div>
                                     <div className="py-3 flex justify-between">
                                         <dt className="text-gray-500">Parsel</dt>
-                                        <dd className="font-medium text-gray-900">{parcel.parcel}</dd>
+                                        <dd className="font-medium text-gray-900">{parcel.parsel}</dd>
                                     </div>
                                     <div className="py-3 flex justify-between">
                                         <dt className="text-gray-500">Yüz Ölçümü</dt>

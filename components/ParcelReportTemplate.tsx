@@ -48,7 +48,7 @@ export default function ParcelReportTemplate({ parcel, feasibilityResult }: Parc
                         <tbody>
                             <tr className="border-b border-gray-100"><td className="py-1 text-gray-500">İl / İlçe</td><td className="font-bold text-right">{parcel.city} / {parcel.district}</td></tr>
                             <tr className="border-b border-gray-100"><td className="py-1 text-gray-500">Mahalle</td><td className="font-bold text-right">{parcel.neighborhood}</td></tr>
-                            <tr className="border-b border-gray-100"><td className="py-1 text-gray-500">Ada / Parsel</td><td className="font-bold text-right">{parcel.island} / {parcel.parcel}</td></tr>
+                            <tr className="border-b border-gray-100"><td className="py-1 text-gray-500">Ada / Parsel</td><td className="font-bold text-right">{parcel.island} / {parcel.parsel}</td></tr>
                             <tr className="border-b border-gray-100"><td className="py-1 text-gray-500">Yüz Ölçümü</td><td className="font-bold text-right">{parcel.area} m²</td></tr>
                         </tbody>
                     </table>
@@ -136,7 +136,7 @@ export default function ParcelReportTemplate({ parcel, feasibilityResult }: Parc
                             <div className="flex-1 bg-white p-4 rounded border border-gray-200">
                                 <h4 className="font-bold text-sm mb-2 text-gray-900">Karar Destek</h4>
                                 <p className={`text-lg font-bold ${feasibilityResult.karar_destek.durum === "FIRSAT" ? "text-emerald-600" :
-                                        feasibilityResult.karar_destek.durum === "RİSKLİ" ? "text-red-600" : "text-blue-600"
+                                    feasibilityResult.karar_destek.durum === "RİSKLİ" ? "text-red-600" : "text-blue-600"
                                     }`}>
                                     {feasibilityResult.karar_destek.durum}
                                 </p>
