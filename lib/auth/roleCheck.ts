@@ -10,7 +10,7 @@ export async function requireAuth() {
 
 export async function requireAdmin() {
     const user = await requireAuth();
-    if (user.role !== "ADMIN") {
+    if ((user as any).role !== "ADMIN") {
         throw new Error("Admin access required");
     }
     return user;
@@ -18,7 +18,7 @@ export async function requireAdmin() {
 
 export async function getUserId() {
     const user = await requireAuth();
-    return parseInt(user.id);
+    return parseInt(user.id || "0");
 }
 
 export function isAdmin(role: string) {
