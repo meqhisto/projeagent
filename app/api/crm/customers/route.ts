@@ -12,7 +12,7 @@ export async function GET(request: Request) {
         const parcelId = searchParams.get('parcelId');
 
         // Build where clause based on role
-        const baseWhere = isAdmin(user.role as string)
+        const baseWhere = isAdmin((user as any).role as string)
             ? {} // Admin sees all customers
             : { ownerId: userId }; // Users see only their own customers
 
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
                         city: true,
                         district: true,
                         island: true,
-                        parcel: true
+                        parsel: true
                     }
                 },
                 interactions: {

@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const user = await requireAuth();
-        const userId = parseInt(user.id);
+        const userId = parseInt(user.id || "0");
+
+        const { searchParams } = new URL(request.url);
 
         // Build query based on role
-        const where = isAdmin(user.role as string)
+        const where = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
                 OR: [
