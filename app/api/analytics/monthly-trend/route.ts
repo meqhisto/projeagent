@@ -8,10 +8,10 @@ import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 export async function GET() {
     try {
         const user = await requireAuth();
-        const userId = parseInt(user.id);
+        const userId = parseInt(user.id || "0");
 
         // Build query based on role
-        const where = isAdmin(user.role as string)
+        const where = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
                 OR: [
