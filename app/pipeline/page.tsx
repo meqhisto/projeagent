@@ -11,7 +11,7 @@ interface PipelineParcel {
     district: string;
     neighborhood: string;
     island: string;
-    parcel: string;
+    parsel: string;
     area: number;
     crmStage: string;
     zoning: {

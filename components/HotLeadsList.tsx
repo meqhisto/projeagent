@@ -8,7 +8,7 @@ interface HotLead {
     city: string;
     district: string;
     island: string;
-    parcel: string;
+    parsel: string;
     area?: number;
     roi?: number;
 }
