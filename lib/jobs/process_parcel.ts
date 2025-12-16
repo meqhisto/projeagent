@@ -11,7 +11,7 @@ export async function processParcelInBackground(parcelId: number) {
 
         // 1. Fetch Visual Data
         console.log("Fetching visual data...");
-        const visualData = await fetchVisualData(parcel.city, parcel.district, parcel.island, parcel.parcel);
+        const visualData = await fetchVisualData(parcel.city, parcel.district, parcel.island, parcel.parsel);
 
         if (visualData && visualData.imageUrl) {
             await prisma.image.create({
@@ -25,7 +25,7 @@ export async function processParcelInBackground(parcelId: number) {
 
         // 2. Research Zoning (Emsal)
         console.log("Researching zoning info...");
-        const zoningData = await researchZoningInfo(parcel.city, parcel.district, parcel.island, parcel.parcel);
+        const zoningData = await researchZoningInfo(parcel.city, parcel.district, parcel.island, parcel.parsel);
 
         if (zoningData) {
             await prisma.zoningInfo.create({
