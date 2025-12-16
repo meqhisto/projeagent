@@ -7,15 +7,19 @@ import os
 # from .vision import VisionEngine (Moved to lazy load)
 
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI(title="ParselMonitor Engine", version="1.0.0")
 
+# CORS Configuration - Production-safe
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, set to ["http://localhost:3000"]
+    allow_origins=ALLOWED_ORIGINS,  # Specific origins only
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # ... (Previous Models) ...
@@ -35,6 +39,16 @@ class QueryRequest(BaseModel):
 @app.get("/")
 def read_root():
     return {"status": "Engine Running", "mode": "Hybrid"}
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring"""
+    return {
+        "status": "healthy",
+        "service": "backend",
+        "version": "1.0.0",
+        "timestamp": os.getenv("TIMESTAMP", "N/A")
+    }
 
 # ... (Previous Calculate Endpoint) ...
 @app.post("/calculate/basic", response_model=CalculationResponse)

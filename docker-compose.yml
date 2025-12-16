@@ -1,41 +1,56 @@
-version: '3.8'
-
 services:
   backend:
-    build: 
+    build:
       context: ./backend
     container_name: parselmonitor-backend
+    restart: unless-stopped
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend/app:/app/app # Hot reload for dev (optional)
-      - ./backend/temp_uploads:/app/temp_uploads
     environment:
       - PORT=8000
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./backend/temp_uploads:/app/temp_uploads
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - parselmonitor-network
 
   frontend:
-    build: 
+    build:
       context: .
     container_name: parselmonitor-frontend
+    restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=file:/app/prisma/dev.db
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=fc83539cfs734346_generated_secret_key_12345
-      - AUTH_SECRET=fc83539cfs734346_generated_secret_key_12345
-      # In Docker, backend is accessed internally by service name for server-side calls?
-      # But standard fetch in Next.js might be client-side.
-      # If using Proxy or Server Actions, we might need internal URL.
-      # For now assuming client-side browser access mainly, but let's see.
+      - NODE_ENV=production
+      - INTERNAL_BACKEND_URL=http://backend:8000
     volumes:
-      - ./prisma:/app/prisma # Persist SQLite DB
+      - ./prisma:/app/prisma
+      - node_modules:/app/node_modules
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - parselmonitor-network
 
-# Note: Backend URL handling
-# If frontend makes API calls from the BROWSER, it uses localhost:8000.
-# If frontend makes API calls from the SERVER (SSR), it should use http://backend:8000.
-# You may need to configure an environment variable for BACKEND_URL similar to:
-# NEXT_PUBLIC_API_URL=http://localhost:8000 (Client)
-# INTERNAL_API_URL=http://backend:8000 (Server)
+networks:
+  parselmonitor-network:
+    driver: bridge
+
+volumes:
+  node_modules:
