@@ -41,7 +41,7 @@ export default function SettingsPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">İsim</label>
                         <input
                             type="text"
-                            value={session.user.name || ""}
+                            value={session?.user?.name || ""}
                             disabled
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                         />
@@ -51,7 +51,7 @@ export default function SettingsPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
                         <input
                             type="email"
-                            value={session.user.email || ""}
+                            value={session?.user?.email || ""}
                             disabled
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                         />
@@ -117,7 +117,7 @@ export default function SettingsPage() {
             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
                 <div className="space-y-2 text-sm">
                     <p className="text-gray-700"><strong>Sistem:</strong> ParselMonitor Pro v2.0</p>
-                    <p className="text-gray-700"><strong>Kullanıcı ID:</strong> {session.user.id}</p>
+                    <p className="text-gray-700"><strong>Kullanıcı ID:</strong> {session?.user?.id}</p>
                     <p className="text-gray-700"><strong>Giriş:</strong> {new Date().toLocaleDateString('tr-TR')}</p>
                 </div>
             </div>
