@@ -10,6 +10,9 @@ RUN apt-get update -y && apt-get install -y openssl
 COPY package*.json ./
 COPY prisma ./prisma/
 
+# Skip Puppeteer download (not needed in production)
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
 # Install dependencies
 RUN npm install
 
