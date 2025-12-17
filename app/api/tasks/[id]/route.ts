@@ -42,7 +42,7 @@ export async function PATCH(
         });
 
         // Create notification if task completed (notify creator)
-        if (isCompleted === true && task.createdBy && task.createdBy !== parseInt(user.id)) {
+        if (isCompleted === true && task.createdBy && user.id && task.createdBy !== parseInt(user.id)) {
             await prisma.notification.create({
                 data: {
                     type: "TASK_COMPLETED",
