@@ -157,7 +157,7 @@ export async function POST(req: Request) {
                 dueDate: dueDate ? new Date(dueDate) : null,
                 priority,
                 assignedTo: assignedTo ? parseInt(assignedTo) : null,
-                createdBy: parseInt(user.id),
+                createdBy: user.id ? parseInt(user.id) : null,
                 tags,
                 isCompleted: false
             },
