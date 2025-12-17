@@ -4,6 +4,178 @@ import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { User, Lock, LogOut, Loader2 } from "lucide-react";
 
+// Password Change Form Component
+function ChangePasswordForm() {
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setMessage(null);
+
+        // Validation
+        if (newPassword.length < 8) {
+            setMessage({ type: "error", text: "Yeni şifre en az 8 karakter olmalıdır" });
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setMessage({ type: "error", text: "Yeni şifreler eşleşmiyor" });
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const res = await fetch("/api/auth/change-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setMessage({ type: "success", text: data.message });
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+            } else {
+                setMessage({ type: "error", text: data.error || "Bir hata oluştu" });
+            }
+        } catch (error) {
+            setMessage({ type: "error", text: "Sunucu hatası" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Current Password */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mevcut Şifre
+                </label>
+                <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="••••••••"
+                />
+            </div>
+
+            {/* New Password */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Yeni Şifre
+                </label>
+                <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="••••••••"
+                />
+                {newPassword && (
+                    <PasswordStrengthIndicator password={newPassword} />
+                )}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Yeni Şifre (Tekrar)
+                </label>
+                <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="••••••••"
+                />
+            </div>
+
+            {/* Message */}
+            {message && (
+                <div className={`p-3 rounded-lg text-sm ${message.type === "success"
+                        ? "bg-green-50 text-green-800 border border-green-200"
+                        : "bg-red-50 text-red-800 border border-red-200"
+                    }`}>
+                    {message.text}
+                </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Güncelleniyor...
+                    </>
+                ) : (
+                    "Şifreyi Güncelle"
+                )}
+            </button>
+
+            {/* Security Tip */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                    <strong>💡 Güvenlik İpucu:</strong> Güçlü bir şifre için en az 8 karakter, büyük-küçük harf, rakam ve özel karakter kullanın.
+                </p>
+            </div>
+        </form>
+    );
+}
+
+// Simple Password Strength Indicator
+function PasswordStrengthIndicator({ password }: { password: string }) {
+    const getStrength = () => {
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+        if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+        return Math.min(score, 4);
+    };
+
+    const strength = getStrength();
+    const labels = ["", "Çok Zayıf", "Zayıf", "Orta", "Güçlü"];
+    const colors = ["bg-gray-200", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500"];
+
+    return (
+        <div className="mt-2">
+            <div className="flex gap-1 mb-1">
+                {[1, 2, 3, 4].map((level) => (
+                    <div
+                        key={level}
+                        className={`h-1 flex-1 rounded-full transition-colors ${level <= strength ? colors[strength] : "bg-gray-200"
+                            }`}
+                    />
+                ))}
+            </div>
+            {strength > 0 && (
+                <p className="text-xs font-medium text-gray-600">
+                    Şifre Gücü: {labels[strength]}
+                </p>
+            )}
+        </div>
+    );
+}
+
 export default function SettingsPage() {
     const { data: session } = useSession();
     const [loading, setLoading] = useState(false);
@@ -72,18 +244,7 @@ export default function SettingsPage() {
                     <h2 className="text-lg font-bold text-gray-900">Güvenlik</h2>
                 </div>
 
-                <div className="space-y-4">
-                    <div>
-                        <p className="text-sm text-gray-700 mb-4">
-                            Şifrenizi düzenlemek için lütfen yönetici ile iletişime geçin.
-                        </p>
-                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <p className="text-sm text-blue-800">
-                                <strong>Güvenlik İpucu:</strong> Güçlü bir şifre kullanın ve düzenli olarak değiştirin.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <ChangePasswordForm />
             </div>
 
             {/* Logout Section */}

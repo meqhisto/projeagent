@@ -8,7 +8,9 @@ export async function POST(request: Request, props: { params: Promise<{ path: st
         const path = params.path.join("/");
 
         // Use environment variable for Docker compatibility
-        const backendUrl = process.env.INTERNAL_BACKEND_URL || "http://127.0.0.1:8000";
+        // Lokal: INTERNAL_BACKEND_URL=http://127.0.0.1:8888
+        // Docker: INTERNAL_BACKEND_URL=http://parselmonitor-backend:8000
+        const backendUrl = process.env.INTERNAL_BACKEND_URL || "http://127.0.0.1:8888";
         const targetUrl = `${backendUrl}/${path}`;
 
         console.log(`[PROXY] Forwarding to: ${targetUrl}`);

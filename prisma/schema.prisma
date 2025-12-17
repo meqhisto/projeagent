@@ -111,13 +111,19 @@ model Interaction {
   customerId Int?
   customer   Customer? @relation(fields: [customerId], references: [id])
   
-  type       String   // "Call", "Meeting", "Offer", "Note"
+  type       String   // "CALL", "MEETING", "OFFER", "NOTE", "TASK"
   content    String
   date       DateTime @default(now())
   
-  // Task specific
-  dueDate    DateTime?
-  isCompleted Boolean @default(false)
+  // Task/Görevlendirme özellikleri
+  dueDate     DateTime?
+  isCompleted Boolean   @default(false)
+  priority    String?   @default("MEDIUM")  // "LOW", "MEDIUM", "HIGH", "URGENT"
+  assignedTo  Int?      // Atanan kullanıcı
+  assignee    User?     @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  createdBy   Int?      // Oluşturan kullanıcı
+  creator     User?     @relation("CreatedTasks", fields: [createdBy], references: [id])
+  tags        String?   // Comma-separated tags
 
   createdAt  DateTime @default(now())
 }
@@ -159,6 +165,11 @@ model User {
   parcels         Parcel[]   @relation("OwnedParcels")
   assignedParcels Parcel[]   @relation("AssignedParcels")
   customers       Customer[] @relation("OwnedCustomers")
+  
+  // Task relations
+  assignedTasks   Interaction[] @relation("AssignedTasks")
+  createdTasks    Interaction[] @relation("CreatedTasks")
+  
   sessions  Session[]
 }
 

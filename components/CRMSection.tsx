@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Users, Phone, Calendar, Plus, UserPlus, Mail, FileText, User } from "lucide-react";
 
 interface Interaction {
@@ -133,13 +134,17 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                 ) : (
                     <div className="flex flex-wrap gap-3">
                         {customers.map(c => (
-                            <div key={c.id} className="group relative bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all min-w-[200px] flex items-start gap-3">
+                            <Link
+                                key={c.id}
+                                href={`/customers/${c.id}`}
+                                className="group relative bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all min-w-[200px] flex items-start gap-3 cursor-pointer"
+                            >
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm
                                     ${c.role === 'Land Owner' ? 'bg-indigo-500' : c.role === 'Investor' ? 'bg-emerald-500' : 'bg-gray-400'}`}>
                                     {c.name.charAt(0)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-bold text-gray-900 text-sm truncate">{c.name}</div>
+                                    <div className="font-bold text-gray-900 text-sm truncate group-hover:text-emerald-600 transition-colors">{c.name}</div>
                                     <div className="text-xs text-purple-600 font-medium">{c.role === 'Land Owner' ? 'Mal Sahibi' : c.role === 'Agent' ? 'Emlakçı' : c.role}</div>
 
                                     {(c.phone || c.email) && (
@@ -149,7 +154,7 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}

@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { MapPin, ArrowLeft, Building, Loader2, FileText, ExternalLink, History, Share2, MoreVertical, ChevronRight, Layers, Maximize2, Info, Download } from "lucide-react";
+import { MapPin, ArrowLeft, Building, Loader2, FileText, ExternalLink, History, Share2, MoreVertical, ChevronRight, Layers, Maximize2, Info, Download, Calculator, Users, FolderOpen } from "lucide-react";
 import Link from "next/link";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import ZoningEditSection from "@/components/ZoningEditSection";
 import CRMSection from "@/components/CRMSection";
 import FeasibilitySection from "@/components/FeasibilitySection";
@@ -12,6 +13,7 @@ import Modal from "@/components/ui/Modal";
 import ParcelReportTemplate from "@/components/ParcelReportTemplate";
 import ImageUploadSection from "@/components/ImageUploadSection";
 import DocumentUploadSection from "@/components/DocumentUploadSection";
+import ParcelTaskList from "@/components/ParcelTaskList";
 
 export default function ParcelDetailPage() {
     const params = useParams();
@@ -177,205 +179,257 @@ export default function ParcelDetailPage() {
                     {/* 1. Process Timeline */}
                     <ProcessTimeline currentStage={processStage} onStageChange={handleStageChange} />
 
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-                        {/* LEFT COLUMN: Main Visuals & Actions */}
-                        <div className="lg:col-span-3 space-y-8">
-                            {/* Main Info Card */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative group">
-                                <div className="h-[300px] md:h-[400px] w-full bg-gray-100 relative group-hover:shadow-inner transition-all">
-                                    <img
-                                        src={displayImage}
-                                        alt="Parcel View"
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            // Fallback if image fails to load
-                                            const target = e.target as HTMLImageElement;
-                                            if (target.src !== '/placeholder-parcel.jpg') {
-                                                target.src = '/placeholder-parcel.jpg';
-                                            }
+                    {/* Tabs Navigation */}
+                    <Tabs defaultValue="general" className="w-full">
+                        <TabsList className="bg-white rounded-xl p-1 shadow-sm border border-gray-200 mb-6">
+                            <TabsTrigger value="general" icon={<Info className="h-4 w-4" />}>
+                                Genel Bilgiler
+                            </TabsTrigger>
+                            <TabsTrigger value="feasibility" icon={<Calculator className="h-4 w-4" />}>
+                                Müteahhit Hesabı
+                            </TabsTrigger>
+                            <TabsTrigger value="crm" icon={<Users className="h-4 w-4" />}>
+                                CRM & Müşteriler
+                            </TabsTrigger>
+                            <TabsTrigger value="documents" icon={<FolderOpen className="h-4 w-4" />}>
+                                Dökümanlar
+                            </TabsTrigger>
+                        </TabsList>
+
+                        {/* Tab Content: General Info */}
+                        <TabsContent value="general">
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+                                {/* LEFT COLUMN: Main Visuals & Actions */}
+                                <div className="lg:col-span-3 space-y-8">
+                                    {/* Main Info Card */}
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative group">
+                                        <div className="h-[300px] md:h-[400px] w-full bg-gray-100 relative group-hover:shadow-inner transition-all">
+                                            <img
+                                                src={displayImage}
+                                                alt="Parcel View"
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    // Fallback if image fails to load
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (target.src !== '/placeholder-parcel.jpg') {
+                                                        target.src = '/placeholder-parcel.jpg';
+                                                    }
+                                                }}
+                                            />
+                                            <div className="absolute bottom-4 left-4 flex gap-2">
+                                                <span className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-200 flex items-center gap-1">
+                                                    <Maximize2 className="w-3 h-3" /> {parcel.area ? `${parcel.area} m²` : 'Alan Yok'}
+                                                </span>
+                                            </div>
+                                            <div className="absolute bottom-4 right-4 print:hidden">
+                                                <a
+                                                    href={`https://www.google.com/maps/search/?api=1&query=${parcel.city}+${parcel.district}+Ada+${parcel.island}+Parsel+${parcel.parsel}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="bg-white/90 backdrop-blur-sm text-gray-700 font-medium text-xs px-3 py-2 rounded-lg shadow-sm hover:bg-white flex items-center transition-colors"
+                                                >
+                                                    Google Maps <ExternalLink className="ml-1 h-3 w-3" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        {/* Zoning Summary Bar */}
+                                        <div className="bg-white p-4 border-t border-gray-200 grid grid-cols-2 md:grid-cols-4 gap-4 divide-x divide-gray-100">
+                                            <div className="px-4 text-center">
+                                                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Emsal (KAKS)</div>
+                                                <div className="text-2xl font-black text-gray-800 tracking-tight">{parcel.zoning?.ks || '-'}</div>
+                                            </div>
+                                            <div className="px-4 text-center">
+                                                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Gabari (Hmax)</div>
+                                                <div className="text-2xl font-black text-gray-800 tracking-tight">{parcel.zoning?.maxHeight || '-'}</div>
+                                            </div>
+                                            <div className="px-4 text-center">
+                                                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Fonksiyon</div>
+                                                <div className="text-lg font-bold text-purple-600 truncate">{parcel.zoning?.zoningType || 'Konut'}</div>
+                                            </div>
+                                            <div className="px-4 text-center flex flex-col items-center justify-center">
+                                                <button
+                                                    onClick={handleDownloadReport}
+                                                    className="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-2 rounded-lg hover:bg-purple-100 transition-colors w-full flex items-center justify-center gap-1"
+                                                >
+                                                    <Download className="h-3 w-3" />
+                                                    Rapor İndir (Yazdır)
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                {/* RIGHT COLUMN: Edit & Details Sidebar */}
+                                <div className="space-y-6">
+
+                                    {/* Info Card */}
+                                    <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
+                                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                                            <Building className="mr-2 h-4 w-4 text-emerald-500" />
+                                            Künye
+                                        </h3>
+                                        <dl className="divide-y divide-gray-100 text-sm">
+                                            <div className="py-3 flex justify-between">
+                                                <dt className="text-gray-500">İl</dt>
+                                                <dd className="font-medium text-gray-900">{parcel.city}</dd>
+                                            </div>
+                                            <div className="py-3 flex justify-between">
+                                                <dt className="text-gray-500">İlçe</dt>
+                                                <dd className="font-medium text-gray-900">{parcel.district}</dd>
+                                            </div>
+                                            <div className="py-3 flex justify-between">
+                                                <dt className="text-gray-500">Mahalle</dt>
+                                                <dd className="font-medium text-gray-900">{parcel.neighborhood}</dd>
+                                            </div>
+                                            <div className="py-3 flex justify-between">
+                                                <dt className="text-gray-500">Ada</dt>
+                                                <dd className="font-medium text-gray-900">{parcel.island}</dd>
+                                            </div>
+                                            <div className="py-3 flex justify-between">
+                                                <dt className="text-gray-500">Parsel</dt>
+                                                <dd className="font-medium text-gray-900">{parcel.parsel}</dd>
+                                            </div>
+                                            <div className="py-3 flex justify-between">
+                                                <dt className="text-gray-500">Yüz Ölçümü</dt>
+                                                <dd className="font-medium text-gray-900">{parcel.area ? `${parcel.area} m²` : '-'}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+
+                                    {/* Zoning Info & Manual Edit Trigger */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-semibold text-gray-900 flex items-center">
+                                                <Info className="mr-2 h-4 w-4 text-emerald-500" />
+                                                Manuel İmar Verisi
+                                            </h3>
+                                            <button
+                                                onClick={() => setIsZoningModalOpen(true)}
+                                                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-100"
+                                            >
+                                                Düzenle
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                                <span className="text-xs text-gray-500">Fonksiyon</span>
+                                                <span className="text-sm font-bold text-gray-900">{parcel.zoning?.zoningType || '-'}</span>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div className="p-2 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                                                    <div className="text-[10px] text-gray-400 mb-1">Emsal</div>
+                                                    <div className="text-sm font-bold text-gray-900">{parcel.zoning?.ks || '-'}</div>
+                                                </div>
+                                                <div className="p-2 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                                                    <div className="text-[10px] text-gray-400 mb-1">TAKS</div>
+                                                    <div className="text-sm font-bold text-gray-900">{parcel.zoning?.taks || '-'}</div>
+                                                </div>
+                                                <div className="p-2 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                                                    <div className="text-[10px] text-gray-400 mb-1">Hmax</div>
+                                                    <div className="text-sm font-bold text-gray-900">{parcel.zoning?.maxHeight || '-'}</div>
+                                                </div>
+                                            </div>
+                                            {parcel.zoning?.notes && (
+                                                <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs text-yellow-800 italic">
+                                                    "{parcel.zoning.notes}"
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Precedents (Emsal) - Placeholder since component is missing */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                                        <div className="flex items-center gap-2 mb-4 text-gray-800 font-bold border-b border-gray-100 pb-2">
+                                            <History className="w-5 h-5 text-purple-600" />
+                                            <span>Bölge Emsalleri</span>
+                                        </div>
+                                        <div className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                                            <span className="text-xs text-gray-400 font-medium">Bu bölge için henüz emsal kaydı bulunamadı.</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Notes */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                                        <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                            <FileText className="h-4 w-4 text-gray-400" /> Notlar
+                                        </h3>
+                                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                            {parcel.notes?.map((note: any) => (
+                                                <div key={note.id} className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-sm text-yellow-900 shadow-sm relative group">
+                                                    <p>{note.content}</p>
+                                                    <span className="text-[10px] text-yellow-600/70 mt-2 block text-right">{new Date(note.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            ))}
+                                            {(!parcel.notes || parcel.notes.length === 0) && (
+                                                <p className="text-xs text-gray-400 italic text-center py-4">Henüz not eklenmemiş.</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Image Upload Section */}
+                                    <ImageUploadSection
+                                        parcelId={parcel.id}
+                                        images={images}
+                                        onUploadSuccess={() => {
+                                            fetchImages();
+                                            fetchParcel(); // Refresh parcel for main image update
                                         }}
                                     />
-                                    <div className="absolute bottom-4 left-4 flex gap-2">
-                                        <span className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-200 flex items-center gap-1">
-                                            <Maximize2 className="w-3 h-3" /> {parcel.area ? `${parcel.area} m²` : 'Alan Yok'}
-                                        </span>
-                                    </div>
-                                    <div className="absolute bottom-4 right-4 print:hidden">
-                                        <a
-                                            href={`https://www.google.com/maps/search/?api=1&query=${parcel.city}+${parcel.district}+Ada+${parcel.island}+Parsel+${parcel.parsel}`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="bg-white/90 backdrop-blur-sm text-gray-700 font-medium text-xs px-3 py-2 rounded-lg shadow-sm hover:bg-white flex items-center transition-colors"
-                                        >
-                                            Google Maps <ExternalLink className="ml-1 h-3 w-3" />
-                                        </a>
-                                    </div>
-                                </div>
-                                {/* Zoning Summary Bar */}
-                                <div className="bg-white p-4 border-t border-gray-200 grid grid-cols-2 md:grid-cols-4 gap-4 divide-x divide-gray-100">
-                                    <div className="px-4 text-center">
-                                        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Emsal (KAKS)</div>
-                                        <div className="text-2xl font-black text-gray-800 tracking-tight">{parcel.zoning?.ks || '-'}</div>
-                                    </div>
-                                    <div className="px-4 text-center">
-                                        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Gabari (Hmax)</div>
-                                        <div className="text-2xl font-black text-gray-800 tracking-tight">{parcel.zoning?.maxHeight || '-'}</div>
-                                    </div>
-                                    <div className="px-4 text-center">
-                                        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Fonksiyon</div>
-                                        <div className="text-lg font-bold text-purple-600 truncate">{parcel.zoning?.zoningType || 'Konut'}</div>
-                                    </div>
-                                    <div className="px-4 text-center flex flex-col items-center justify-center">
-                                        <button
-                                            onClick={handleDownloadReport}
-                                            className="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-2 rounded-lg hover:bg-purple-100 transition-colors w-full flex items-center justify-center gap-1"
-                                        >
-                                            <Download className="h-3 w-3" />
-                                            Rapor İndir (Yazdır)
-                                        </button>
-                                    </div>
+
+                                    {/* Document Upload Section */}
+                                    <DocumentUploadSection
+                                        parcelId={parcel.id}
+                                        documents={documents}
+                                        onUploadSuccess={fetchDocuments}
+                                    />
+
                                 </div>
                             </div>
+                        </TabsContent>
 
-                            {/* Feasibility Calculator */}
-                            <FeasibilitySection
-                                parcelArea={parcel.area || 0}
-                                initialKs={parcel.zoning?.ks}
-                                initialTaks={parcel.zoning?.taks}
-                                onCalculateSuccess={(data) => setFeasibilityData(data)}
-                            />
-
-                            {/* CRM Section */}
-                            <CRMSection parcelId={parcel.id} />
-                        </div>
-
-                        {/* RIGHT COLUMN: Edit & Details Sidebar */}
-                        <div className="space-y-6">
-
-                            {/* Info Card */}
-                            <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
-                                <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                                    <Building className="mr-2 h-4 w-4 text-emerald-500" />
-                                    Künye
-                                </h3>
-                                <dl className="divide-y divide-gray-100 text-sm">
-                                    <div className="py-3 flex justify-between">
-                                        <dt className="text-gray-500">İl</dt>
-                                        <dd className="font-medium text-gray-900">{parcel.city}</dd>
-                                    </div>
-                                    <div className="py-3 flex justify-between">
-                                        <dt className="text-gray-500">İlçe</dt>
-                                        <dd className="font-medium text-gray-900">{parcel.district}</dd>
-                                    </div>
-                                    <div className="py-3 flex justify-between">
-                                        <dt className="text-gray-500">Mahalle</dt>
-                                        <dd className="font-medium text-gray-900">{parcel.neighborhood}</dd>
-                                    </div>
-                                    <div className="py-3 flex justify-between">
-                                        <dt className="text-gray-500">Ada</dt>
-                                        <dd className="font-medium text-gray-900">{parcel.island}</dd>
-                                    </div>
-                                    <div className="py-3 flex justify-between">
-                                        <dt className="text-gray-500">Parsel</dt>
-                                        <dd className="font-medium text-gray-900">{parcel.parsel}</dd>
-                                    </div>
-                                    <div className="py-3 flex justify-between">
-                                        <dt className="text-gray-500">Yüz Ölçümü</dt>
-                                        <dd className="font-medium text-gray-900">{parcel.area ? `${parcel.area} m²` : '-'}</dd>
-                                    </div>
-                                </dl>
+                        {/* Tab Content: Feasibility */}
+                        <TabsContent value="feasibility">
+                            <div className="max-w-5xl mx-auto">
+                                <FeasibilitySection
+                                    parcelArea={parcel.area || 0}
+                                    initialKs={parcel.zoning?.ks}
+                                    initialTaks={parcel.zoning?.taks}
+                                    onCalculateSuccess={(data) => setFeasibilityData(data)}
+                                />
                             </div>
+                        </TabsContent>
 
-                            {/* Zoning Info & Manual Edit Trigger */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-semibold text-gray-900 flex items-center">
-                                        <Info className="mr-2 h-4 w-4 text-emerald-500" />
-                                        Manuel İmar Verisi
-                                    </h3>
-                                    <button
-                                        onClick={() => setIsZoningModalOpen(true)}
-                                        className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-100"
-                                    >
-                                        Düzenle
-                                    </button>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                        <span className="text-xs text-gray-500">Fonksiyon</span>
-                                        <span className="text-sm font-bold text-gray-900">{parcel.zoning?.zoningType || '-'}</span>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="p-2 bg-gray-50 rounded-lg border border-gray-100 text-center">
-                                            <div className="text-[10px] text-gray-400 mb-1">Emsal</div>
-                                            <div className="text-sm font-bold text-gray-900">{parcel.zoning?.ks || '-'}</div>
-                                        </div>
-                                        <div className="p-2 bg-gray-50 rounded-lg border border-gray-100 text-center">
-                                            <div className="text-[10px] text-gray-400 mb-1">TAKS</div>
-                                            <div className="text-sm font-bold text-gray-900">{parcel.zoning?.taks || '-'}</div>
-                                        </div>
-                                        <div className="p-2 bg-gray-50 rounded-lg border border-gray-100 text-center">
-                                            <div className="text-[10px] text-gray-400 mb-1">Hmax</div>
-                                            <div className="text-sm font-bold text-gray-900">{parcel.zoning?.maxHeight || '-'}</div>
-                                        </div>
-                                    </div>
-                                    {parcel.zoning?.notes && (
-                                        <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs text-yellow-800 italic">
-                                            "{parcel.zoning.notes}"
-                                        </div>
-                                    )}
-                                </div>
+                        {/* Tab Content: CRM */}
+                        <TabsContent value="crm">
+                            <div className="max-w-5xl mx-auto">
+                                <CRMSection parcelId={parcel.id} />
+                                <ParcelTaskList parcelId={parcel.id} />
                             </div>
+                        </TabsContent>
 
-                            {/* Precedents (Emsal) - Placeholder since component is missing */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                                <div className="flex items-center gap-2 mb-4 text-gray-800 font-bold border-b border-gray-100 pb-2">
-                                    <History className="w-5 h-5 text-purple-600" />
-                                    <span>Bölge Emsalleri</span>
-                                </div>
-                                <div className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                                    <span className="text-xs text-gray-400 font-medium">Bu bölge için henüz emsal kaydı bulunamadı.</span>
-                                </div>
+                        {/* Tab Content: Documents */}
+                        <TabsContent value="documents">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                                <ImageUploadSection
+                                    parcelId={parcel.id}
+                                    images={images}
+                                    onUploadSuccess={() => {
+                                        fetchImages();
+                                        fetchParcel();
+                                    }}
+                                />
+                                <DocumentUploadSection
+                                    parcelId={parcel.id}
+                                    documents={documents}
+                                    onUploadSuccess={fetchDocuments}
+                                />
                             </div>
+                        </TabsContent>
 
-                            {/* Notes */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                                <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-gray-400" /> Notlar
-                                </h3>
-                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {parcel.notes?.map((note: any) => (
-                                        <div key={note.id} className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-sm text-yellow-900 shadow-sm relative group">
-                                            <p>{note.content}</p>
-                                            <span className="text-[10px] text-yellow-600/70 mt-2 block text-right">{new Date(note.createdAt).toLocaleDateString()}</span>
-                                        </div>
-                                    ))}
-                                    {(!parcel.notes || parcel.notes.length === 0) && (
-                                        <p className="text-xs text-gray-400 italic text-center py-4">Henüz not eklenmemiş.</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Image Upload Section */}
-                            <ImageUploadSection
-                                parcelId={parcel.id}
-                                images={images}
-                                onUploadSuccess={() => {
-                                    fetchImages();
-                                    fetchParcel(); // Refresh parcel for main image update
-                                }}
-                            />
-
-                            {/* Document Upload Section */}
-                            <DocumentUploadSection
-                                parcelId={parcel.id}
-                                documents={documents}
-                                onUploadSuccess={fetchDocuments}
-                            />
-
-                        </div>
-                    </div>
+                    </Tabs>
                 </main>
 
                 {/* Zoning Edit Modal */}

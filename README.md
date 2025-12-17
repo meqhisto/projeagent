@@ -1,10 +1,18 @@
 # 🏗️ ParselMonitor - İnşaat Arsa Yönetim Sistemi
 
-**Version:** 1.0.1  
+**Version:** 1.1.0  
 **Status:** Production Ready  
-**License:** MIT
+**License:** MIT  
+**Last Updated:** 17 Aralık 2025
 
 Modern, güvenli ve kullanıcı dostu **arsa takip ve analiz platformu**. Gayrimenkul profesyonelleri için tasarlanmış, tam özellikli CRM ve fizibilite analiz sistemi.
+
+## 🆕 Yeni Özellikler (v1.1.0)
+
+- ✅ **Self-Service Şifre Değiştirme:** Kullanıcılar artık kendi şifrelerini değiştirebiliyor
+- ✅ **Sekmeli Parsel Detay:** 4 sekme ile organize görünüm (Genel, Müteahhit, CRM, Dökümanlar)
+- ✅ **Müşteri Detay Sayfası:** Kapsamlı müşteri profilleri ve görüşme geçmişi
+- ✅ **Geliştirilmiş CRM:** Tıklanabilir müşteri kartları ve timeline görünümü
 
 ---
 
@@ -60,6 +68,8 @@ Modern, güvenli ve kullanıcı dostu **arsa takip ve analiz platformu**. Gayrim
 - **NextAuth.js:** Güvenli kimlik doğrulama
 - **Rol Bazlı Yetkilendirme:** Admin, Agent, Viewer
 - **Bcrypt:** Şifre hashleme
+- **Self-Service Şifre Değiştirme:** Kullanıcılar kendi şifrelerini güncelleyebilir
+- **Password Strength Meter:** Gerçek zamanlı şifre gücü göstergesi
 - **CORS Koruması:** Whitelist bazlı
 - **Health Check Endpoints:** Sistem durumu izleme
 

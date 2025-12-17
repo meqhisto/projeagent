@@ -10,6 +10,7 @@ import HotLeadsList from "@/components/HotLeadsList";
 import ParcelCard from "@/components/ParcelCard";
 import AdvancedFilterPanel from "@/components/AdvancedFilterPanel";
 import ExportButton from "@/components/ExportButton";
+import TaskWidget from "@/components/TaskWidget";
 
 export default function Home() {
   const [parcels, setParcels] = useState<any[]>([]);
@@ -163,10 +164,11 @@ export default function Home() {
         </div>
       )}
 
-      {/* Charts Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Charts & Tasks Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <PipelineChart data={pipelineData} />
         <MonthlyTrendChart data={monthlyData} />
+        <TaskWidget />
       </div>
 
       {/* Hot Leads */}
