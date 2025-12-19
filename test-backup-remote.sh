@@ -139,8 +139,8 @@ echo "----------------------------------------"
 # Create old backup to test cleanup (8 days old)
 OLD_DATE=$(date -d '8 days ago' '+%Y%m%d_%H%M%S' 2>/dev/null || date -v-8d '+%Y%m%d_%H%M%S' 2>/dev/null)
 if [ -n "$OLD_DATE" ]; then
-    touch "backups/db_backup_${OLD_DATE}.sql"
-    echo "Test için eski backup oluşturuldu: db_backup_${OLD_DATE}.sql"
+    touch -d "8 days ago" "backups/db_backup_${OLD_DATE}.sql"
+    echo "Test için eski backup oluşturuldu (tarihi 8 gün geri alındı): db_backup_${OLD_DATE}.sql"
     
     # Run backup again
     bash backup-database.sh > /dev/null 2>&1
