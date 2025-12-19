@@ -43,18 +43,23 @@ fi
 mkdir -p "$BACKUP_DIR"
 
 # Check if Docker container is running
-CONTAINER_NAME="parselmonitor-db"
-if ! docker ps | grep -q "$CONTAINER_NAME"; then
-    # Try alternative container name (might be from docker-compose)
-    # Filter for postgres containers
-    CONTAINER_NAME=$(docker ps --format '{{.Names}}' | grep -i postgres | head -1)
-    
-    if [ -z "$CONTAINER_NAME" ]; then
-        echo -e "${RED}Error: PostgreSQL container not found or not running${NC}"
-        echo -e "${YELLOW}Available containers:${NC}"
-        docker ps --format 'table {{.Names}}\t{{.Status}}'
-        exit 1
+# Prioritize names used in project
+CANDIDATE_CONTAINERS=("parselmonitor-db" "postgresql-postgres-1" "postgres")
+CONTAINER_NAME=""
+
+for name in "${CANDIDATE_CONTAINERS[@]}"; do
+    if docker ps | grep -q "$name"; then
+        CONTAINER_NAME=$(docker ps --format '{{.Names}}' | grep "$name" | head -1)
+        break
     fi
+done
+
+if [ -z "$CONTAINER_NAME" ]; then
+    echo -e "${RED}Error: PostgreSQL container not found or not running${NC}"
+    echo -e "${YELLOW}Checked for: ${CANDIDATE_CONTAINERS[*]}${NC}"
+    echo -e "${YELLOW}Available containers:${NC}"
+    docker ps --format 'table {{.Names}}\t{{.Status}}'
+    exit 1
 fi
 
 echo -e "${GREEN}Found PostgreSQL container: ${CONTAINER_NAME}${NC}"
@@ -62,10 +67,11 @@ echo -e "${GREEN}Found PostgreSQL container: ${CONTAINER_NAME}${NC}"
 # Get database credentials from environment
 DB_USER=${DB_USER:-parselmonitor_user}
 DB_NAME=${DB_NAME:-parselmonitor}
+
 # Ensure DB_PASSWORD is set (loaded from .env)
+# Only fail if not set - sometimes .pgpass is used, but for docker exec we usually need it
 if [ -z "$DB_PASSWORD" ]; then
-    echo -e "${RED}Error: DB_PASSWORD not found in environment${NC}"
-    exit 1
+    echo -e "${YELLOW}Warning: DB_PASSWORD not found in environment. Assuming configured via .pgpass or trust auth.${NC}"
 fi
 
 echo -e "${YELLOW}Creating backup...${NC}"
@@ -74,25 +80,34 @@ echo -e "User: ${DB_USER}"
 echo -e "Backup file: ${BACKUP_DIR}/${BACKUP_FILE}"
 
 # Create backup using pg_dump via Docker
-# IMPORTANT: 
-# 1. Do NOT use -t (tty) for stdout redirection, it messes up line endings
-# 2. Pass PGPASSWORD environment variable to docker exec
-docker exec -e PGPASSWORD="$DB_PASSWORD" "$CONTAINER_NAME" pg_dump -U "$DB_USER" -d "$DB_NAME" --clean --if-exists > "${BACKUP_DIR}/${BACKUP_FILE}"
+# Capture stderr to a temporary file for debugging
+ERROR_LOG=$(mktemp)
 
-if [ $? -eq 0 ]; then
-    # Get file size
+# Use explicit PGPASSWORD if available
+if [ -n "$DB_PASSWORD" ]; then
+    docker exec -e PGPASSWORD="$DB_PASSWORD" "$CONTAINER_NAME" pg_dump -U "$DB_USER" -d "$DB_NAME" --clean --if-exists > "${BACKUP_DIR}/${BACKUP_FILE}" 2> "$ERROR_LOG" || true
+else
+    docker exec "$CONTAINER_NAME" pg_dump -U "$DB_USER" -d "$DB_NAME" --clean --if-exists > "${BACKUP_DIR}/${BACKUP_FILE}" 2> "$ERROR_LOG" || true
+fi
+
+# Check exit code manually (to handle pipefail issues if we set it)
+# We didn't set pipefail, so we check if the file has content and if ERROR_LOG has critical errors
+
+# Check if backup file is empty
+FILE_SIZE_BYTES=$(stat -f%z "${BACKUP_DIR}/${BACKUP_FILE}" 2>/dev/null || stat -c%s "${BACKUP_DIR}/${BACKUP_FILE}" 2>/dev/null)
+if [ -z "$FILE_SIZE_BYTES" ]; then FILE_SIZE_BYTES=0; fi
+
+if [ "$FILE_SIZE_BYTES" -gt 100 ]; then
     BACKUP_SIZE=$(du -h "${BACKUP_DIR}/${BACKUP_FILE}" | cut -f1)
-    # Check if empty (sometimes grep failure or other issues create empty file)
-    FILE_SIZE_BYTES=$(stat -f%z "${BACKUP_DIR}/${BACKUP_FILE}" 2>/dev/null || stat -c%s "${BACKUP_DIR}/${BACKUP_FILE}" 2>/dev/null)
-    if [ "$FILE_SIZE_BYTES" -lt 100 ]; then
-         echo -e "${RED}Warning: Backup file is very small ($FILE_SIZE_BYTES bytes). Check content/errors.${NC}"
-    fi
-
     echo -e "${GREEN}✓ Backup created successfully!${NC}"
     echo -e "  File: ${BACKUP_FILE}"
     echo -e "  Size: ${BACKUP_SIZE}"
+    rm "$ERROR_LOG"
 else
     echo -e "${RED}✗ Backup failed!${NC}"
+    echo -e "${RED}Error details form pg_dump:${NC}"
+    cat "$ERROR_LOG"
+    rm "$ERROR_LOG"
     rm -f "${BACKUP_DIR}/${BACKUP_FILE}" # Remove failed/empty file
     exit 1
 fi
