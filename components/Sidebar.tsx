@@ -8,6 +8,7 @@ import clsx from "clsx";
 
 const allNavigation = [
     { name: "Anasayfa", href: "/", icon: Home, roles: ["USER", "ADMIN"] },
+    { name: "Parsel Listesi", href: "/parcels", icon: LayoutGrid, roles: ["USER", "ADMIN"] },
     { name: "İş Akışı (Kanban)", href: "/kanban", icon: KanbanSquare, roles: ["USER", "ADMIN"] },
     { name: "Kişiler (Directory)", href: "/customers", icon: Users, roles: ["USER", "ADMIN"] },
     { name: "Harita Görünümü", href: "/map", icon: MapIcon, roles: ["USER", "ADMIN"] },
