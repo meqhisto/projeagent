@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET(
     request: Request,
@@ -83,6 +84,55 @@ export async function PATCH(
         console.error("Update Error:", error);
         return NextResponse.json(
             { error: "Failed to update" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const user = await requireAuth();
+        const userId = parseInt(user.id || "0");
+
+        const { id } = await params;
+        const parcelId = parseInt(id);
+
+        if (isNaN(parcelId)) {
+            return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+        }
+
+        // Check ownership or admin status
+        const parcel = await prisma.parcel.findUnique({
+            where: { id: parcelId },
+            select: { ownerId: true }
+        });
+
+        if (!parcel) {
+            return NextResponse.json({ error: "Parcel not found" }, { status: 404 });
+        }
+
+        const isOwner = parcel.ownerId === userId;
+        const isUserAdmin = isAdmin((user as any).role as string);
+
+        if (!isOwner && !isUserAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+        }
+
+        await prisma.parcel.delete({
+            where: { id: parcelId }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        console.error("Delete Error:", error);
+        if (error.message === "Unauthorized") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        return NextResponse.json(
+            { error: "Failed to delete parcel" },
             { status: 500 }
         );
     }
