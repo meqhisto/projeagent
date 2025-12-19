@@ -1,63 +1,65 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import fs from "fs";
-import path from "path";
-
-// Manually load .env
-const envPath = path.join(__dirname, "../.env"); // Adjusted path for prisma/seed.ts (parent dir)
-if (fs.existsSync(envPath)) {
-    const envConfig = fs.readFileSync(envPath, "utf-8");
-    envConfig.split("\n").forEach((line) => {
-        const [key, value] = line.split("=");
-        if (key && value) {
-            process.env[key.trim()] = value.trim().replace(/"/g, "");
-        }
-    });
-}
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log("🌱 Seeding database...");
+    console.log('🌱 Seeding database...');
 
-    // Create admin user
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+    // 1. Admin kullanıcı oluştur
+    const adminEmail = 'altanbariscomert@gmail.com';
+    const adminPassword = await bcrypt.hash('altan123', 10);
 
-    const adminUser = await prisma.user.upsert({
-        where: { email: "admin@parselmonitor.com" },
+    const admin = await prisma.user.upsert({
+        where: { email: adminEmail },
         update: {},
         create: {
-            email: "admin@parselmonitor.com",
-            password: hashedPassword,
-            name: "Admin User",
-            role: "ADMIN",
+            email: adminEmail,
+            password: adminPassword,
+            name: 'Altan Baris Comert',
+            role: 'ADMIN',
+            isActive: true,
         },
     });
 
-    console.log(`✅ Admin user created: ${adminUser.email}`);
-    console.log(`   Default password: admin123`);
+    console.log('✅ Admin user created:', admin.email);
 
-    // Create custom user
-    const customUser = await prisma.user.upsert({
-        where: { email: "altanbariscomert@gmail.com" },
-        update: {
-            password: hashedPassword,
-            role: "ADMIN",
-            name: "Altan Baris Comert"
+    // 2. Demo parsel oluştur (opsiyonel)
+    const demoParcel = await prisma.parcel.upsert({
+        where: {
+            ownerId_city_district_neighborhood_island_parsel: {
+                ownerId: admin.id,
+                city: 'İstanbul',
+                district: 'Kadıköy',
+                neighborhood: 'Fenerbahçe',
+                island: '100',
+                parsel: '5',
+            },
         },
+        update: {},
         create: {
-            email: "altanbariscomert@gmail.com",
-            password: hashedPassword,
-            name: "Altan Baris Comert",
-            role: "ADMIN", // Assuming admin role as requested implies power user
+            ownerId: admin.id,
+            city: 'İstanbul',
+            district: 'Kadıköy',
+            neighborhood: 'Fenerbahçe',
+            island: '100',
+            parsel: '5',
+            area: 500,
+            latitude: 40.9833,
+            longitude: 29.0333,
+            status: 'PENDING',
+            crmStage: 'NEW_LEAD',
         },
     });
-    console.log(`✅ Custom user created: ${customUser.email}`);
+
+    console.log('✅ Demo parcel created:', demoParcel.id);
+
+    console.log('🎉 Seeding completed!');
 }
 
 main()
     .catch((e) => {
-        console.error(e);
+        console.error('❌ Seeding failed:', e);
         process.exit(1);
     })
     .finally(async () => {

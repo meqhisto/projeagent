@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "reset-password": "tsx prisma/reset-password.ts"
+    "reset-password": "tsx prisma/reset-password.ts",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
@@ -40,5 +41,8 @@
     "eslint-config-next": "16.0.10",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
