@@ -28,7 +28,7 @@ else
     exit 1
 fi
 
-if grep -q "npm run backup" package.json; then
+if grep -q '"backup".*"bash backup-database.sh"' package.json; then
     echo -e "${GREEN}✓ package.json'da 'backup' script mevcut${NC}"
 else
     echo -e "${RED}✗ package.json'da 'backup' script bulunamadı!${NC}"
