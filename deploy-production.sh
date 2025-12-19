@@ -85,19 +85,33 @@ fi
 echo -e "${GREEN}✅ PostgreSQL hazır${NC}"
 echo ""
 
-# 6. Build
-echo "🔨 6. Docker build başlatılıyor..."
+# 6. Database Backup
+echo "💾 6. Veritabanı yedekleniyor..."
+if [ -f backup-database.sh ]; then
+    bash backup-database.sh
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✅ Backup tamamlandı${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Backup başarısız oldu ama devam ediliyor...${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  backup-database.sh bulunamadı, backup atlanıyor${NC}"
+fi
+echo ""
+
+# 7. Build
+echo "🔨 7. Docker build başlatılıyor..."
 docker compose build --no-cache frontend
 echo -e "${GREEN}✅ Build tamamlandı${NC}"
 echo ""
 
-# 7. Deployment
-echo "🚀 7. Containerlar başlatılıyor..."
+# 8. Deployment
+echo "🚀 8. Containerlar başlatılıyor..."
 docker compose up -d
 echo ""
 
-# 8. Migration & Seeding
-echo "📤 8. Database migration ve seeding..."
+# 9. Migration & Seeding
+echo "📤 9. Database migration ve seeding..."
 sleep 10  # Container'ın ayağa kalkması için bekle
 
 docker exec parselmonitor-frontend npx prisma migrate deploy || docker exec parselmonitor-frontend npx prisma db push --accept-data-loss
@@ -107,8 +121,8 @@ echo "🌱 Seeding database..."
 docker exec parselmonitor-frontend npm run seed || echo -e "${YELLOW}⚠️  Seeding failed veya zaten yapılmış${NC}"
 echo ""
 
-# 9. Health Check
-echo "🏥 9. Health check yapılıyor..."
+# 10. Health Check
+echo "🏥 10. Health check yapılıyor..."
 sleep 5
 
 # Frontend health
@@ -128,8 +142,8 @@ else
 fi
 echo ""
 
-# 10. User Kontrol
-echo "👤 10. Admin kullanıcı kontrol ediliyor..."
+# 11. User Kontrol
+echo "👤 11. Admin kullanıcı kontrol ediliyor..."
 USER_COUNT=$(docker exec postgresql-postgres-1 psql -U mmuser -d parselmonitor -t -c "SELECT COUNT(*) FROM \"User\";" | tr -d ' ')
 if [ "$USER_COUNT" -gt 0 ]; then
     echo -e "${GREEN}✅ $USER_COUNT kullanıcı mevcut${NC}"
@@ -139,8 +153,8 @@ else
 fi
 echo ""
 
-# 11. Container Status
-echo "📋 11. Container durumu:"
+# 12. Container Status
+echo "📋 12. Container durumu:"
 docker ps --filter name=parselmonitor --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 echo ""
 

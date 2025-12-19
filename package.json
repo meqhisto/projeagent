@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "reset-password": "tsx prisma/reset-password.ts",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "backup": "bash backup-database.sh"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
