@@ -46,6 +46,7 @@ mkdir -p "$BACKUP_DIR"
 CONTAINER_NAME="parselmonitor-db"
 if ! docker ps | grep -q "$CONTAINER_NAME"; then
     # Try alternative container name (might be from docker-compose)
+    # Filter for postgres containers
     CONTAINER_NAME=$(docker ps --format '{{.Names}}' | grep -i postgres | head -1)
     
     if [ -z "$CONTAINER_NAME" ]; then
@@ -61,6 +62,11 @@ echo -e "${GREEN}Found PostgreSQL container: ${CONTAINER_NAME}${NC}"
 # Get database credentials from environment
 DB_USER=${DB_USER:-parselmonitor_user}
 DB_NAME=${DB_NAME:-parselmonitor}
+# Ensure DB_PASSWORD is set (loaded from .env)
+if [ -z "$DB_PASSWORD" ]; then
+    echo -e "${RED}Error: DB_PASSWORD not found in environment${NC}"
+    exit 1
+fi
 
 echo -e "${YELLOW}Creating backup...${NC}"
 echo -e "Database: ${DB_NAME}"
@@ -68,16 +74,26 @@ echo -e "User: ${DB_USER}"
 echo -e "Backup file: ${BACKUP_DIR}/${BACKUP_FILE}"
 
 # Create backup using pg_dump via Docker
-docker exec -t "$CONTAINER_NAME" pg_dump -U "$DB_USER" -d "$DB_NAME" --clean --if-exists > "${BACKUP_DIR}/${BACKUP_FILE}"
+# IMPORTANT: 
+# 1. Do NOT use -t (tty) for stdout redirection, it messes up line endings
+# 2. Pass PGPASSWORD environment variable to docker exec
+docker exec -e PGPASSWORD="$DB_PASSWORD" "$CONTAINER_NAME" pg_dump -U "$DB_USER" -d "$DB_NAME" --clean --if-exists > "${BACKUP_DIR}/${BACKUP_FILE}"
 
 if [ $? -eq 0 ]; then
     # Get file size
     BACKUP_SIZE=$(du -h "${BACKUP_DIR}/${BACKUP_FILE}" | cut -f1)
+    # Check if empty (sometimes grep failure or other issues create empty file)
+    FILE_SIZE_BYTES=$(stat -f%z "${BACKUP_DIR}/${BACKUP_FILE}" 2>/dev/null || stat -c%s "${BACKUP_DIR}/${BACKUP_FILE}" 2>/dev/null)
+    if [ "$FILE_SIZE_BYTES" -lt 100 ]; then
+         echo -e "${RED}Warning: Backup file is very small ($FILE_SIZE_BYTES bytes). Check content/errors.${NC}"
+    fi
+
     echo -e "${GREEN}✓ Backup created successfully!${NC}"
     echo -e "  File: ${BACKUP_FILE}"
     echo -e "  Size: ${BACKUP_SIZE}"
 else
     echo -e "${RED}✗ Backup failed!${NC}"
+    rm -f "${BACKUP_DIR}/${BACKUP_FILE}" # Remove failed/empty file
     exit 1
 fi
 
@@ -100,4 +116,4 @@ echo -e "${GREEN}=====================================${NC}"
 
 # Instructions for restore
 echo -e "\n${YELLOW}To restore from this backup, run:${NC}"
-echo -e "  docker exec -i ${CONTAINER_NAME} psql -U ${DB_USER} -d ${DB_NAME} < ${BACKUP_DIR}/${BACKUP_FILE}"
+echo -e "  cat ${BACKUP_DIR}/${BACKUP_FILE} | docker exec -i ${CONTAINER_NAME} psql -U ${DB_USER} -d ${DB_NAME}"
