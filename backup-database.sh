@@ -73,22 +73,28 @@ perform_backup() {
     
     echo -e "${YELLOW}Attempting backup with user: ${USER}${NC}"
     
+    # We use '|| return 1' to ensure non-zero return code if docker command fails
     if [ -n "$PASSWORD" ]; then
-        docker exec -e PGPASSWORD="$PASSWORD" "$CONTAINER_NAME" pg_dump -U "$USER" -d "$DB_NAME" --clean --if-exists > "$OUT_FILE" 2> "$LOG_FILE"
+        docker exec -e PGPASSWORD="$PASSWORD" "$CONTAINER_NAME" pg_dump -U "$USER" -d "$DB_NAME" --clean --if-exists > "$OUT_FILE" 2> "$LOG_FILE" || return 1
     else
-        docker exec "$CONTAINER_NAME" pg_dump -U "$USER" -d "$DB_NAME" --clean --if-exists > "$OUT_FILE" 2> "$LOG_FILE"
+        docker exec "$CONTAINER_NAME" pg_dump -U "$USER" -d "$DB_NAME" --clean --if-exists > "$OUT_FILE" 2> "$LOG_FILE" || return 1
     fi
     
-    return $?
+    return 0
 }
 
 # Try with configured user first
 TARGET_USER=${DB_USER:-parselmonitor_user}
 ERROR_LOG=$(mktemp)
+SUCCESS=1
 
 # Try primary user
-perform_backup "$TARGET_USER" "$DB_PASSWORD" "${BACKUP_DIR}/${BACKUP_FILE}" "$ERROR_LOG"
-SUCCESS=$?
+# WRAPPING IN IF TO PREVENT 'set -e' EXIT
+if perform_backup "$TARGET_USER" "$DB_PASSWORD" "${BACKUP_DIR}/${BACKUP_FILE}" "$ERROR_LOG"; then
+    SUCCESS=0
+else
+    SUCCESS=1
+fi
 
 # Validate primary attempt
 if [ $SUCCESS -eq 0 ]; then
@@ -107,8 +113,11 @@ if [ $SUCCESS -ne 0 ] && [ "$TARGET_USER" != "mmuser" ]; then
     echo -e "${YELLOW}Falling back to 'mmuser' (superuser)...${NC}"
     
     # Try mmuser (usually no password/trust in this setup)
-    perform_backup "mmuser" "" "${BACKUP_DIR}/${BACKUP_FILE}" "$ERROR_LOG"
-    SUCCESS=$?
+    if perform_backup "mmuser" "" "${BACKUP_DIR}/${BACKUP_FILE}" "$ERROR_LOG"; then
+        SUCCESS=0
+    else
+        SUCCESS=1
+    fi
 fi
 
 # Final Check
