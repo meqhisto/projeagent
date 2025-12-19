@@ -86,7 +86,7 @@ export default function Home() {
       roi: Math.floor(Math.random() * 20) + 20 // Placeholder ROI
     }));
 
-  const recentParcels = filteredParcels.slice(0, 6);
+  const recentParcels = filteredParcels.slice(0, 8);
 
   if (loading) {
     return (
@@ -185,9 +185,14 @@ export default function Home() {
                 ? 'Filtrelenmiş Parseller'
                 : 'Son Eklenen Parseller'}
             </h3>
-            <span className="text-sm text-gray-500">
-              {filteredParcels.length} sonuç
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-500">
+                {filteredParcels.length} sonuç
+              </span>
+              <a href="/parcels" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">
+                Tümünü Gör →
+              </a>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recentParcels.map((parcel) => (
