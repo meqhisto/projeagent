@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Users, Phone, Calendar, Plus, UserPlus, Mail, FileText, User } from "lucide-react";
+import { Users, Phone, Calendar, Plus, UserPlus, Mail, FileText, User, X } from "lucide-react";
+import AddStakeholderModal from "./AddStakeholderModal";
 
+// ... (interfaces remain same)
 interface Interaction {
     id: number;
     type: string;
@@ -29,21 +31,12 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [isStakeholderModalOpen, setIsStakeholderModalOpen] = useState(false);
 
     // Form State
     const [interactionType, setInteractionType] = useState("CALL");
     const [content, setContent] = useState("");
     const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
-
-    // New Customer Form
-    const [showNewCustomer, setShowNewCustomer] = useState(false);
-    const [newCustomer, setNewCustomer] = useState({
-        name: "",
-        role: "Land Owner",
-        phone: "",
-        email: "",
-        notes: ""
-    });
 
     useEffect(() => {
         fetchData();
@@ -63,26 +56,6 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
             console.error(e);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleCreateCustomer = async () => {
-        if (!newCustomer.name) return;
-        try {
-            const res = await fetch(`/api/crm/customers`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...newCustomer, parcelId })
-            });
-            if (res.ok) {
-                const customer = await res.json();
-                setCustomers([customer, ...customers]);
-                setSelectedCustomerId(customer.id.toString());
-                setShowNewCustomer(false);
-                setNewCustomer({ name: "", role: "Land Owner", phone: "", email: "", notes: "" });
-            }
-        } catch (e) {
-            alert("Müşteri oluşturulamadı.");
         }
     };
 
@@ -118,19 +91,24 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                     <Users className="mr-2 h-5 w-5 text-purple-600" />
                     İlişki Yönetimi (CRM)
                 </h3>
-                <button
-                    onClick={() => setShowAddForm(!showAddForm)}
-                    className="text-sm bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-semibold hover:bg-emerald-100 flex items-center transition-colors shadow-sm border border-emerald-100"
-                >
-                    <Plus className="h-4 w-4 mr-1" /> Kayıt/Kişi Ekle
-                </button>
             </div>
 
-            {/* Stakeholders List (New!) */}
+            {/* Stakeholders List */}
             <div className="mb-8">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 pl-1">Projeyle İlgili Kişiler</h4>
+                <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide pl-1">Projeyle İlgili Kişiler</h4>
+                    <button
+                        onClick={() => setIsStakeholderModalOpen(true)}
+                        className="text-xs bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg font-bold hover:bg-purple-100 flex items-center transition-colors border border-purple-100"
+                    >
+                        <UserPlus className="h-3.5 w-3.5 mr-1" /> Kişi Ekle
+                    </button>
+                </div>
+
                 {customers.length === 0 ? (
-                    <div className="text-sm text-gray-400 italic pl-1">Henüz kişi eklenmemiş.</div>
+                    <div className="text-sm text-gray-400 italic pl-1 border border-dashed border-gray-200 rounded-lg p-4 bg-gray-50/50">
+                        Henüz bu parsele bağlı bir kişi yok.
+                    </div>
                 ) : (
                     <div className="flex flex-wrap gap-3">
                         {customers.map(c => (
@@ -160,11 +138,27 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                 )}
             </div>
 
+            {/* Add Interaction Button Toggle */}
+            {!showAddForm && (
+                <button
+                    onClick={() => setShowAddForm(true)}
+                    className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-gray-500 font-medium hover:bg-gray-50 hover:border-gray-400 hover:text-gray-700 transition-all flex items-center justify-center gap-2 mb-8"
+                >
+                    <Plus className="w-4 h-4" />
+                    Yeni Etkileşim / Not Ekle
+                </button>
+            )}
+
             {/* Add Interaction Form */}
             {showAddForm && (
                 <div className="bg-gray-50 p-5 rounded-xl mb-8 border border-gray-200 shadow-inner animate-fade-in-down">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-bold text-gray-700 text-sm">Yeni Etkileşim</h4>
+                        <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
                     <div className="space-y-5">
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Left Col: Type */}
                             <div className="space-y-2">
@@ -188,83 +182,18 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                             {/* Right Col: Customer */}
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">İlgili Kişi</label>
-                                <div className="flex gap-2">
-                                    <select
-                                        value={selectedCustomerId}
-                                        onChange={(e) => setSelectedCustomerId(e.target.value)}
-                                        className="flex-1 text-sm p-2 rounded-lg border border-gray-300 text-gray-900 font-medium bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none h-[42px]"
-                                    >
-                                        <option value="">Kişi Seçiniz...</option>
-                                        {customers.map(c => (
-                                            <option key={c.id} value={c.id}>{c.name} ({c.role})</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={() => setShowNewCustomer(!showNewCustomer)}
-                                        className={`w-[42px] h-[42px] flex items-center justify-center rounded-lg border transition-colors ${showNewCustomer ? 'bg-purple-100 border-purple-300 text-purple-700' : 'bg-white border-gray-300 hover:bg-gray-50'
-                                            }`}
-                                        title="Yeni Kişi Ekle"
-                                    >
-                                        <UserPlus className="h-5 w-5" />
-                                    </button>
-                                </div>
+                                <select
+                                    value={selectedCustomerId}
+                                    onChange={(e) => setSelectedCustomerId(e.target.value)}
+                                    className="w-full text-sm p-2 rounded-lg border border-gray-300 text-gray-900 font-medium bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none h-[42px]"
+                                >
+                                    <option value="">(Opsiyonel) Kişi Seçiniz...</option>
+                                    {customers.map(c => (
+                                        <option key={c.id} value={c.id}>{c.name} ({c.role})</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
-
-                        {/* Inline New Customer Form (Enhanced) */}
-                        {showNewCustomer && (
-                            <div className="bg-white p-4 rounded-xl border border-purple-200 shadow-sm animate-fade-in relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-                                <h5 className="text-sm font-bold text-purple-800 mb-3 flex items-center gap-2">
-                                    <UserPlus className="w-4 h-4" /> Yeni Kişi Oluştur
-                                </h5>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                    <input
-                                        placeholder="Ad Soyad *"
-                                        className="text-sm p-2 border border-gray-200 rounded-lg outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                                        value={newCustomer.name}
-                                        onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                                    />
-                                    <select
-                                        className="text-sm p-2 border border-gray-200 rounded-lg outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 bg-white"
-                                        value={newCustomer.role}
-                                        onChange={(e) => setNewCustomer({ ...newCustomer, role: e.target.value })}
-                                    >
-                                        <option value="Land Owner">Mal Sahibi</option>
-                                        <option value="Investor">Yatırımcı</option>
-                                        <option value="Agent">Emlakçı</option>
-                                        <option value="Architect">Mimar</option>
-                                        <option value="Municipality">Belediye Yetkilisi</option>
-                                    </select>
-                                    <input
-                                        placeholder="Telefon (5xx...)"
-                                        className="text-sm p-2 border border-gray-200 rounded-lg outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                                        value={newCustomer.phone}
-                                        onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                                    />
-                                    <input
-                                        placeholder="E-Posta"
-                                        className="text-sm p-2 border border-gray-200 rounded-lg outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                                        value={newCustomer.email}
-                                        onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                                    />
-                                </div>
-                                <div className="flex justify-end gap-2">
-                                    <button
-                                        onClick={() => setShowNewCustomer(false)}
-                                        className="text-xs text-gray-500 hover:text-gray-700 font-medium px-3 py-2"
-                                    >
-                                        İptal
-                                    </button>
-                                    <button
-                                        onClick={handleCreateCustomer}
-                                        className="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-700 shadow-sm"
-                                    >
-                                        Kişiyi Kaydet
-                                    </button>
-                                </div>
-                            </div>
-                        )}
 
                         <div className="relative">
                             <textarea
@@ -279,7 +208,7 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                                     className="bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-emerald-700 shadow-md transition-all flex items-center gap-2"
                                 >
                                     <Plus className="w-4 h-4" />
-                                    İşleme Ekle
+                                    Kaydet
                                 </button>
                             </div>
                         </div>
@@ -339,6 +268,14 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                     ))
                 )}
             </div>
+
+            <AddStakeholderModal
+                isOpen={isStakeholderModalOpen}
+                onClose={() => setIsStakeholderModalOpen(false)}
+                onSuccess={fetchData}
+                parcelId={parcelId}
+                existingStakeholderIds={customers.map(c => c.id)}
+            />
         </div>
     );
 }

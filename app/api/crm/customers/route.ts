@@ -10,11 +10,20 @@ export async function GET(request: Request) {
 
         const { searchParams } = new URL(request.url);
         const parcelId = searchParams.get('parcelId');
+        const search = searchParams.get('search');
 
         // Build where clause based on role
-        const baseWhere = isAdmin((user as any).role as string)
+        const baseWhere: any = isAdmin((user as any).role as string)
             ? {} // Admin sees all customers
             : { ownerId: userId }; // Users see only their own customers
+
+        if (search) {
+            baseWhere['OR'] = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+            ];
+        }
 
         if (parcelId) {
             const customers = await prisma.customer.findMany({
