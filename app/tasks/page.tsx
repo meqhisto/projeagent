@@ -196,8 +196,8 @@ export default function TasksPage() {
                             <button
                                 onClick={() => setFilter("all")}
                                 className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${filter === "all"
-                                        ? "bg-purple-600 text-white border-purple-600"
-                                        : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
+                                    ? "bg-purple-600 text-white border-purple-600"
+                                    : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
                                     }`}
                             >
                                 Tümü
@@ -205,8 +205,8 @@ export default function TasksPage() {
                             <button
                                 onClick={() => setFilter("assigned")}
                                 className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg border transition-colors ${filter === "assigned"
-                                        ? "bg-purple-600 text-white border-purple-600"
-                                        : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
+                                    ? "bg-purple-600 text-white border-purple-600"
+                                    : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
                                     }`}
                             >
                                 Bana Atanan
@@ -340,10 +340,14 @@ function TaskSection({ title, tasks, onToggleComplete, onEdit, onDelete, getPrio
                 {tasks.map((task: Task) => (
                     <div
                         key={task.id}
-                        className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100"
+                        onClick={() => onEdit(task.id)}
+                        className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100 cursor-pointer"
                     >
                         <button
-                            onClick={() => onToggleComplete(task.id, task.isCompleted)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleComplete(task.id, task.isCompleted);
+                            }}
                             className="mt-0.5"
                         >
                             {task.isCompleted ? (
@@ -377,14 +381,20 @@ function TaskSection({ title, tasks, onToggleComplete, onEdit, onDelete, getPrio
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
-                                    onClick={() => onEdit(task.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(task.id);
+                                    }}
                                     className="p-1 text-blue-600 hover:bg-blue-50 rounded"
                                     title="Düzenle"
                                 >
                                     <Edit2 className="h-4 w-4" />
                                 </button>
                                 <button
-                                    onClick={() => onDelete(task.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete(task.id);
+                                    }}
                                     className="p-1 text-red-600 hover:bg-red-50 rounded"
                                     title="Sil"
                                 >

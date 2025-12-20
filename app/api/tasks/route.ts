@@ -20,8 +20,21 @@ export async function GET(req: Request) {
             type: "TASK"
         };
 
-        // Filter by assigned user
+        // User based filtering (Secure default)
+        // If not admin, user can only see tasks assigned to them OR created by them
+        if (user.role !== "ADMIN") {
+            where.OR = [
+                { assignedTo: parseInt(user.id || "0") },
+                { createdBy: parseInt(user.id || "0") }
+            ];
+        }
+
+        // Filter by assigned user (Admin can filter by specific user)
         if (assignedTo) {
+            // If regular user tries to filter by someone else, ignore it or enforce their own id if unrelated
+            // But usually the UI won't show the option. 
+            // We'll trust the OR condition above to handle security.
+            // If we add this AND the OR from above, it works as intersection.
             where.assignedTo = parseInt(assignedTo);
         }
 

@@ -106,8 +106,8 @@ function ChangePasswordForm() {
             {/* Message */}
             {message && (
                 <div className={`p-3 rounded-lg text-sm ${message.type === "success"
-                        ? "bg-green-50 text-green-800 border border-green-200"
-                        : "bg-red-50 text-red-800 border border-red-200"
+                    ? "bg-green-50 text-green-800 border border-green-200"
+                    : "bg-red-50 text-red-800 border border-red-200"
                     }`}>
                     {message.text}
                 </div>
@@ -183,7 +183,9 @@ export default function SettingsPage() {
 
     const handleLogout = async () => {
         setLoading(true);
-        await signOut({ callbackUrl: "/login" });
+        // Use window.location.origin to ensure we redirect to the correct domain (e.g., in Docker)
+        const callbackUrl = window.location.origin + "/login";
+        await signOut({ callbackUrl });
     };
 
     if (!session) {

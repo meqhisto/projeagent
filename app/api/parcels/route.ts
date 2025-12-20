@@ -8,9 +8,11 @@ export async function GET(request: Request) {
         const userId = parseInt(user.id || "0");
 
         const { searchParams } = new URL(request.url);
+        const island = searchParams.get("island");
+        const parsel = searchParams.get("parsel");
 
         // Build query based on role
-        const where = isAdmin((user as any).role as string)
+        const where: any = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
                 OR: [
@@ -18,6 +20,14 @@ export async function GET(request: Request) {
                     { assignedTo: userId }
                 ]
             };
+
+        if (island) {
+            where.island = island;
+        }
+
+        if (parsel) {
+            where.parsel = parsel;
+        }
 
         const parcels = await prisma.parcel.findMany({
             where,
