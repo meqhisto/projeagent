@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
+import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
+import { ParcelCreateSchema, validateSchema } from "@/lib/validations";
 
 export async function GET(request: Request) {
     try {
@@ -50,6 +52,19 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    // Rate limiting for POST operations
+    const rateLimitResult = rateLimit(request, "/api/parcels");
+
+    if (!rateLimitResult.success) {
+        return NextResponse.json(
+            { error: "Çok fazla istek. Lütfen biraz bekleyin." },
+            {
+                status: 429,
+                headers: getRateLimitHeaders(rateLimitResult),
+            }
+        );
+    }
+
     try {
         console.log("POST /api/parcels - Starting");
         const userId = await getUserId();
@@ -58,23 +73,18 @@ export async function POST(request: Request) {
         const body = await request.json();
         console.log("POST /api/parcels - Body received", { city: body.city, parsel: body.parsel });
 
-        const { city, district, neighborhood, island, parsel, area, latitude, longitude } = body;
+        // Zod validation
+        const validation = validateSchema(ParcelCreateSchema, body);
 
-        // Basic validation
-        const missingFields = [];
-        if (!city) missingFields.push("city (İl)");
-        if (!district) missingFields.push("district (İlçe)");
-        if (!neighborhood) missingFields.push("neighborhood (Mahalle)");
-        if (!island) missingFields.push("island (Ada)");
-        if (!parsel) missingFields.push("parsel (Parsel)");
-
-        if (missingFields.length > 0) {
-            console.log("POST /api/parcels - Missing fields:", missingFields);
+        if (!validation.success) {
+            console.log("POST /api/parcels - Validation errors:", validation.errors);
             return NextResponse.json(
-                { error: `Eksik alanlar: ${missingFields.join(", ")}` },
+                { error: "Geçersiz veri", details: validation.errors },
                 { status: 400 }
             );
         }
+
+        const { city, district, neighborhood, island, parsel, area, latitude, longitude } = validation.data!;
 
         const newParcel = await prisma.parcel.create({
             data: {
@@ -83,9 +93,9 @@ export async function POST(request: Request) {
                 neighborhood,
                 island,
                 parsel,
-                area: area ? parseFloat(area) : null,
-                latitude: latitude ? parseFloat(latitude) : null,
-                longitude: longitude ? parseFloat(longitude) : null,
+                area: area,
+                latitude: latitude,
+                longitude: longitude,
                 status: "RESEARCHING",
                 ownerId: userId, // Automatically set owner
             },

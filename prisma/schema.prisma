@@ -143,13 +143,17 @@ model Document {
 
 model Notification {
   id          Int      @id @default(autoincrement())
-  type        String   // PARCEL_ADDED, RESEARCH_COMPLETED, STAGE_CHANGED, etc.
+  type        String   // PARCEL_ADDED, RESEARCH_COMPLETED, STAGE_CHANGED, TASK_ASSIGNED, etc.
   title       String
   message     String
   relatedId   Int?     // ParcelId, DocumentId, etc.
-  relatedType String?  // "PARCEL", "DOCUMENT", etc.
+  relatedType String?  // "PARCEL", "DOCUMENT", "TASK", etc.
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
+  
+  // User-specific notification
+  userId      Int?     // If null, notification is global (for backwards compatibility)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -169,6 +173,9 @@ model User {
   // Task relations
   assignedTasks   Interaction[] @relation("AssignedTasks")
   createdTasks    Interaction[] @relation("CreatedTasks")
+  
+  // Notifications
+  notifications   Notification[]
   
   sessions  Session[]
 }

@@ -183,9 +183,12 @@ export default function SettingsPage() {
 
     const handleLogout = async () => {
         setLoading(true);
-        // Use window.location.origin to ensure we redirect to the correct domain (e.g., in Docker)
-        const callbackUrl = window.location.origin + "/login";
-        await signOut({ callbackUrl });
+        // Use NEXTAUTH_URL from environment for Docker/production, fallback to window.location.origin
+        // In client-side, we need to handle this properly since env vars may not be available
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ||
+            (typeof window !== 'undefined' ? window.location.origin : 'https://ekip.invecoproje.com');
+        const callbackUrl = `${baseUrl}/login`;
+        await signOut({ callbackUrl, redirect: true });
     };
 
     if (!session) {

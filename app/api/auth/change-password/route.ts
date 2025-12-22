@@ -2,10 +2,24 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { requireAuth } from "@/lib/auth/roleCheck";
+import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
+    // Rate limiting check
+    const rateLimitResult = rateLimit(req, "/api/auth/change-password");
+
+    if (!rateLimitResult.success) {
+        return NextResponse.json(
+            { error: "Çok fazla deneme. Lütfen daha sonra tekrar deneyin." },
+            {
+                status: 429,
+                headers: getRateLimitHeaders(rateLimitResult),
+            }
+        );
+    }
+
     try {
         // Get authenticated user
         const user = await requireAuth();
