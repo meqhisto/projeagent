@@ -183,11 +183,8 @@ export default function SettingsPage() {
 
     const handleLogout = async () => {
         setLoading(true);
-        // Use NEXTAUTH_URL from environment for Docker/production, fallback to window.location.origin
-        // In client-side, we need to handle this properly since env vars may not be available
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ||
-            (typeof window !== 'undefined' ? window.location.origin : 'https://ekip.invecoproje.com');
-        const callbackUrl = `${baseUrl}/login`;
+        // Production URL - Docker/reverse proxy arkasında çalışırken doğru yönlendirme için
+        const callbackUrl = "https://ekip.invecoproje.com/login";
         await signOut({ callbackUrl, redirect: true });
     };
 
