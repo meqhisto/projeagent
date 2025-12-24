@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Map as MapIcon, Database, Settings, Search, LayoutGrid, KanbanSquare, Users, Shield } from "lucide-react";
+import { Home, Map as MapIcon, Database, Settings, Search, LayoutGrid, KanbanSquare, Users, Shield, Building2, Wallet } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -9,6 +9,7 @@ import clsx from "clsx";
 const allNavigation = [
     { name: "Anasayfa", href: "/", icon: Home, roles: ["USER", "ADMIN"] },
     { name: "Parsel Listesi", href: "/parcels", icon: LayoutGrid, roles: ["USER", "ADMIN"] },
+    { name: "Gayrimenkul Portföyü", href: "/properties", icon: Building2, roles: ["USER", "ADMIN"] },
     { name: "İş Akışı (Kanban)", href: "/kanban", icon: KanbanSquare, roles: ["USER", "ADMIN"] },
     { name: "Kişiler (Directory)", href: "/customers", icon: Users, roles: ["USER", "ADMIN"] },
     { name: "Harita Görünümü", href: "/map", icon: MapIcon, roles: ["USER", "ADMIN"] },

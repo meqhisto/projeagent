@@ -36,6 +36,7 @@ model Parcel {
   notes        Note[]
   interactions Interaction[]
   stakeholders Customer[]
+  properties   Property[]    // Üzerine yapılan gayrimenkuller
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
 }
@@ -101,6 +102,7 @@ model Customer {
   
   parcels      Parcel[]
   interactions Interaction[]
+  units        Unit[]       // Kiracı olduğu daireler
   createdAt DateTime @default(now())
 }
 
@@ -177,6 +179,9 @@ model User {
   // Notifications
   notifications   Notification[]
   
+  // Property Portfolio
+  properties      Property[] @relation("OwnedProperties")
+  
   sessions  Session[]
 }
 
@@ -186,4 +191,186 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+// ==========================================
+// GAYRIMENKUL PORTFÖY SİSTEMİ
+// ==========================================
+
+// Gayrimenkul Tipi
+enum PropertyType {
+  APARTMENT     // Daire
+  VILLA         // Villa
+  DETACHED      // Müstakil Ev
+  OFFICE        // Ofis
+  SHOP          // Dükkan
+  COMMERCIAL    // Ticari Alan
+  LAND          // Arsa
+  BUILDING      // Bina
+  WAREHOUSE     // Depo
+}
+
+// Gayrimenkul Durumu
+enum PropertyStatus {
+  AVAILABLE           // Boş/Satılık
+  RENTED              // Kirada
+  SOLD                // Satıldı
+  UNDER_CONSTRUCTION  // İnşaat Halinde
+  RENOVATION          // Tadilatta
+  RESERVED            // Rezerve
+}
+
+// Oda Sayısı (Ön Tanımlı)
+enum RoomType {
+  STUDIO        // Stüdyo
+  ONE_PLUS_ZERO // 1+0
+  ONE_PLUS_ONE  // 1+1
+  TWO_PLUS_ONE  // 2+1
+  THREE_PLUS_ONE // 3+1
+  THREE_PLUS_TWO // 3+2
+  FOUR_PLUS_ONE  // 4+1
+  FOUR_PLUS_TWO  // 4+2
+  FIVE_PLUS_ONE  // 5+1
+  FIVE_PLUS_TWO  // 5+2
+  SIX_PLUS       // 6+ ve üzeri
+  OTHER          // Diğer
+}
+
+// Finansal İşlem Tipi
+enum TransactionType {
+  RENT_INCOME   // Kira Geliri
+  EXPENSE       // Gider
+  PURCHASE      // Satın Alma
+  SALE          // Satış
+  DEPOSIT       // Depozito
+  MAINTENANCE   // Bakım/Onarım
+  TAX           // Vergi
+  INSURANCE     // Sigorta
+}
+
+// Ana Gayrimenkul Modeli
+model Property {
+  id           Int            @id @default(autoincrement())
+  
+  // Temel Bilgiler
+  title        String         // "Ataşehir 3+1 Daire"
+  type         PropertyType   @default(APARTMENT)
+  status       PropertyStatus @default(AVAILABLE)
+  
+  // Konum
+  city         String
+  district     String
+  neighborhood String
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  
+  // Fiziksel Özellikler
+  grossArea    Float?         // Brüt m²
+  netArea      Float?         // Net m²
+  roomType     RoomType?      // Oda tipi
+  floorNumber  Int?           // Bulunduğu kat
+  totalFloors  Int?           // Bina toplam kat
+  buildYear    Int?           // Yapım yılı
+  hasElevator  Boolean        @default(false)
+  hasParking   Boolean        @default(false)
+  heatingType  String?        // Doğalgaz, Merkezi, Klima
+  
+  // Finansal Bilgiler
+  purchasePrice    Float?     // Alış fiyatı
+  purchaseDate     DateTime?  // Alış tarihi
+  currentValue     Float?     // Mevcut değer
+  monthlyRent      Float?     // Aylık kira
+  listingPrice     Float?     // İlan fiyatı
+  
+  // İlişkiler
+  parcelId     Int?           // İsteğe bağlı parsel bağlantısı
+  parcel       Parcel?        @relation(fields: [parcelId], references: [id])
+  
+  ownerId      Int
+  owner        User           @relation("OwnedProperties", fields: [ownerId], references: [id])
+  
+  units        Unit[]         // Bina ise daireler
+  transactions Transaction[]
+  valuations   Valuation[]
+  images       PropertyImage[]
+  
+  notes        String?        // Notlar
+  
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+// Gayrimenkul Görselleri
+model PropertyImage {
+  id          Int       @id @default(autoincrement())
+  propertyId  Int
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url         String
+  type        String    @default("PHOTO") // PHOTO, FLOOR_PLAN, EXTERIOR
+  isDefault   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+}
+
+// Alt Birimler (Daireler/Ofisler)
+model Unit {
+  id           Int       @id @default(autoincrement())
+  propertyId   Int
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  unitNumber   String    // "A-12", "Daire 5"
+  roomType     RoomType? // 1+1, 2+1, etc.
+  area         Float?    // m²
+  status       PropertyStatus @default(AVAILABLE)
+  
+  floorNumber  Int?      // Kat
+  monthlyRent  Float?    // Kira
+  currentValue Float?    // Değer
+  
+  // Kiracı bilgisi
+  tenantId     Int?
+  tenant       Customer? @relation(fields: [tenantId], references: [id])
+  leaseStart   DateTime? // Kira başlangıç
+  leaseEnd     DateTime? // Kira bitiş
+  
+  transactions Transaction[]
+  notes        String?
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// Finansal İşlemler
+model Transaction {
+  id           Int             @id @default(autoincrement())
+  
+  propertyId   Int?
+  property     Property?       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unitId       Int?
+  unit         Unit?           @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  type         TransactionType
+  amount       Float
+  date         DateTime
+  description  String?
+  category     String?         // Alt kategori
+  
+  isPaid       Boolean         @default(true) // Ödendi mi?
+  dueDate      DateTime?       // Vade tarihi
+  
+  createdAt    DateTime        @default(now())
+}
+
+// Değerleme Geçmişi
+model Valuation {
+  id           Int       @id @default(autoincrement())
+  propertyId   Int
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  value        Float
+  source       String?   // "Manuel", "AI Tahmini", "Ekspertiz"
+  date         DateTime
+  notes        String?
+  
+  createdAt    DateTime  @default(now())
 }
