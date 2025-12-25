@@ -241,3 +241,19 @@ export interface PortfolioStats {
     averageValue: number;
     occupancyRate: number;
 }
+
+// Unit form data
+export interface UnitFormData {
+    unitNumber: string;
+    roomType?: RoomType;
+    area?: number;
+    status: PropertyStatus;
+    floorNumber?: number;
+    monthlyRent?: number;
+    currentValue?: number;
+    tenantId?: number;
+    leaseStart?: string;
+    leaseEnd?: string;
+    notes?: string;
+}
+

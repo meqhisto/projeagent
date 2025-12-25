@@ -18,7 +18,9 @@ import {
     Plus
 } from "lucide-react";
 import AddPropertyModal from "@/components/AddPropertyModal";
+import AddUnitModal from "@/components/AddUnitModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { Unit } from "@/types/property";
 import {
     PropertyTypeLabels,
     PropertyStatusLabels,
@@ -39,6 +41,11 @@ export default function PropertyDetailPage({
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [activeTab, setActiveTab] = useState<'overview' | 'units' | 'finances' | 'history'>('overview');
+
+    // Unit modal states
+    const [showUnitModal, setShowUnitModal] = useState(false);
+    const [editUnit, setEditUnit] = useState<Unit | null>(null);
+    const [deleteUnit, setDeleteUnit] = useState<Unit | null>(null);
 
     useEffect(() => {
         fetchProperty();
@@ -70,6 +77,20 @@ export default function PropertyDetailPage({
             });
             if (!response.ok) throw new Error('Silme hatası');
             router.push('/properties');
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleDeleteUnit = async () => {
+        if (!deleteUnit) return;
+        try {
+            const response = await fetch(`/api/properties/${id}/units/${deleteUnit.id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Birim silinemedi');
+            fetchProperty();
+            setDeleteUnit(null);
         } catch (err: any) {
             setError(err.message);
         }
@@ -234,8 +255,8 @@ export default function PropertyDetailPage({
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
-                                ? 'text-emerald-600 border-b-2 border-emerald-600'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'text-emerald-600 border-b-2 border-emerald-600'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         <tab.icon className="w-4 h-4" />
@@ -329,7 +350,10 @@ export default function PropertyDetailPage({
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold text-gray-900">Birimler</h3>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+                        <button
+                            onClick={() => { setEditUnit(null); setShowUnitModal(true); }}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                        >
                             <Plus className="w-4 h-4" />
                             Birim Ekle
                         </button>
@@ -338,7 +362,7 @@ export default function PropertyDetailPage({
                     {property.units?.length > 0 ? (
                         <div className="space-y-3">
                             {property.units.map((unit: any) => (
-                                <div key={unit.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                <div key={unit.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
                                             <DoorOpen className="w-5 h-5 text-gray-500" />
@@ -348,10 +372,13 @@ export default function PropertyDetailPage({
                                             <p className="text-gray-500 text-sm">
                                                 {unit.roomType ? RoomTypeLabels[unit.roomType as keyof typeof RoomTypeLabels] : '-'}
                                                 {unit.area && ` • ${unit.area} m²`}
+                                                {unit.tenant && (
+                                                    <span className="ml-2 text-emerald-600">• Kiracı: {unit.tenant.name}</span>
+                                                )}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${PropertyStatusColors[unit.status as keyof typeof PropertyStatusColors]?.bg
                                             } ${PropertyStatusColors[unit.status as keyof typeof PropertyStatusColors]?.text}`}>
                                             {PropertyStatusLabels[unit.status as keyof typeof PropertyStatusLabels]}
@@ -361,6 +388,20 @@ export default function PropertyDetailPage({
                                                 {formatCurrency(unit.monthlyRent)}/ay
                                             </span>
                                         )}
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => { setEditUnit(unit); setShowUnitModal(true); }}
+                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteUnit(unit)}
+                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -368,7 +409,13 @@ export default function PropertyDetailPage({
                     ) : (
                         <div className="text-center py-12">
                             <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-500">Henüz birim eklenmemiş</p>
+                            <p className="text-gray-500 mb-3">Henüz birim eklenmemiş</p>
+                            <button
+                                onClick={() => { setEditUnit(null); setShowUnitModal(true); }}
+                                className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors"
+                            >
+                                İlk Birimi Ekle
+                            </button>
                         </div>
                     )}
                 </div>
@@ -386,8 +433,8 @@ export default function PropertyDetailPage({
                                         <p className="text-gray-500 text-sm">{formatDate(tx.date)}</p>
                                     </div>
                                     <span className={`font-medium ${tx.type === 'RENT_INCOME' || tx.type === 'SALE'
-                                            ? 'text-green-600'
-                                            : 'text-red-600'
+                                        ? 'text-green-600'
+                                        : 'text-red-600'
                                         }`}>
                                         {tx.type === 'RENT_INCOME' || tx.type === 'SALE' ? '+' : '-'}
                                         {formatCurrency(tx.amount)}
@@ -450,6 +497,31 @@ export default function PropertyDetailPage({
                 onConfirm={handleDelete}
                 title="Gayrimenkül Sil"
                 message={`"${property.title}" gayrimenkulünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`}
+                confirmText="Sil"
+                cancelText="İptal"
+                variant="danger"
+            />
+
+            {/* Unit Modal */}
+            <AddUnitModal
+                isOpen={showUnitModal}
+                onClose={() => { setShowUnitModal(false); setEditUnit(null); }}
+                onSuccess={() => {
+                    fetchProperty();
+                    setShowUnitModal(false);
+                    setEditUnit(null);
+                }}
+                propertyId={parseInt(id)}
+                editUnit={editUnit}
+            />
+
+            {/* Delete Unit Dialog */}
+            <ConfirmDialog
+                isOpen={!!deleteUnit}
+                onClose={() => setDeleteUnit(null)}
+                onConfirm={handleDeleteUnit}
+                title="Birim Sil"
+                message={`"${deleteUnit?.unitNumber}" birimini silmek istediğinizden emin misiniz?`}
                 confirmText="Sil"
                 cancelText="İptal"
                 variant="danger"
