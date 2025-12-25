@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import {
     Plus,
     Search,
-    Filter,
     Building2,
     Grid,
     List,
@@ -138,234 +137,228 @@ export default function PropertiesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-            <div className="pl-72 p-8">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">
-                            Gayrimenkul Portföyü
-                        </h1>
-                        <p className="text-slate-400">
-                            Portföyünüzdeki tüm gayrimenkulleri yönetin
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20"
-                    >
-                        <Plus className="w-5 h-5" />
-                        Yeni Gayrimenkul
-                    </button>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Gayrimenkul Portföyü</h1>
+                    <p className="text-sm text-gray-500 mt-1">Portföyünüzdeki tüm gayrimenkulleri yönetin</p>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-4 gap-4 mb-8">
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border border-slate-700/50">
-                        <p className="text-slate-400 text-sm mb-1">Toplam</p>
-                        <p className="text-2xl font-bold text-white">{stats.total}</p>
-                    </div>
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border border-slate-700/50">
-                        <p className="text-slate-400 text-sm mb-1">Boş/Satılık</p>
-                        <p className="text-2xl font-bold text-green-400">{stats.available}</p>
-                    </div>
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border border-slate-700/50">
-                        <p className="text-slate-400 text-sm mb-1">Kirada</p>
-                        <p className="text-2xl font-bold text-blue-400">{stats.rented}</p>
-                    </div>
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border border-slate-700/50">
-                        <p className="text-slate-400 text-sm mb-1">Toplam Değer</p>
-                        <p className="text-2xl font-bold text-emerald-400">
-                            {new Intl.NumberFormat('tr-TR', {
-                                style: 'currency',
-                                currency: 'TRY',
-                                maximumFractionDigits: 0,
-                                notation: 'compact'
-                            }).format(stats.totalValue)}
-                        </p>
-                    </div>
+                <button
+                    onClick={() => setShowAddModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                >
+                    <Plus className="w-4 h-4" />
+                    Yeni Gayrimenkul
+                </button>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <p className="text-gray-500 text-sm mb-1">Toplam</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                </div>
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <p className="text-gray-500 text-sm mb-1">Boş/Satılık</p>
+                    <p className="text-2xl font-bold text-green-600">{stats.available}</p>
+                </div>
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <p className="text-gray-500 text-sm mb-1">Kirada</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.rented}</p>
+                </div>
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <p className="text-gray-500 text-sm mb-1">Toplam Değer</p>
+                    <p className="text-2xl font-bold text-emerald-600">
+                        {new Intl.NumberFormat('tr-TR', {
+                            style: 'currency',
+                            currency: 'TRY',
+                            maximumFractionDigits: 0,
+                            notation: 'compact'
+                        }).format(stats.totalValue)}
+                    </p>
+                </div>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="flex gap-4">
+                <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Gayrimenkul ara..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                    />
                 </div>
 
-                {/* Search and Filters */}
-                <div className="flex gap-4 mb-6">
-                    <div className="flex-1 relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Gayrimenkul ara..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:border-emerald-500 focus:outline-none"
-                        />
-                    </div>
+                <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors ${showFilters || hasActiveFilters
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                >
+                    <SlidersHorizontal className="w-5 h-5" />
+                    Filtreler
+                    {hasActiveFilters && (
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    )}
+                </button>
 
+                <div className="flex gap-1 p-1 bg-white rounded-lg border border-gray-200">
                     <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${showFilters || hasActiveFilters
-                            ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
-                            : 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white'
+                        onClick={() => setViewMode('grid')}
+                        className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
-                        <SlidersHorizontal className="w-5 h-5" />
-                        Filtreler
-                        {hasActiveFilters && (
-                            <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                        )}
+                        <Grid className="w-5 h-5" />
                     </button>
-
-                    <div className="flex gap-1 p-1 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-white'
-                                }`}
-                        >
-                            <Grid className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-white'
-                                }`}
-                        >
-                            <List className="w-5 h-5" />
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => setViewMode('list')}
+                        className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <List className="w-5 h-5" />
+                    </button>
                 </div>
+            </div>
 
-                {/* Filter Panel */}
-                {showFilters && (
-                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border border-slate-700/50 mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-white font-medium">Filtreler</h3>
-                            {hasActiveFilters && (
-                                <button
-                                    onClick={clearFilters}
-                                    className="text-sm text-slate-400 hover:text-white flex items-center gap-1"
-                                >
-                                    <X className="w-4 h-4" />
-                                    Temizle
-                                </button>
-                            )}
-                        </div>
-                        <div className="grid grid-cols-4 gap-4">
-                            <select
-                                value={filters.type}
-                                onChange={(e) => {
-                                    setFilters(prev => ({ ...prev, type: e.target.value as PropertyType | "" }));
-                                    setTimeout(fetchProperties, 100);
-                                }}
-                                className="px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
-                            >
-                                <option value="">Tüm Tipler</option>
-                                {Object.entries(PropertyTypeLabels).map(([value, label]) => (
-                                    <option key={value} value={value}>{label}</option>
-                                ))}
-                            </select>
-
-                            <select
-                                value={filters.status}
-                                onChange={(e) => {
-                                    setFilters(prev => ({ ...prev, status: e.target.value as PropertyStatus | "" }));
-                                    setTimeout(fetchProperties, 100);
-                                }}
-                                className="px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
-                            >
-                                <option value="">Tüm Durumlar</option>
-                                {Object.entries(PropertyStatusLabels).map(([value, label]) => (
-                                    <option key={value} value={value}>{label}</option>
-                                ))}
-                            </select>
-
-                            <select
-                                value={filters.roomType}
-                                onChange={(e) => {
-                                    setFilters(prev => ({ ...prev, roomType: e.target.value as RoomType | "" }));
-                                    setTimeout(fetchProperties, 100);
-                                }}
-                                className="px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
-                            >
-                                <option value="">Tüm Oda Sayıları</option>
-                                {Object.entries(RoomTypeLabels).map(([value, label]) => (
-                                    <option key={value} value={value}>{label}</option>
-                                ))}
-                            </select>
-
-                            <input
-                                type="text"
-                                placeholder="Şehir"
-                                value={filters.city}
-                                onChange={(e) => {
-                                    setFilters(prev => ({ ...prev, city: e.target.value }));
-                                }}
-                                onBlur={fetchProperties}
-                                className="px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-emerald-500 focus:outline-none"
-                            />
-                        </div>
-                    </div>
-                )}
-
-                {/* Content */}
-                {loading ? (
-                    <div className="flex items-center justify-center py-20">
-                        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                    </div>
-                ) : error ? (
-                    <div className="text-center py-20">
-                        <p className="text-red-400 mb-4">{error}</p>
-                        <button
-                            onClick={fetchProperties}
-                            className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
-                        >
-                            Tekrar Dene
-                        </button>
-                    </div>
-                ) : filteredProperties.length === 0 ? (
-                    <div className="text-center py-20">
-                        <Building2 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                        <h3 className="text-xl font-medium text-white mb-2">
-                            {hasActiveFilters ? 'Sonuç Bulunamadı' : 'Henüz Gayrimenkul Yok'}
-                        </h3>
-                        <p className="text-slate-400 mb-6">
-                            {hasActiveFilters
-                                ? 'Filtre kriterlerinize uygun gayrimenkul bulunamadı.'
-                                : 'Portföyünüze ilk gayrimenkulü ekleyerek başlayın.'
-                            }
-                        </p>
-                        {hasActiveFilters ? (
+            {/* Filter Panel */}
+            {showFilters && (
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-gray-900 font-medium">Filtreler</h3>
+                        {hasActiveFilters && (
                             <button
                                 onClick={clearFilters}
-                                className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+                                className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
                             >
-                                Filtreleri Temizle
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setShowAddModal(true)}
-                                className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
-                            >
-                                Gayrimenkul Ekle
+                                <X className="w-4 h-4" />
+                                Temizle
                             </button>
                         )}
                     </div>
-                ) : (
-                    <div className={viewMode === 'grid'
-                        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-                        : 'flex flex-col gap-4'
-                    }>
-                        {filteredProperties.map(property => (
-                            <PropertyCard
-                                key={property.id}
-                                property={property}
-                                onEdit={(p) => {
-                                    setEditProperty(p);
-                                    setShowAddModal(true);
-                                }}
-                                onDelete={(p) => setDeleteProperty(p)}
-                            />
-                        ))}
+                    <div className="grid grid-cols-4 gap-4">
+                        <select
+                            value={filters.type}
+                            onChange={(e) => {
+                                setFilters(prev => ({ ...prev, type: e.target.value as PropertyType | "" }));
+                                setTimeout(fetchProperties, 100);
+                            }}
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                        >
+                            <option value="">Tüm Tipler</option>
+                            {Object.entries(PropertyTypeLabels).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={filters.status}
+                            onChange={(e) => {
+                                setFilters(prev => ({ ...prev, status: e.target.value as PropertyStatus | "" }));
+                                setTimeout(fetchProperties, 100);
+                            }}
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                        >
+                            <option value="">Tüm Durumlar</option>
+                            {Object.entries(PropertyStatusLabels).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={filters.roomType}
+                            onChange={(e) => {
+                                setFilters(prev => ({ ...prev, roomType: e.target.value as RoomType | "" }));
+                                setTimeout(fetchProperties, 100);
+                            }}
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                        >
+                            <option value="">Tüm Oda Sayıları</option>
+                            {Object.entries(RoomTypeLabels).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+
+                        <input
+                            type="text"
+                            placeholder="Şehir"
+                            value={filters.city}
+                            onChange={(e) => {
+                                setFilters(prev => ({ ...prev, city: e.target.value }));
+                            }}
+                            onBlur={fetchProperties}
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                        />
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
+            {/* Content */}
+            {loading ? (
+                <div className="flex items-center justify-center py-20">
+                    <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+            ) : error ? (
+                <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                    <p className="text-red-500 mb-4">{error}</p>
+                    <button
+                        onClick={fetchProperties}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                    >
+                        Tekrar Dene
+                    </button>
+                </div>
+            ) : filteredProperties.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+                    <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">
+                        {hasActiveFilters ? 'Sonuç Bulunamadı' : 'Henüz Gayrimenkul Yok'}
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                        {hasActiveFilters
+                            ? 'Filtre kriterlerinize uygun gayrimenkul bulunamadı.'
+                            : 'Portföyünüze ilk gayrimenkulü ekleyerek başlayın.'
+                        }
+                    </p>
+                    {hasActiveFilters ? (
+                        <button
+                            onClick={clearFilters}
+                            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                        >
+                            Filtreleri Temizle
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                        >
+                            Gayrimenkul Ekle
+                        </button>
+                    )}
+                </div>
+            ) : (
+                <div className={viewMode === 'grid'
+                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                    : 'flex flex-col gap-4'
+                }>
+                    {filteredProperties.map(property => (
+                        <PropertyCard
+                            key={property.id}
+                            property={property}
+                            onEdit={(p) => {
+                                setEditProperty(p);
+                                setShowAddModal(true);
+                            }}
+                            onDelete={(p) => setDeleteProperty(p)}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Add/Edit Modal */}
             <AddPropertyModal
