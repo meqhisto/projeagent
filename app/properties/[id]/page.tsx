@@ -19,8 +19,9 @@ import {
 } from "lucide-react";
 import AddPropertyModal from "@/components/AddPropertyModal";
 import AddUnitModal from "@/components/AddUnitModal";
+import AddTransactionModal from "@/components/AddTransactionModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { Unit } from "@/types/property";
+import { Unit, Transaction, TransactionTypeLabels } from "@/types/property";
 import {
     PropertyTypeLabels,
     PropertyStatusLabels,
@@ -46,6 +47,11 @@ export default function PropertyDetailPage({
     const [showUnitModal, setShowUnitModal] = useState(false);
     const [editUnit, setEditUnit] = useState<Unit | null>(null);
     const [deleteUnit, setDeleteUnit] = useState<Unit | null>(null);
+
+    // Transaction modal states
+    const [showTransactionModal, setShowTransactionModal] = useState(false);
+    const [editTransaction, setEditTransaction] = useState<Transaction | null>(null);
+    const [deleteTransaction, setDeleteTransaction] = useState<Transaction | null>(null);
 
     useEffect(() => {
         fetchProperty();
@@ -91,6 +97,20 @@ export default function PropertyDetailPage({
             if (!response.ok) throw new Error('Birim silinemedi');
             fetchProperty();
             setDeleteUnit(null);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleDeleteTransaction = async () => {
+        if (!deleteTransaction) return;
+        try {
+            const response = await fetch(`/api/properties/${id}/transactions/${deleteTransaction.id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('İşlem silinemedi');
+            fetchProperty();
+            setDeleteTransaction(null);
         } catch (err: any) {
             setError(err.message);
         }
@@ -423,29 +443,70 @@ export default function PropertyDetailPage({
 
             {activeTab === 'finances' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Son İşlemler</h3>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Son İşlemler</h3>
+                        <button
+                            onClick={() => { setEditTransaction(null); setShowTransactionModal(true); }}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                        >
+                            <Plus className="w-4 h-4" />
+                            İşlem Ekle
+                        </button>
+                    </div>
                     {property.transactions?.length > 0 ? (
                         <div className="space-y-3">
-                            {property.transactions.map((tx: any) => (
-                                <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                    <div>
-                                        <p className="text-gray-900 font-medium">{tx.description || tx.type}</p>
-                                        <p className="text-gray-500 text-sm">{formatDate(tx.date)}</p>
+                            {property.transactions.map((tx: any) => {
+                                const isIncome = tx.type === 'RENT_INCOME' || tx.type === 'SALE' || tx.type === 'DEPOSIT';
+                                return (
+                                    <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isIncome ? 'bg-green-100' : 'bg-red-100'}`}>
+                                                <Wallet className={`w-5 h-5 ${isIncome ? 'text-green-600' : 'text-red-600'}`} />
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-900 font-medium">
+                                                    {tx.description || TransactionTypeLabels[tx.type as keyof typeof TransactionTypeLabels]}
+                                                </p>
+                                                <p className="text-gray-500 text-sm">
+                                                    {formatDate(tx.date)}
+                                                    {tx.category && ` • ${tx.category}`}
+                                                    {!tx.isPaid && <span className="ml-2 text-orange-500">• Ödenmedi</span>}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`text-lg font-semibold ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+                                                {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
+                                            </span>
+                                            <div className="flex gap-1">
+                                                <button
+                                                    onClick={() => { setEditTransaction(tx); setShowTransactionModal(true); }}
+                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteTransaction(tx)}
+                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className={`font-medium ${tx.type === 'RENT_INCOME' || tx.type === 'SALE'
-                                        ? 'text-green-600'
-                                        : 'text-red-600'
-                                        }`}>
-                                        {tx.type === 'RENT_INCOME' || tx.type === 'SALE' ? '+' : '-'}
-                                        {formatCurrency(tx.amount)}
-                                    </span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="text-center py-12">
                             <Wallet className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-500">Henüz işlem kaydı yok</p>
+                            <p className="text-gray-500 mb-3">Henüz işlem kaydı yok</p>
+                            <button
+                                onClick={() => { setEditTransaction(null); setShowTransactionModal(true); }}
+                                className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors"
+                            >
+                                İlk İşlemi Ekle
+                            </button>
                         </div>
                     )}
                 </div>
@@ -522,6 +583,32 @@ export default function PropertyDetailPage({
                 onConfirm={handleDeleteUnit}
                 title="Birim Sil"
                 message={`"${deleteUnit?.unitNumber}" birimini silmek istediğinizden emin misiniz?`}
+                confirmText="Sil"
+                cancelText="İptal"
+                variant="danger"
+            />
+
+            {/* Transaction Modal */}
+            <AddTransactionModal
+                isOpen={showTransactionModal}
+                onClose={() => { setShowTransactionModal(false); setEditTransaction(null); }}
+                onSuccess={() => {
+                    fetchProperty();
+                    setShowTransactionModal(false);
+                    setEditTransaction(null);
+                }}
+                propertyId={parseInt(id)}
+                units={property.units}
+                editTransaction={editTransaction}
+            />
+
+            {/* Delete Transaction Dialog */}
+            <ConfirmDialog
+                isOpen={!!deleteTransaction}
+                onClose={() => setDeleteTransaction(null)}
+                onConfirm={handleDeleteTransaction}
+                title="İşlem Sil"
+                message={`Bu işlemi silmek istediğinizden emin misiniz?`}
                 confirmText="Sil"
                 cancelText="İptal"
                 variant="danger"

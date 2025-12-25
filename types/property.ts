@@ -257,3 +257,16 @@ export interface UnitFormData {
     notes?: string;
 }
 
+// Transaction form data
+export interface TransactionFormData {
+    type: TransactionType;
+    amount: number;
+    date: string;
+    description?: string;
+    category?: string;
+    unitId?: number;
+    isPaid: boolean;
+    dueDate?: string;
+}
+
+
