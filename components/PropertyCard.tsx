@@ -7,10 +7,7 @@ import {
     Calendar,
     DoorOpen,
     Car,
-    Thermometer,
-    TrendingUp,
     Home,
-    MoreVertical,
     Edit,
     Trash2,
     Eye
@@ -47,9 +44,9 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
         || null;
 
     return (
-        <div className="group relative bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
+        <div className="group relative bg-white rounded-xl border border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all duration-300 overflow-hidden">
             {/* Image Section */}
-            <div className="relative h-48 bg-gradient-to-br from-slate-700 to-slate-800">
+            <div className="relative h-44 bg-gray-100">
                 {defaultImage ? (
                     <img
                         src={defaultImage}
@@ -58,7 +55,7 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                     />
                 ) : (
                     <div className="flex items-center justify-center h-full">
-                        <Building2 className="w-16 h-16 text-slate-600" />
+                        <Building2 className="w-14 h-14 text-gray-300" />
                     </div>
                 )}
 
@@ -68,7 +65,7 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                 </div>
 
                 {/* Type Badge */}
-                <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium bg-slate-900/80 text-slate-300">
+                <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-700 shadow-sm">
                     {PropertyTypeLabels[property.type]}
                 </div>
 
@@ -76,96 +73,96 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                 <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Link
                         href={`/properties/${property.id}`}
-                        className="p-2 bg-slate-900/80 rounded-lg hover:bg-emerald-500 transition-colors"
+                        className="p-2 bg-white/90 rounded-lg hover:bg-emerald-500 hover:text-white text-gray-600 transition-colors shadow-sm"
                     >
-                        <Eye className="w-4 h-4 text-white" />
+                        <Eye className="w-4 h-4" />
                     </Link>
                     {onEdit && (
                         <button
                             onClick={() => onEdit(property)}
-                            className="p-2 bg-slate-900/80 rounded-lg hover:bg-blue-500 transition-colors"
+                            className="p-2 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white text-gray-600 transition-colors shadow-sm"
                         >
-                            <Edit className="w-4 h-4 text-white" />
+                            <Edit className="w-4 h-4" />
                         </button>
                     )}
                     {onDelete && (
                         <button
                             onClick={() => onDelete(property)}
-                            className="p-2 bg-slate-900/80 rounded-lg hover:bg-red-500 transition-colors"
+                            className="p-2 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white text-gray-600 transition-colors shadow-sm"
                         >
-                            <Trash2 className="w-4 h-4 text-white" />
+                            <Trash2 className="w-4 h-4" />
                         </button>
                     )}
                 </div>
             </div>
 
             {/* Content Section */}
-            <div className="p-5">
+            <div className="p-4">
                 {/* Title */}
                 <Link href={`/properties/${property.id}`}>
-                    <h3 className="text-lg font-semibold text-white mb-2 hover:text-emerald-400 transition-colors line-clamp-1">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1 hover:text-emerald-600 transition-colors line-clamp-1">
                         {property.title}
                     </h3>
                 </Link>
 
                 {/* Location */}
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-4">
-                    <MapPin className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-gray-500 text-sm mb-3">
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
                     <span className="line-clamp-1">
                         {property.neighborhood}, {property.district} / {property.city}
                     </span>
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-3 gap-2 mb-3">
                     {property.roomType && (
-                        <div className="flex flex-col items-center p-2 bg-slate-700/30 rounded-lg">
-                            <DoorOpen className="w-4 h-4 text-slate-400 mb-1" />
-                            <span className="text-xs text-slate-300">{RoomTypeLabels[property.roomType]}</span>
+                        <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                            <DoorOpen className="w-4 h-4 text-gray-400 mb-1" />
+                            <span className="text-xs text-gray-600">{RoomTypeLabels[property.roomType]}</span>
                         </div>
                     )}
                     {property.grossArea && (
-                        <div className="flex flex-col items-center p-2 bg-slate-700/30 rounded-lg">
-                            <Ruler className="w-4 h-4 text-slate-400 mb-1" />
-                            <span className="text-xs text-slate-300">{property.grossArea} m²</span>
+                        <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                            <Ruler className="w-4 h-4 text-gray-400 mb-1" />
+                            <span className="text-xs text-gray-600">{property.grossArea} m²</span>
                         </div>
                     )}
                     {property.buildYear && (
-                        <div className="flex flex-col items-center p-2 bg-slate-700/30 rounded-lg">
-                            <Calendar className="w-4 h-4 text-slate-400 mb-1" />
-                            <span className="text-xs text-slate-300">{property.buildYear}</span>
+                        <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                            <Calendar className="w-4 h-4 text-gray-400 mb-1" />
+                            <span className="text-xs text-gray-600">{property.buildYear}</span>
                         </div>
                     )}
                 </div>
 
                 {/* Amenities */}
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-3">
                     {property.hasElevator && (
-                        <span className="px-2 py-1 bg-slate-700/30 rounded text-xs text-slate-400">
+                        <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
                             Asansör
                         </span>
                     )}
                     {property.hasParking && (
-                        <span className="px-2 py-1 bg-slate-700/30 rounded text-xs text-slate-400 flex items-center gap-1">
+                        <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 flex items-center gap-1">
                             <Car className="w-3 h-3" /> Otopark
                         </span>
                     )}
                 </div>
 
                 {/* Price Section */}
-                <div className="flex justify-between items-end pt-3 border-t border-slate-700/50">
+                <div className="flex justify-between items-end pt-3 border-t border-gray-100">
                     {property.currentValue && (
                         <div>
-                            <p className="text-xs text-slate-500">Değer</p>
-                            <p className="text-lg font-bold text-emerald-400">
+                            <p className="text-xs text-gray-400">Değer</p>
+                            <p className="text-base font-bold text-emerald-600">
                                 {formatCurrency(property.currentValue)}
                             </p>
                         </div>
                     )}
                     {property.monthlyRent && (
                         <div className="text-right">
-                            <p className="text-xs text-slate-500">Aylık Kira</p>
-                            <p className="text-sm font-medium text-blue-400">
+                            <p className="text-xs text-gray-400">Aylık Kira</p>
+                            <p className="text-sm font-medium text-blue-600">
                                 {formatCurrency(property.monthlyRent)}
                             </p>
                         </div>
@@ -174,10 +171,10 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
 
                 {/* Linked Parcel */}
                 {property.parcel && (
-                    <div className="mt-3 pt-3 border-t border-slate-700/50">
+                    <div className="mt-3 pt-3 border-t border-gray-100">
                         <Link
                             href={`/parcels/${property.parcel.id}`}
-                            className="flex items-center gap-2 text-xs text-slate-400 hover:text-emerald-400 transition-colors"
+                            className="flex items-center gap-2 text-xs text-gray-500 hover:text-emerald-600 transition-colors"
                         >
                             <Home className="w-3 h-3" />
                             <span>Parsel: {property.parcel.island}/{property.parcel.parsel}</span>
