@@ -8,7 +8,12 @@ import {
     Grid,
     List,
     SlidersHorizontal,
-    X
+    X,
+    TrendingUp,
+    TrendingDown,
+    Wallet,
+    Home,
+    Users
 } from "lucide-react";
 import PropertyCard from "@/components/PropertyCard";
 import AddPropertyModal from "@/components/AddPropertyModal";
@@ -47,9 +52,13 @@ export default function PropertiesPage() {
     // View mode
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+    // Portfolio stats
+    const [portfolioStats, setPortfolioStats] = useState<any>(null);
+
     useEffect(() => {
         fetchProperties();
         fetchParcels();
+        fetchStats();
     }, []);
 
     const fetchProperties = async () => {
@@ -86,6 +95,18 @@ export default function PropertiesPage() {
             }
         } catch (err) {
             console.error('Parseller yüklenemedi:', err);
+        }
+    };
+
+    const fetchStats = async () => {
+        try {
+            const response = await fetch('/api/properties/stats');
+            if (response.ok) {
+                const data = await response.json();
+                setPortfolioStats(data);
+            }
+        } catch (err) {
+            console.error('İstatistikler yüklenemedi:', err);
         }
     };
 
@@ -154,22 +175,42 @@ export default function PropertiesPage() {
                 </button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Stats Cards - Enhanced */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <p className="text-gray-500 text-sm mb-1">Toplam</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <Building2 className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <p className="text-gray-500 text-sm">Toplam</p>
+                    </div>
                     <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
                 </div>
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <p className="text-gray-500 text-sm mb-1">Boş/Satılık</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center">
+                            <Home className="w-5 h-5 text-green-600" />
+                        </div>
+                        <p className="text-gray-500 text-sm">Boş/Satılık</p>
+                    </div>
                     <p className="text-2xl font-bold text-green-600">{stats.available}</p>
                 </div>
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <p className="text-gray-500 text-sm mb-1">Kirada</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <Users className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <p className="text-gray-500 text-sm">Kirada</p>
+                    </div>
                     <p className="text-2xl font-bold text-blue-600">{stats.rented}</p>
                 </div>
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                    <p className="text-gray-500 text-sm mb-1">Toplam Değer</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center">
+                            <Wallet className="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <p className="text-gray-500 text-sm">Toplam Değer</p>
+                    </div>
                     <p className="text-2xl font-bold text-emerald-600">
                         {new Intl.NumberFormat('tr-TR', {
                             style: 'currency',
@@ -177,6 +218,31 @@ export default function PropertiesPage() {
                             maximumFractionDigits: 0,
                             notation: 'compact'
                         }).format(stats.totalValue)}
+                    </p>
+                </div>
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${(portfolioStats?.valueAppreciation || 0) >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                            {(portfolioStats?.valueAppreciation || 0) >= 0
+                                ? <TrendingUp className="w-5 h-5 text-green-600" />
+                                : <TrendingDown className="w-5 h-5 text-red-600" />
+                            }
+                        </div>
+                        <p className="text-gray-500 text-sm">Değer Artışı</p>
+                    </div>
+                    <p className={`text-2xl font-bold ${(portfolioStats?.valueAppreciation || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {(portfolioStats?.valueAppreciation || 0) >= 0 ? '+' : ''}{portfolioStats?.valueAppreciation?.toFixed(1) || 0}%
+                    </p>
+                </div>
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center">
+                            <Users className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <p className="text-gray-500 text-sm">Doluluk</p>
+                    </div>
+                    <p className="text-2xl font-bold text-purple-600">
+                        {portfolioStats?.occupancyRate?.toFixed(0) || 0}%
                     </p>
                 </div>
             </div>
@@ -197,8 +263,8 @@ export default function PropertiesPage() {
                 <button
                     onClick={() => setShowFilters(!showFilters)}
                     className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors ${showFilters || hasActiveFilters
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         }`}
                 >
                     <SlidersHorizontal className="w-5 h-5" />
