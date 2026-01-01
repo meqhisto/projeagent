@@ -1,16 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Loader2, Lock, Mail } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2, Lock, Mail, CheckCircle } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [logoutSuccess, setLogoutSuccess] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // Logout başarılı mesajını kontrol et
+    useEffect(() => {
+        if (searchParams.get("logout") === "success") {
+            setLogoutSuccess(true);
+            // 5 saniye sonra mesajı temizle ve URL'yi güncelle
+            const timer = setTimeout(() => {
+                setLogoutSuccess(false);
+                // URL'den logout parametresini kaldır
+                router.replace("/login", { scroll: false });
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [searchParams, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -93,6 +109,14 @@ export default function LoginPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* Success Message - Logout */}
+                        {logoutSuccess && (
+                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4" />
+                                Çıkış işlemi başarılı. Güvenli bir şekilde oturumunuz kapatıldı.
+                            </div>
+                        )}
 
                         {/* Error Message */}
                         {error && (

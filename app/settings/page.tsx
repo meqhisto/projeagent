@@ -183,9 +183,18 @@ export default function SettingsPage() {
 
     const handleLogout = async () => {
         setLoading(true);
-        // Production URL - Docker/reverse proxy arkasında çalışırken doğru yönlendirme için
-        const callbackUrl = "https://ekip.invecoproje.com/login";
-        await signOut({ callbackUrl, redirect: true });
+        try {
+            // signOut'u çağır ama redirect'i biz kontrol edelim
+            await signOut({ redirect: false });
+
+            // Başarılı çıkış sonrası production login sayfasına yönlendir
+            // logout=success parametresi ile kullanıcıya bilgi verilecek
+            window.location.href = "https://ekip.invecoproje.com/login?logout=success";
+        } catch (error) {
+            console.error("Logout error:", error);
+            // Hata durumunda da yönlendir
+            window.location.href = "https://ekip.invecoproje.com/login";
+        }
     };
 
     if (!session) {
