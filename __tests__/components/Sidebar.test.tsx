@@ -4,9 +4,16 @@ import Sidebar from "@/components/Sidebar";
 
 // Base mock setup
 const mockUseSession = vi.fn();
+const mockSignOut = vi.fn();
 
 vi.mock("next-auth/react", () => ({
     useSession: () => mockUseSession(),
+    signOut: () => mockSignOut(),
+}));
+
+// Mock usePathname
+vi.mock("next/navigation", () => ({
+    usePathname: () => "/",
 }));
 
 describe("Sidebar", () => {
@@ -41,12 +48,11 @@ describe("Sidebar", () => {
     it("shows user profile section with user name", () => {
         render(<Sidebar />);
         expect(screen.getByText("Test User")).toBeInTheDocument();
+        expect(screen.getByText("test@example.com")).toBeInTheDocument();
     });
 
-    it("shows Online status in profile", () => {
-        render(<Sidebar />);
-        expect(screen.getByText("Online")).toBeInTheDocument();
-    });
+    // "Online" status was removed in the redesign for a cleaner look
+    // it("shows Online status in profile", () => { ... });
 
     it("does not show Admin Panel for USER role", () => {
         render(<Sidebar />);
@@ -97,6 +103,6 @@ describe("Sidebar without session", () => {
 
     it("does not show user profile when not authenticated", () => {
         render(<Sidebar />);
-        expect(screen.queryByText("Online")).not.toBeInTheDocument();
+        expect(screen.queryByText("Test User")).not.toBeInTheDocument();
     });
 });

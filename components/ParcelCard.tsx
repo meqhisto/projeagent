@@ -6,9 +6,8 @@ import Link from "next/link";
 import clsx from "clsx";
 import ConfirmDialog from "./ConfirmDialog";
 import ParcelDetailModal from "./ParcelDetailModal";
-import { MapPin, ArrowRight, Building2, Calendar, Trash2, Eye } from "lucide-react";
+import { MapPin, ArrowRight, Building2, Calendar, Trash2, Eye, MoreHorizontal, Edit2 } from "lucide-react";
 
-// ... (interfaces remain same)
 interface ParcelCardProps {
     id?: number;
     city: string;
@@ -50,7 +49,7 @@ export default function ParcelCard({
             if (!response.ok) throw new Error('Silme işlemi başarısız');
 
             setIsDeleteOpen(false);
-            router.refresh(); // Refresh server components to update list
+            router.refresh();
         } catch (error) {
             console.error('Delete error:', error);
             alert('Parsel silinirken bir hata oluştu.');
@@ -61,97 +60,105 @@ export default function ParcelCard({
 
     return (
         <>
-            <div className="group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] backdrop-blur-sm shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10 hover:border-emerald-500/30">
-                {/* Status Badge & Actions */}
-                <div className="absolute top-4 right-4 z-10 flex gap-2">
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setIsQuickViewOpen(true);
-                        }}
-                        className="inline-flex items-center justify-center p-1.5 rounded-full bg-white/20 text-white hover:bg-white hover:text-emerald-600 backdrop-blur-md shadow-sm border border-white/30 transition-all duration-200"
-                        title="Hızlı Bakış"
-                    >
-                        <Eye className="h-4 w-4" />
-                    </button>
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setIsDeleteOpen(true);
-                        }}
-                        className="inline-flex items-center justify-center p-1.5 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white backdrop-blur-md shadow-sm border border-red-200 dark:border-red-900 transition-all duration-200"
-                        title="Parseli Sil"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </button>
-                    <span className={clsx(
-                        "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase backdrop-blur-md shadow-sm border",
-                        status === 'COMPLETED' ? "bg-emerald-500/90 text-white border-emerald-400" :
-                            status === 'RESEARCHING' ? "bg-amber-500/90 text-white border-amber-400 animate-pulse" :
-                                "bg-slate-500/90 text-white border-slate-400"
-                    )}>
-                        {status === 'RESEARCHING' ? 'Araştırılıyor' : status === 'COMPLETED' ? 'Tamamlandı' : 'Bekliyor'}
-                    </span>
-                </div>
+            <div className="group relative bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
+                {/* Image Area */}
+                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                    {/* Status Badge */}
+                    <div className="absolute top-3 left-3 z-20">
+                        <span className={clsx(
+                            "px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase shadow-sm border",
+                            status === 'COMPLETED' ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
+                                status === 'RESEARCHING' ? "bg-amber-100 text-amber-700 border-amber-200" :
+                                    "bg-slate-100 text-slate-600 border-slate-200"
+                        )}>
+                            {status === 'RESEARCHING' ? 'Araştırılıyor' : status === 'COMPLETED' ? 'Tamamlandı' : 'Bekliyor'}
+                        </span>
+                    </div>
 
-                <Link href={`/parcels/${id || '#'}`}>
-                    {/* Hero Image Section */}
-                    <div className="relative h-48 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                    {/* Action Buttons (Hover Only) */}
+                    <div className="absolute top-3 right-3 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform translate-y-[-10px] group-hover:translate-y-0">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsQuickViewOpen(true);
+                            }}
+                            className="p-2 rounded-lg bg-white/90 text-slate-600 hover:text-emerald-600 shadow-sm hover:shadow-md transition-all"
+                            title="Hızlı Bakış"
+                        >
+                            <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsDeleteOpen(true);
+                            }}
+                            className="p-2 rounded-lg bg-white/90 text-slate-600 hover:text-red-600 shadow-sm hover:shadow-md transition-all"
+                            title="Parseli Sil"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    <Link href={`/parcels/${id || '#'}`} className="block h-full w-full">
                         {imageUrl ? (
                             <div
                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                                 style={{ backgroundImage: `url(${imageUrl})` }}
                             />
                         ) : (
-                            <div className="flex h-full items-center justify-center text-slate-300 dark:text-slate-600">
-                                <MapPin className="h-16 w-16 opacity-50" />
+                            <div className="flex h-full items-center justify-center bg-slate-50">
+                                <MapPin className="h-10 w-10 text-slate-300" />
                             </div>
                         )}
-                        {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-80" />
+                        {/* Gradient for text readability */}
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
 
-                        {/* Bottom Info on Image */}
-                        <div className="absolute bottom-4 left-4 text-white">
-                            <div className="flex items-center gap-2 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-1">
-                                <Building2 className="h-3 w-3" />
-                                {city} / {district}
+                        <div className="absolute bottom-3 left-3 right-3 text-white">
+                            <div className="flex items-center gap-1.5 text-slate-200 text-xs font-medium uppercase tracking-wide mb-0.5">
+                                <MapPin className="h-3 w-3" />
+                                {city}, {district}
                             </div>
-                            <h3 className="text-2xl font-bold tracking-tight shadow-black drop-shadow-md">
-                                {island} / {parcel}
+                            <h3 className="text-xl font-bold tracking-tight text-white drop-shadow-sm truncate">
+                                Ada {island} / Parsel {parcel}
                             </h3>
                         </div>
-                    </div>
+                    </Link>
+                </div>
 
-                    {/* Content Section */}
-                    <div className="p-5">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <p className="text-xs text-slate-500 font-medium">EMSAL (KAKS)</p>
-                                <p className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                                    {zoning?.ks ? zoning.ks.toFixed(2) : <span className="text-slate-400">-</span>}
-                                </p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-xs text-slate-500 font-medium">TAKS</p>
-                                <p className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                                    {zoning?.taks ? zoning.taks.toFixed(2) : <span className="text-slate-400">-</span>}
-                                </p>
-                            </div>
+                {/* Content */}
+                <div className="p-4 flex flex-col flex-1">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                            <span className="text-[10px] uppercase text-slate-400 font-semibold">EMSAL</span>
+                            <span className="text-lg font-bold text-slate-700">
+                                {zoning?.ks ? zoning.ks.toFixed(2) : "-"}
+                            </span>
                         </div>
-
-                        <div className="mt-6 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
-                            <div className="flex items-center text-xs text-slate-400">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                <span>14 Ara 2025</span>
-                            </div>
-                            <span className="inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors">
-                                Detaylar <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                            <span className="text-[10px] uppercase text-slate-400 font-semibold">TAKS</span>
+                            <span className="text-lg font-bold text-slate-700">
+                                {zoning?.taks ? zoning.taks.toFixed(2) : "-"}
                             </span>
                         </div>
                     </div>
-                </Link>
+
+                    <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Bugün
+                        </span>
+
+                        <Link
+                            href={`/parcels/${id || '#'}`}
+                            className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group/link"
+                        >
+                            Detayları Gör
+                            <ArrowRight className="h-3 w-3 transition-transform group-hover/link:translate-x-1" />
+                        </Link>
+                    </div>
+                </div>
             </div>
 
             <ConfirmDialog
@@ -159,9 +166,8 @@ export default function ParcelCard({
                 onClose={() => setIsDeleteOpen(false)}
                 onConfirm={handleDelete}
                 title="Parseli Sil"
-                message={`Bu parseli (${city} / ${district} - ${island}/${parcel}) silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve ilgili tüm veriler (notlar, resimler vb.) silinecektir.`}
+                message="Bu parseli silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
                 confirmText="Evet, Sil"
-                cancelText="İptal"
                 variant="danger"
                 isLoading={isDeleting}
             />

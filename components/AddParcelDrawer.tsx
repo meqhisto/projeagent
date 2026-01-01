@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, Upload, Check, AlertCircle, Loader2, FileJson, FormInput } from "lucide-react";
 import { createNotification } from "@/lib/notifications";
+import clsx from "clsx";
 
 interface AddParcelModalProps {
     isOpen: boolean;
@@ -23,13 +24,24 @@ interface ManualFormData {
     longitude: string;
 }
 
-export default function AddParcelModal({ isOpen, onClose, onSuccess }: AddParcelModalProps) {
+export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParcelModalProps) {
     const [mode, setMode] = useState<InputMode>("manual");
     const [jsonInput, setJsonInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    // Animation control
+    useEffect(() => {
+        if (isOpen) {
+            setIsVisible(true);
+        } else {
+            const timer = setTimeout(() => setIsVisible(false), 300);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen]);
 
     // Manual form state
     const [formData, setFormData] = useState<ManualFormData>({
@@ -43,7 +55,7 @@ export default function AddParcelModal({ isOpen, onClose, onSuccess }: AddParcel
         longitude: "",
     });
 
-    if (!isOpen) return null;
+    if (!isOpen && !isVisible) return null;
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -282,175 +294,169 @@ export default function AddParcelModal({ isOpen, onClose, onSuccess }: AddParcel
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
-                <div className="flex items-center justify-between border-b p-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Parsel Ekle</h3>
-                    <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100">
-                        <X className="h-5 w-5 text-gray-500" />
+        <div
+            className={clsx(
+                "fixed inset-0 z-[100] flex justify-end transition-all duration-300",
+                isOpen ? "bg-black/20 backdrop-blur-sm pointer-events-auto" : "bg-transparent pointer-events-none"
+            )}
+            onClick={onClose}
+        >
+            {/* Drawer */}
+            <div
+                className={clsx(
+                    "h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col",
+                    isOpen ? "translate-x-0" : "translate-x-full"
+                )}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between border-b border-slate-100 p-5 bg-slate-50/50">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-900">Parsel Ekle</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Sisteme yeni bir gayrimenkul ekleyin.</p>
+                    </div>
+                    <button onClick={onClose} className="rounded-full p-2 hover:bg-slate-200 transition-colors">
+                        <X className="h-5 w-5 text-slate-500" />
                     </button>
                 </div>
 
                 {/* Tab Navigation */}
-                <div className="flex border-b bg-gray-50">
+                <div className="flex border-b border-slate-100 p-1 bg-white">
                     <button
                         onClick={() => setMode("manual")}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${mode === "manual"
-                                ? "border-b-2 border-emerald-600 text-emerald-600 bg-white"
-                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                            }`}
+                        className={clsx(
+                            "flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all",
+                            mode === "manual" ? "bg-emerald-50 text-emerald-700 shadow-sm" : "text-slate-600 hover:bg-slate-50"
+                        )}
                     >
                         <FormInput className="h-4 w-4" />
-                        Manuel Giriş
+                        Manuel
                     </button>
                     <button
                         onClick={() => setMode("json")}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${mode === "json"
-                                ? "border-b-2 border-emerald-600 text-emerald-600 bg-white"
-                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                            }`}
+                        className={clsx(
+                            "flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all",
+                            mode === "json" ? "bg-emerald-50 text-emerald-700 shadow-sm" : "text-slate-600 hover:bg-slate-50"
+                        )}
                     >
                         <FileJson className="h-4 w-4" />
-                        JSON Yükleme
+                        JSON Yükle
                     </button>
                 </div>
 
-                <div className="p-6 flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto p-6 bg-white">
                     {mode === "manual" ? (
                         /* Manual Form */
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* İl */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        İl <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.city}
-                                        onChange={(e) => handleFormChange("city", e.target.value)}
-                                        placeholder="Örn: İstanbul"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                                    />
+                        <div className="space-y-5">
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Lokasyon Bilgileri</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">İl</label>
+                                        <input
+                                            type="text"
+                                            value={formData.city}
+                                            onChange={(e) => handleFormChange("city", e.target.value)}
+                                            placeholder="İstanbul"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">İlçe</label>
+                                        <input
+                                            type="text"
+                                            value={formData.district}
+                                            onChange={(e) => handleFormChange("district", e.target.value)}
+                                            placeholder="Kadıköy"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        />
+                                    </div>
                                 </div>
-
-                                {/* İlçe */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        İlçe <span className="text-red-500">*</span>
-                                    </label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Mahalle</label>
                                     <input
                                         type="text"
-                                        value={formData.district}
-                                        onChange={(e) => handleFormChange("district", e.target.value)}
-                                        placeholder="Örn: Kadıköy"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Mahalle */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Mahalle
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.neighborhood}
-                                    onChange={(e) => handleFormChange("neighborhood", e.target.value)}
-                                    placeholder="Örn: Moda (Opsiyonel)"
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Ada */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Ada <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.island}
-                                        onChange={(e) => handleFormChange("island", e.target.value)}
-                                        placeholder="Örn: 123"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                                    />
-                                </div>
-
-                                {/* Parsel */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Parsel <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.parsel}
-                                        onChange={(e) => handleFormChange("parsel", e.target.value)}
-                                        placeholder="Örn: 45"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                        value={formData.neighborhood}
+                                        onChange={(e) => handleFormChange("neighborhood", e.target.value)}
+                                        placeholder="Moda (Opsiyonel)"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
                                     />
                                 </div>
                             </div>
 
-                            {/* Alan */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Alan (m²)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={formData.area}
-                                    onChange={(e) => handleFormChange("area", e.target.value)}
-                                    placeholder="Örn: 500.50 (Opsiyonel)"
-                                    step="0.01"
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                                />
-                            </div>
+                            <hr className="border-slate-100" />
 
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Enlem */}
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Tapu Bilgileri</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Ada</label>
+                                        <input
+                                            type="text"
+                                            value={formData.island}
+                                            onChange={(e) => handleFormChange("island", e.target.value)}
+                                            placeholder="123"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Parsel</label>
+                                        <input
+                                            type="text"
+                                            value={formData.parsel}
+                                            onChange={(e) => handleFormChange("parsel", e.target.value)}
+                                            placeholder="45"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        />
+                                    </div>
+                                </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Enlem (Latitude)
-                                    </label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Alan (m²)</label>
                                     <input
                                         type="number"
-                                        value={formData.latitude}
-                                        onChange={(e) => handleFormChange("latitude", e.target.value)}
-                                        placeholder="40.9923"
-                                        step="any"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                                    />
-                                </div>
-
-                                {/* Boylam */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Boylam (Longitude)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        value={formData.longitude}
-                                        onChange={(e) => handleFormChange("longitude", e.target.value)}
-                                        placeholder="29.0254"
-                                        step="any"
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                        value={formData.area}
+                                        onChange={(e) => handleFormChange("area", e.target.value)}
+                                        placeholder="500.50"
+                                        step="0.01"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
                                     />
                                 </div>
                             </div>
 
-                            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <p className="text-xs text-blue-800">
-                                    <span className="text-red-500 font-semibold">*</span> işaretli alanlar zorunludur.
-                                </p>
+                            <hr className="border-slate-100" />
+
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Koordinatlar (Opsiyonel)</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Enlem (Lat)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.latitude}
+                                            onChange={(e) => handleFormChange("latitude", e.target.value)}
+                                            placeholder="40.9923"
+                                            step="any"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Boylam (Lon)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.longitude}
+                                            onChange={(e) => handleFormChange("longitude", e.target.value)}
+                                            placeholder="29.0254"
+                                            step="any"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ) : (
                         /* JSON Upload Mode */
-                        <>
-                            <div
-                                className={`cursor-pointer mb-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors ${dragActive ? "border-emerald-500 bg-emerald-50" : "border-gray-200 hover:border-emerald-400 hover:bg-gray-50 bg-slate-50"
+                        <div className="space-y-4 h-full flex flex-col">
+                             <div
+                                className={`flex-1 cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors ${dragActive ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-400 hover:bg-slate-50 bg-slate-50/50"
                                     }`}
                                 onDragEnter={handleDrag}
                                 onDragLeave={handleDrag}
@@ -465,54 +471,56 @@ export default function AddParcelModal({ isOpen, onClose, onSuccess }: AddParcel
                                     accept=".json,application/json"
                                     onChange={handleFileChange}
                                 />
-                                <div className="rounded-full bg-white p-3 shadow-sm ring-1 ring-gray-200 mb-3">
-                                    <Upload className={`h-6 w-6 ${dragActive ? 'text-emerald-500' : 'text-gray-400'}`} />
+                                <div className="rounded-full bg-white p-4 shadow-sm ring-1 ring-slate-100 mb-4">
+                                    <Upload className={`h-8 w-8 ${dragActive ? 'text-emerald-500' : 'text-slate-400'}`} />
                                 </div>
-                                <p className="text-sm font-medium text-gray-900 text-center">Dosyayı sürükleyip bırakın</p>
-                                <p className="text-xs text-gray-500 mt-1 text-center">veya seçmek için tıklayın (.json)</p>
+                                <p className="text-sm font-medium text-slate-900 text-center">Dosyayı sürükleyip bırakın</p>
+                                <p className="text-xs text-slate-500 mt-1 text-center">veya seçmek için tıklayın (.json)</p>
                             </div>
 
-                            <div className="mb-2 flex items-center justify-between">
-                                <label className="text-sm font-medium text-gray-700">JSON Verisi</label>
-                                <button
-                                    onClick={() => setJsonInput("")}
-                                    className="text-xs text-gray-400 hover:text-red-500"
-                                    hidden={!jsonInput}
-                                >
-                                    Temizle
-                                </button>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-slate-700">JSON Verisi</label>
+                                    <button
+                                        onClick={() => setJsonInput("")}
+                                        className="text-xs text-slate-400 hover:text-red-500"
+                                        hidden={!jsonInput}
+                                    >
+                                        Temizle
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={jsonInput}
+                                    onChange={(e) => setJsonInput(e.target.value)}
+                                    className="h-40 w-full rounded-lg border border-slate-200 p-3 text-xs focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono text-slate-600 bg-slate-50/50 resize-none"
+                                    placeholder={`GeoJSON FeatureCollection veya JSON Array...\n\nÖrnek:\n{"features":[{"properties":{"ParselNo":"2","Ada":"1115",...}}]}`}
+                                />
                             </div>
-                            <textarea
-                                value={jsonInput}
-                                onChange={(e) => setJsonInput(e.target.value)}
-                                className="h-40 w-full rounded-lg border border-gray-300 p-3 text-xs focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono text-slate-600"
-                                placeholder={`GeoJSON FeatureCollection veya JSON Array...\n\nÖrnek:\n{"features":[{"properties":{"ParselNo":"2","Ada":"1115",...}}]}`}
-                            />
-                        </>
+                        </div>
                     )}
 
                     {error && (
-                        <div className="mt-4 flex items-center rounded-lg bg-red-50 p-3 text-sm text-red-700">
-                            <AlertCircle className="mr-2 h-4 w-4" />
+                        <div className="mt-6 flex items-start rounded-xl bg-red-50 p-4 text-sm text-red-700 shadow-sm border border-red-100">
+                            <AlertCircle className="mr-3 h-5 w-5 shrink-0 mt-0.5" />
                             {error}
                         </div>
                     )}
                 </div>
 
-                <div className="flex justify-end gap-3 border-t bg-gray-50 p-4 rounded-b-2xl">
-                    <button
+                <div className="flex justify-between items-center gap-3 border-t border-slate-100 bg-white p-5">
+                     <button
                         onClick={onClose}
-                        className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                        className="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors px-2"
                     >
                         İptal
                     </button>
                     <button
                         onClick={mode === "manual" ? handleManualSubmit : handleJsonSubmit}
                         disabled={loading || (mode === "manual" ? false : !jsonInput)}
-                        className="flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                        className="flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
                     >
                         {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Check className="h-4 w-4 mr-2" />}
-                        {mode === "manual" ? "Parseli Kaydet" : "Parselleri Kaydet"}
+                        {mode === "manual" ? "Kaydet" : "Yükle ve Kaydet"}
                     </button>
                 </div>
             </div>

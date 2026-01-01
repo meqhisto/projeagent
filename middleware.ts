@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export default auth((req) => {
     const isLoggedIn = !!req.auth;
     const isAuthPage = req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/register');
-    const isPublicPage = req.nextUrl.pathname.startsWith('/public');
+    const isPublicPage = req.nextUrl.pathname.startsWith('/public') || req.nextUrl.pathname.startsWith('/test-ui');
     const isApiAuth_or_Webhooks = req.nextUrl.pathname.startsWith('/api/auth') || req.nextUrl.pathname.startsWith('/api/webhooks');
 
     // Allow static files and next internals

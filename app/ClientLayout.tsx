@@ -14,6 +14,7 @@ interface ClientLayoutProps {
 export default function ClientLayout({ children }: ClientLayoutProps) {
     const pathname = usePathname();
     const isLoginPage = pathname === "/login";
+    const isTestUiPage = pathname === "/test-ui";
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -21,7 +22,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
     return (
         <AuthProvider>
-            {isLoginPage ? (
+            {isLoginPage || isTestUiPage ? (
                 children
             ) : (
                 <AuthGuard>
