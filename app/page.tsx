@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Loader2, TrendingUp, Users, Target, DollarSign, Building2, CheckCircle } from "lucide-react";
-import AddParcelModal from "@/components/AddParcelModal";
+import AddParcelDrawer from "@/components/AddParcelDrawer";
 import KPICard from "@/components/KPICard";
 import PipelineChart from "@/components/PipelineChart";
 import MonthlyTrendChart from "@/components/MonthlyTrendChart";
@@ -18,7 +18,7 @@ export default function Home() {
   const [pipelineData, setPipelineData] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<any>({});
 
   const fetchParcels = async () => {
@@ -56,7 +56,6 @@ export default function Home() {
       setLoading(false);
     };
     fetchAll();
-    // Auto-refresh removed - user can manually refresh if needed
   }, []);
 
   // Apply filters
@@ -90,29 +89,29 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex h-64 w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
+        <Loader2 className="h-12 w-12 animate-spin text-emerald-500" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 lg:space-y-6">
+    <div className="space-y-6 lg:space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Parsel yönetimi ve analiz merkezi</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Parsel yönetimi ve analiz merkezi</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <AdvancedFilterPanel
             onFilterChange={setFilters}
             availableCities={availableCities}
           />
           <ExportButton parcels={filteredParcels} />
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center rounded-lg bg-emerald-600 px-3 lg:px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 shadow-sm transition-colors"
+            onClick={() => setIsDrawerOpen(true)}
+            className="flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all hover:-translate-y-0.5"
           >
             <Plus className="h-4 w-4 lg:mr-2" />
             <span className="hidden lg:inline">Yeni Parsel Ekle</span>
@@ -122,7 +121,7 @@ export default function Home() {
 
       {/* KPI Cards */}
       {kpis && (
-        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid gap-4 sm:gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           <KPICard
             title="Toplam Parsel"
             value={kpis.totalParcels}
@@ -165,7 +164,7 @@ export default function Home() {
       )}
 
       {/* Charts & Tasks Grid */}
-      <div className="grid gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <PipelineChart data={pipelineData} />
         <MonthlyTrendChart data={monthlyData} />
         <TaskWidget />
@@ -178,15 +177,15 @@ export default function Home() {
 
       {/* Recent Parcels */}
       {recentParcels.length > 0 && (
-        <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-200">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+            <h3 className="text-xl font-bold text-slate-900 tracking-tight">
               {Object.keys(filters).some(k => filters[k] && (Array.isArray(filters[k]) ? filters[k].length > 0 : true))
                 ? 'Filtrelenmiş Parseller'
                 : 'Son Eklenen Parseller'}
             </h3>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-slate-500 font-medium">
                 {filteredParcels.length} sonuç
               </span>
               <a href="/parcels" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">
@@ -194,7 +193,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {recentParcels.map((parcel) => (
               <ParcelCard
                 key={parcel.id}
@@ -213,15 +212,15 @@ export default function Home() {
       )}
 
       {!loading && parcels.length === 0 && (
-        <div className="text-center py-12 lg:py-20 bg-white rounded-xl border border-dashed border-gray-300">
-          <h3 className="text-lg font-medium text-gray-900">Henüz takip edilen parsel yok</h3>
-          <p className="mt-1 text-sm text-gray-500">Yeni bir parsel ekleyerek analize başlayın.</p>
+        <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+          <h3 className="text-lg font-bold text-slate-900">Henüz takip edilen parsel yok</h3>
+          <p className="mt-2 text-sm text-slate-500 max-w-sm mx-auto">Yeni bir parsel ekleyerek portföyünüzü oluşturmaya ve analiz etmeye başlayın.</p>
         </div>
       )}
 
-      <AddParcelModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+      <AddParcelDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
         onSuccess={fetchParcels}
       />
     </div>

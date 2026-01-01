@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Loader2, Building2 } from "lucide-react";
-import AddParcelModal from "@/components/AddParcelModal";
+import { Plus, Loader2, Building2, Search, FilterX } from "lucide-react";
+import AddParcelDrawer from "@/components/AddParcelDrawer";
 import ParcelCard from "@/components/ParcelCard";
 import AdvancedFilterPanel from "@/components/AdvancedFilterPanel";
 import ExportButton from "@/components/ExportButton";
@@ -10,7 +10,7 @@ import ExportButton from "@/components/ExportButton";
 export default function ParcelsPage() {
     const [parcels, setParcels] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [filters, setFilters] = useState<any>({});
 
     const fetchParcels = async () => {
@@ -51,25 +51,21 @@ export default function ParcelsPage() {
         return Array.from(new Set(parcels.map(p => p.city))).sort();
     }, [parcels]);
 
-    if (loading) {
-        return (
-            <div className="flex h-96 w-full items-center justify-center">
-                <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
-            </div>
-        );
-    }
-
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 animate-fade-in">
             {/* Header */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Building2 className="h-6 w-6 text-emerald-500" />
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
                         Parsel Listesi
                     </h1>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        Toplam {filteredParcels.length} kayıt listeleniyor
+                    <p className="text-slate-500 mt-2 max-w-2xl">
+                        Portföyünüzdeki tüm arsaları buradan yönetebilir, filtreleyebilir ve detaylı analizlerine ulaşabilirsiniz.
+                        {filteredParcels.length > 0 && (
+                            <span className="ml-1 font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                                {filteredParcels.length} kayıt
+                            </span>
+                        )}
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -79,8 +75,8 @@ export default function ParcelsPage() {
                     />
                     <ExportButton parcels={filteredParcels} />
                     <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 shadow-sm transition-colors"
+                        onClick={() => setIsDrawerOpen(true)}
+                        className="flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all hover:-translate-y-0.5"
                     >
                         <Plus className="mr-2 h-4 w-4" />
                         Yeni Parsel Ekle
@@ -88,8 +84,16 @@ export default function ParcelsPage() {
                 </div>
             </div>
 
-            {/* Grid */}
-            {filteredParcels.length > 0 ? (
+            {/* Content */}
+            {loading ? (
+                // Skeleton Loader
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                        <div key={i} className="h-[340px] rounded-xl bg-slate-100 animate-pulse border border-slate-200" />
+                    ))}
+                </div>
+            ) : filteredParcels.length > 0 ? (
+                // Grid
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredParcels.map((parcel) => (
                         <ParcelCard
@@ -106,26 +110,27 @@ export default function ParcelsPage() {
                     ))}
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-12 text-center">
-                    <div className="rounded-full bg-slate-100 dark:bg-slate-800 p-4 mb-4">
-                        <Building2 className="h-8 w-8 text-slate-400" />
+                // Empty State
+                <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-16 text-center animate-slide-up">
+                    <div className="rounded-full bg-white p-6 mb-6 shadow-sm ring-1 ring-slate-100">
+                        <FilterX className="h-10 w-10 text-slate-300" />
                     </div>
-                    <h3 className="text-lg font-medium text-slate-900 dark:text-white">Kayıt Bulunamadı</h3>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 max-w-sm">
-                        Arama kriterlerinize uygun parsel bulunamadı veya henüz hiç parsel eklenmemiş.
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Sonuç Bulunamadı</h3>
+                    <p className="text-slate-500 max-w-md mb-6">
+                        Arama kriterlerinize uygun parsel bulunamadı. Filtreleri değiştirerek tekrar deneyebilir veya yeni bir parsel ekleyebilirsiniz.
                     </p>
                     <button
                         onClick={() => setFilters({})}
-                        className="mt-4 text-sm font-medium text-emerald-600 hover:text-emerald-500 hover:underline"
+                        className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors"
                     >
                         Filtreleri Temizle
                     </button>
                 </div>
             )}
 
-            <AddParcelModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+            <AddParcelDrawer
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
                 onSuccess={fetchParcels}
             />
         </div>
