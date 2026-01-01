@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { MapPin, Filter, Loader2 } from "lucide-react";
+import { MapPin, Filter, Loader2, X, ChevronDown } from "lucide-react";
 
 // Import Leaflet components dynamically to avoid SSR issues
 const MapContainer = dynamic(
@@ -51,6 +51,7 @@ export default function MapPage() {
         "CONTRACT",
     ]);
     const [icon, setIcon] = useState<any>(null);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     useEffect(() => {
         fetchParcels();
@@ -122,38 +123,74 @@ export default function MapPage() {
     }
 
     return (
-        <div className="h-screen flex flex-col">
-            {/* Header */}
-            <header className="bg-white border-b border-gray-200 px-4 md:px-8 py-4 z-30 shadow-sm">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <MapPin className="h-6 w-6 text-purple-600" />
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900">Harita Görünümü</h1>
-                            <p className="text-xs text-gray-500">
-                                {filteredParcels.length} parsel görüntüleniyor
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex items-center gap-2 text-xs">
-                        {Object.entries(STAGE_NAMES).map(([key, name]) => (
-                            <div key={key} className="flex items-center gap-1">
-                                <div
-                                    className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: STAGE_COLORS[key] }}
-                                ></div>
-                                <span className="text-gray-600">{name}</span>
-                            </div>
-                        ))}
+        <div className="space-y-4">
+            {/* Page Header */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2 lg:gap-3">
+                    <MapPin className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
+                    <div>
+                        <h1 className="text-lg lg:text-xl font-bold text-gray-900">Harita Görünümü</h1>
+                        <p className="text-xs text-gray-500">
+                            {filteredParcels.length} parsel görüntüleniyor
+                        </p>
                     </div>
                 </div>
-            </header>
 
-            <div className="flex flex-1 overflow-hidden">
-                {/* Filter Sidebar */}
-                <aside className="w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto">
+                {/* Mobile Filter Toggle */}
+                <button
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 text-purple-600 text-sm font-medium"
+                >
+                    <Filter className="h-4 w-4" />
+                    Filtre
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Desktop Legend */}
+                <div className="hidden lg:flex items-center gap-2 text-xs flex-wrap">
+                    {Object.entries(STAGE_NAMES).map(([key, name]) => (
+                        <div key={key} className="flex items-center gap-1">
+                            <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: STAGE_COLORS[key] }}
+                            ></div>
+                            <span className="text-gray-600">{name}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Mobile Filter Panel */}
+            {isFilterOpen && (
+                <div className="lg:hidden bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex flex-wrap gap-2">
+                        {Object.entries(STAGE_NAMES).map(([key, name]) => (
+                            <button
+                                key={key}
+                                onClick={() => toggleStage(key)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedStages.includes(key)
+                                        ? 'bg-purple-600 text-white'
+                                        : 'bg-gray-100 text-gray-600'
+                                    }`}
+                            >
+                                <div
+                                    className="w-2.5 h-2.5 rounded-full"
+                                    style={{ backgroundColor: selectedStages.includes(key) ? '#fff' : STAGE_COLORS[key] }}
+                                ></div>
+                                {name}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                        {filteredParcels.length} / {parcels.length} parsel görünür
+                    </div>
+                </div>
+            )}
+
+            {/* Map Container */}
+            <div className="flex gap-4 h-[calc(100vh-16rem)] lg:h-[calc(100vh-12rem)]">
+                {/* Desktop Filter Sidebar */}
+                <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto">
                     <div className="flex items-center gap-2 mb-4">
                         <Filter className="h-5 w-5 text-purple-600" />
                         <h3 className="font-bold text-gray-900">Filtreler</h3>

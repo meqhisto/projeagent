@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Map as MapIcon, Database, Settings, Search, LayoutGrid, KanbanSquare, Users, Shield, Building2, Wallet } from "lucide-react";
+import { Home, Map as MapIcon, Database, Settings, Search, LayoutGrid, KanbanSquare, Users, Shield, Building2, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -17,7 +17,12 @@ const allNavigation = [
     { name: "Ayarlar", href: "/settings", icon: Settings, roles: ["USER", "ADMIN"] },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+    isOpen?: boolean;
+    onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     const pathname = usePathname();
     const { data: session } = useSession();
 
@@ -27,58 +32,85 @@ export default function Sidebar() {
     );
 
     return (
-        <div className="flex h-screen w-72 flex-col fixed left-0 top-0 z-50 transition-all duration-300">
-            {/* Glass Container */}
-            <div className="h-full flex flex-col bg-slate-900/95 backdrop-blur-xl border-r border-slate-800 shadow-2xl">
+        <>
+            {/* Mobile Overlay Backdrop */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] lg:hidden"
+                    onClick={onClose}
+                    aria-hidden="true"
+                />
+            )}
 
-                {/* Logo Section */}
-                <div className="flex h-20 items-center px-8 border-b border-slate-800/50">
-                    <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/20">
-                            <LayoutGrid className="h-5 w-5 text-white" />
+            {/* Sidebar */}
+            <div className={clsx(
+                "flex h-screen flex-col fixed left-0 top-0 z-[9999] transition-all duration-300",
+                // Desktop: always visible
+                "lg:w-72 lg:translate-x-0",
+                // Mobile: slide in/out
+                isOpen ? "w-72 translate-x-0" : "w-72 -translate-x-full lg:translate-x-0"
+            )}>
+                {/* Glass Container */}
+                <div className="h-full flex flex-col bg-slate-900/95 backdrop-blur-xl border-r border-slate-800 shadow-2xl">
+
+                    {/* Logo Section */}
+                    <div className="flex h-20 items-center justify-between px-6 lg:px-8 border-b border-slate-800/50">
+                        <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/20">
+                                <LayoutGrid className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-bold text-lg tracking-wide text-white">PARSEL<span className="text-emerald-400 font-light">MONITOR</span></span>
+                                <span className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Pro v2.0</span>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="font-bold text-lg tracking-wide text-white">PARSEL<span className="text-emerald-400 font-light">MONITOR</span></span>
-                            <span className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Pro v2.0</span>
-                        </div>
+                        {/* Mobile Close Button */}
+                        <button
+                            onClick={onClose}
+                            className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                            aria-label="Menüyü kapat"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
                     </div>
-                </div>
 
-                {/* Navigation */}
-                <div className="flex flex-1 flex-col overflow-y-auto py-6 px-4 space-y-1">
-                    <div className="px-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Menü</div>
-                    <nav className="space-y-1">
-                        {navigation.map((item) => {
-                            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={clsx(
-                                        isActive
-                                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-md shadow-emerald-900/10"
-                                            : "text-slate-400 hover:bg-slate-800/50 hover:text-white border-transparent",
-                                        "group flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 border border-transparent"
-                                    )}
-                                >
-                                    <item.icon
+                    {/* Navigation */}
+                    <div className="flex flex-1 flex-col overflow-y-auto py-6 px-4 space-y-1">
+                        <div className="px-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Menü</div>
+                        <nav className="space-y-1">
+                            {navigation.map((item) => {
+                                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        onClick={onClose}
                                         className={clsx(
-                                            isActive ? "text-emerald-400" : "text-slate-500 group-hover:text-slate-300",
-                                            "mr-3 h-5 w-5 flex-shrink-0 transition-colors"
+                                            isActive
+                                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-md shadow-emerald-900/10"
+                                                : "text-slate-400 hover:bg-slate-800/50 hover:text-white border-transparent",
+                                            "group flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 border border-transparent"
                                         )}
-                                        aria-hidden="true"
-                                    />
-                                    {item.name}
-                                </Link>
-                            );
-                        })}
-                    </nav>
-                </div>
+                                    >
+                                        <item.icon
+                                            className={clsx(
+                                                isActive ? "text-emerald-400" : "text-slate-500 group-hover:text-slate-300",
+                                                "mr-3 h-5 w-5 flex-shrink-0 transition-colors"
+                                            )}
+                                            aria-hidden="true"
+                                        />
+                                        {item.name}
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+                    </div>
 
-                {/* User Profile */}
-                <UserProfile />
+                    {/* User Profile */}
+                    <UserProfile />
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 

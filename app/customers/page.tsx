@@ -74,44 +74,48 @@ export default function CustomersPage() {
     };
 
     return (
-        <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        <Users className="h-8 w-8 text-emerald-600" />
-                        Kişi Rehberi
+        <div className="h-[calc(100vh-theme(spacing.16))] lg:h-[calc(100vh-theme(spacing.20))] flex flex-col space-y-4 lg:space-y-6 w-full max-w-full overflow-x-hidden">
+            {/* Header */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                    <h1 className="text-lg lg:text-2xl font-bold text-gray-900 flex items-center gap-2 lg:gap-3">
+                        <Users className="h-5 w-5 lg:h-8 lg:w-8 text-emerald-600 flex-shrink-0" />
+                        <span className="truncate">Kişi Rehberi</span>
                     </h1>
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-gray-500 text-xs lg:text-sm mt-1 truncate">
                         Mal sahipleri, yatırımcılar ve paydaş yönetimi
                     </p>
                 </div>
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 hover:shadow-lg transition-all"
+                    className="inline-flex items-center justify-center px-3 lg:px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 hover:shadow-lg transition-all flex-shrink-0"
                 >
-                    <Plus className="mr-2 h-4 w-4" /> Yeni Kişi
+                    <Plus className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">Yeni Kişi</span>
                 </button>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <div className="bg-white p-3 lg:p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
+                {/* Search */}
+                <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         type="text"
                         placeholder="İsim, telefon veya e-posta ara..."
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-2 overflow-x-auto">
-                    <Filter className="h-5 w-5 text-gray-400" />
+                {/* Role filter buttons - scrollable on mobile */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                    <Filter className="h-4 w-4 text-gray-400 flex-shrink-0" />
                     {roles.map(role => (
                         <button
                             key={role}
                             onClick={() => setRoleFilter(role)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${roleFilter === role
+                            className={`px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap transition-colors flex-shrink-0 ${roleFilter === role
                                 ? "bg-slate-800 text-white"
                                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                                 }`}
@@ -123,7 +127,7 @@ export default function CustomersPage() {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-y-auto pb-10 pr-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4 overflow-y-auto pb-6 flex-1">
                 {filteredCustomers.map(customer => (
                     <div key={customer.id} className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-emerald-200">
                         <div className="flex items-start justify-between mb-4">

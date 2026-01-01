@@ -97,14 +97,14 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Parsel yönetimi ve analiz merkezi</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <AdvancedFilterPanel
             onFilterChange={setFilters}
             availableCities={availableCities}
@@ -112,17 +112,17 @@ export default function Home() {
           <ExportButton parcels={filteredParcels} />
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 shadow-sm transition-colors"
+            className="flex items-center justify-center rounded-lg bg-emerald-600 px-3 lg:px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 shadow-sm transition-colors"
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Yeni Parsel Ekle
+            <Plus className="h-4 w-4 lg:mr-2" />
+            <span className="hidden lg:inline">Yeni Parsel Ekle</span>
           </button>
         </div>
       </div>
 
       {/* KPI Cards */}
       {kpis && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           <KPICard
             title="Toplam Parsel"
             value={kpis.totalParcels}
@@ -165,7 +165,7 @@ export default function Home() {
       )}
 
       {/* Charts & Tasks Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-3">
         <PipelineChart data={pipelineData} />
         <MonthlyTrendChart data={monthlyData} />
         <TaskWidget />
@@ -178,8 +178,8 @@ export default function Home() {
 
       {/* Recent Parcels */}
       {recentParcels.length > 0 && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-200">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900">
               {Object.keys(filters).some(k => filters[k] && (Array.isArray(filters[k]) ? filters[k].length > 0 : true))
                 ? 'Filtrelenmiş Parseller'
@@ -194,7 +194,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {recentParcels.map((parcel) => (
               <ParcelCard
                 key={parcel.id}
@@ -213,7 +213,7 @@ export default function Home() {
       )}
 
       {!loading && parcels.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+        <div className="text-center py-12 lg:py-20 bg-white rounded-xl border border-dashed border-gray-300">
           <h3 className="text-lg font-medium text-gray-900">Henüz takip edilen parsel yok</h3>
           <p className="mt-1 text-sm text-gray-500">Yeni bir parsel ekleyerek analize başlayın.</p>
         </div>

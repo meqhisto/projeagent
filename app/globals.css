@@ -104,3 +104,44 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Mobile-Friendly Utilities */
+@media (max-width: 1023px) {
+  /* Safe area for notch devices */
+  .safe-area-padding {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Prevent body scroll when sidebar is open */
+  body.sidebar-open {
+    overflow: hidden;
+  }
+
+  /* Touch-friendly tap targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better touch scrolling */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1.125rem;
+  }
+}

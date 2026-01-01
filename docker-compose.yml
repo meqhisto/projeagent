@@ -33,6 +33,7 @@ services:
       - INTERNAL_BACKEND_URL=http://parselmonitor-backend:8000
       - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8000}
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://ekip.invecoproje.com}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-https://ekip.invecoproje.com}
     volumes:
       - node_modules:/app/node_modules
     depends_on:
