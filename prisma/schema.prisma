@@ -37,6 +37,7 @@ model Parcel {
   interactions Interaction[]
   stakeholders Customer[]
   properties   Property[]    // Üzerine yapılan gayrimenkuller
+  contractorMatches ContractorParcelMatch[]
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
 }
@@ -103,6 +104,7 @@ model Customer {
   parcels      Parcel[]
   interactions Interaction[]
   units        Unit[]       // Kiracı olduğu daireler
+  contractorMatches ContractorParcelMatch[]
   createdAt DateTime @default(now())
 }
 
@@ -181,6 +183,10 @@ model User {
   
   // Property Portfolio
   properties      Property[] @relation("OwnedProperties")
+  
+  // Contractor relations
+  contractors       Contractor[]       @relation("OwnedContractors")
+  contractorRatings ContractorRating[] @relation("RatedContractors")
   
   sessions  Session[]
 }
@@ -373,4 +379,69 @@ model Valuation {
   notes        String?
   
   createdAt    DateTime  @default(now())
+}
+
+// ==========================================
+// İNŞAAT FİRMASI SİSTEMİ
+// ==========================================
+
+// İnşaat Firması
+model Contractor {
+  id               Int       @id @default(autoincrement())
+  name             String    // Firma adı
+  authorizedPerson String?   // Yetkili kişi
+  phone            String?   // Telefon
+  email            String?   // E-posta
+  address          String?   // Adres
+  website          String?   // Web sitesi
+  taxNumber        String?   // Vergi numarası
+  specialties      String?   // Uzmanlık alanları (comma-separated)
+  notes            String?   // Notlar
+  
+  ownerId          Int
+  owner            User      @relation("OwnedContractors", fields: [ownerId], references: [id])
+  
+  ratings          ContractorRating[]
+  matches          ContractorParcelMatch[]
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+// İnşaat Firması Puanlama
+model ContractorRating {
+  id           Int        @id @default(autoincrement())
+  contractorId Int
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  
+  reliability    Int      @default(0) // Güvenilirlik (1-5)
+  quality        Int      @default(0) // Kalite (1-5)
+  communication  Int      @default(0) // İletişim (1-5)
+  pricing        Int      @default(0) // Fiyat (1-5)
+  overallScore   Float?   // Hesaplanan ortalama
+  comment        String?  // Yorum
+  
+  ratedBy        Int
+  rater          User     @relation("RatedContractors", fields: [ratedBy], references: [id])
+  
+  createdAt      DateTime @default(now())
+}
+
+// Firma-Parsel Eşleştirmesi (Görüşme/Müzakere)
+model ContractorParcelMatch {
+  id           Int        @id @default(autoincrement())
+  contractorId Int
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  parcelId     Int
+  parcel       Parcel     @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  customerId   Int?       // Arsa sahibi (Customer)
+  customer     Customer?  @relation(fields: [customerId], references: [id])
+  
+  status       String     @default("PLANNED") // PLANNED, MET, OFFER_RECEIVED, AGREED, REJECTED
+  meetingDate  DateTime?
+  offerAmount  Float?
+  notes        String?
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
