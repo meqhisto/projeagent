@@ -2,6 +2,45 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
+// GET - Get single task
+export async function GET(
+    req: Request,
+    props: { params: Promise<{ id: string }> }
+) {
+    const params = await props.params;
+    try {
+        await requireAuth();
+
+        const task = await prisma.interaction.findUnique({
+            where: { id: parseInt(params.id) },
+            include: {
+                parcel: true,
+                customer: true,
+                assignee: true,
+                creator: true
+            }
+        });
+
+        if (!task) {
+            return NextResponse.json({ error: "Task not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(task);
+
+    } catch (error: any) {
+        console.error("Get task error:", error);
+
+        if (error.message === "Unauthorized") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        return NextResponse.json(
+            { error: "Failed to get task" },
+            { status: 500 }
+        );
+    }
+}
+
 // PATCH - Update task
 export async function PATCH(
     req: Request,
