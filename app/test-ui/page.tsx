@@ -85,37 +85,37 @@ export default function TestUIPage() {
 
         {/* Stats / Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockParcels.map((parcel) => (
-                <ParcelCard
-                    key={parcel.id}
-                    id={parcel.id}
-                    city={parcel.properties.il}
-                    district={parcel.properties.ilce}
-                    island={parseInt(parcel.properties.ada)}
-                    parcel={parseInt(parcel.properties.parsel)}
-                    status={parcel.status}
-                    zoning={{ ks: 1.5, taks: 0.4 }} // Mock zoning
-                />
-            ))}
+          {mockParcels.map((parcel) => (
+            <ParcelCard
+              key={parcel.id}
+              id={parcel.id}
+              city={parcel.properties.il}
+              district={parcel.properties.ilce}
+              island={parseInt(parcel.properties.ada)}
+              parcel={parseInt(parcel.properties.parsel)}
+              status={parcel.status}
+              zoning={{ ks: 1.5, taks: 0.4 }} // Mock zoning
+            />
+          ))}
         </div>
 
         {/* Empty State Example */}
         <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔍</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">No results found</h3>
-            <p className="text-gray-500 mt-2">Try adjusting your filters or search query.</p>
+          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">🔍</span>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">No results found</h3>
+          <p className="text-gray-500 mt-2">Try adjusting your filters or search query.</p>
         </div>
 
         {/* Drawer Component */}
         <AddParcelDrawer
-            isOpen={isDrawerOpen}
-            onClose={() => setIsDrawerOpen(false)}
-            onAdd={(data) => {
-                alert("Add parcel triggered with data: " + JSON.stringify(data));
-                setIsDrawerOpen(false);
-            }}
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSuccess={() => {
+            alert("Parcel added successfully!");
+            setIsDrawerOpen(false);
+          }}
         />
 
       </div>
