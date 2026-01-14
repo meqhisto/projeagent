@@ -6,6 +6,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import ConfirmDialog from "./ConfirmDialog";
 import ParcelDetailModal from "./ParcelDetailModal";
+import EditParcelDrawer from "./EditParcelDrawer";
 import { MapPin, ArrowRight, Building2, Calendar, Trash2, Eye, MoreHorizontal, Edit2, Tag } from "lucide-react";
 
 // Category labels and colors
@@ -54,6 +55,7 @@ export default function ParcelCard({
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
     const handleDelete = async () => {
         if (!id) return;
@@ -104,6 +106,17 @@ export default function ParcelCard({
                             title="Hızlı Bakış"
                         >
                             <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsEditOpen(true);
+                            }}
+                            className="p-2 rounded-lg bg-white/90 text-slate-600 hover:text-blue-600 shadow-sm hover:shadow-md transition-all"
+                            title="Düzenle"
+                        >
+                            <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                             onClick={(e) => {
@@ -206,6 +219,15 @@ export default function ParcelCard({
                 <ParcelDetailModal
                     isOpen={isQuickViewOpen}
                     onClose={() => setIsQuickViewOpen(false)}
+                    parcelId={id}
+                />
+            )}
+
+            {id && (
+                <EditParcelDrawer
+                    isOpen={isEditOpen}
+                    onClose={() => setIsEditOpen(false)}
+                    onSuccess={() => router.refresh()}
                     parcelId={id}
                 />
             )}
