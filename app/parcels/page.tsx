@@ -43,6 +43,7 @@ export default function ParcelsPage() {
             if (filters.status && p.status !== filters.status) return false;
             if (filters.hasZoning === "true" && !p.zoning) return false;
             if (filters.hasZoning === "false" && p.zoning) return false;
+            if (filters.category && p.category !== filters.category) return false;
             return true;
         });
     }, [parcels, filters]);
@@ -106,6 +107,8 @@ export default function ParcelsPage() {
                             status={parcel.status}
                             imageUrl={parcel.images && parcel.images.length > 0 ? parcel.images[0].url : undefined}
                             zoning={parcel.zoning}
+                            category={parcel.category}
+                            tags={parcel.tags}
                         />
                     ))}
                 </div>

@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+// ParcelCategory enum values
+export const PARCEL_CATEGORIES = [
+    "RESIDENTIAL",
+    "COMMERCIAL",
+    "INDUSTRIAL",
+    "AGRICULTURAL",
+    "MIXED_USE",
+    "TOURISM",
+    "INVESTMENT",
+    "DEVELOPMENT",
+    "UNCATEGORIZED",
+] as const;
+
 /**
  * Parcel Validation Schemas
  */
@@ -18,7 +31,10 @@ export const ParcelCreateSchema = z.object({
     longitude: z.union([z.string(), z.number()]).optional().transform(val =>
         val ? parseFloat(String(val)) : null
     ),
+    category: z.enum(PARCEL_CATEGORIES).optional().default("UNCATEGORIZED"),
+    tags: z.string().max(500, "Etiketler en fazla 500 karakter olabilir").optional().nullable(),
 });
+
 
 export const ParcelUpdateSchema = ParcelCreateSchema.partial();
 

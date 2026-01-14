@@ -2,6 +2,20 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Filter, X, Check, RotateCcw } from "lucide-react";
+import { PARCEL_CATEGORIES } from "@/lib/validations";
+
+// Category labels for display
+const CATEGORY_LABELS: Record<string, string> = {
+    RESIDENTIAL: "Konut Arsası",
+    COMMERCIAL: "Ticari Arsa",
+    INDUSTRIAL: "Sanayi Arsası",
+    AGRICULTURAL: "Tarım Arazisi",
+    MIXED_USE: "Karma Kullanım",
+    TOURISM: "Turizm Arsası",
+    INVESTMENT: "Yatırım Amaçlı",
+    DEVELOPMENT: "Geliştirme Arazisi",
+    UNCATEGORIZED: "Kategorisiz",
+};
 
 interface AdvancedFilterPanelProps {
     onFilterChange: (filters: any) => void;
@@ -17,7 +31,8 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
         areaMax: "",
         status: "",
         hasZoning: "",
-        crmStages: [] as string[]
+        crmStages: [] as string[],
+        category: ""
     });
     const panelRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +66,8 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
             areaMax: "",
             status: "",
             hasZoning: "",
-            crmStages: []
+            crmStages: [],
+            category: ""
         };
         setFilters(resetFilters);
         onFilterChange({});
@@ -63,8 +79,8 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${isOpen
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-emerald-500 hover:text-emerald-600"
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-emerald-500 hover:text-emerald-600"
                     }`}
             >
                 <Filter className="h-4 w-4" />
@@ -161,6 +177,23 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                                 <option value="">Farketmez</option>
                                 <option value="true">İmarlı</option>
                                 <option value="false">İmarsız</option>
+                            </select>
+                        </div>
+
+                        {/* Category Filter */}
+                        <div>
+                            <label className="mb-1 block text-xs font-medium text-slate-500">Kategori</label>
+                            <select
+                                value={filters.category}
+                                onChange={(e) => handleChange("category", e.target.value)}
+                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                            >
+                                <option value="">Tümü</option>
+                                {PARCEL_CATEGORIES.map((cat) => (
+                                    <option key={cat} value={cat}>
+                                        {CATEGORY_LABELS[cat] || cat}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>

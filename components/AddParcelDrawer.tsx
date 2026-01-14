@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Upload, Check, AlertCircle, Loader2, FileJson, FormInput } from "lucide-react";
+import { X, Upload, Check, AlertCircle, Loader2, FileJson, FormInput, Tag, Folder } from "lucide-react";
 import { createNotification } from "@/lib/notifications";
+import { PARCEL_CATEGORIES } from "@/lib/validations";
 import clsx from "clsx";
 
 interface AddParcelModalProps {
@@ -22,7 +23,22 @@ interface ManualFormData {
     area: string;
     latitude: string;
     longitude: string;
+    category: string;
+    tags: string;
 }
+
+// Category labels for display
+const CATEGORY_LABELS: Record<string, string> = {
+    RESIDENTIAL: "Konut Arsası",
+    COMMERCIAL: "Ticari Arsa",
+    INDUSTRIAL: "Sanayi Arsası",
+    AGRICULTURAL: "Tarım Arazisi",
+    MIXED_USE: "Karma Kullanım",
+    TOURISM: "Turizm Arsası",
+    INVESTMENT: "Yatırım Amaçlı",
+    DEVELOPMENT: "Geliştirme Arazisi",
+    UNCATEGORIZED: "Kategorisiz",
+};
 
 export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParcelModalProps) {
     const [mode, setMode] = useState<InputMode>("manual");
@@ -53,6 +69,8 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
         area: "",
         latitude: "",
         longitude: "",
+        category: "UNCATEGORIZED",
+        tags: "",
     });
 
     if (!isOpen && !isVisible) return null;
@@ -134,6 +152,8 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 area: formData.area ? parseFloat(formData.area) : null,
                 latitude: formData.latitude ? parseFloat(formData.latitude) : null,
                 longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+                category: formData.category || "UNCATEGORIZED",
+                tags: formData.tags.trim() || null,
             };
 
             const res = await fetch("/api/parcels", {
@@ -163,6 +183,8 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 area: "",
                 latitude: "",
                 longitude: "",
+                category: "UNCATEGORIZED",
+                tags: "",
             });
 
             onSuccess();
@@ -451,11 +473,42 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                     </div>
                                 </div>
                             </div>
+
+                            <hr className="border-slate-100" />
+
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Kategori ve Etiketler</h4>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Kategori</label>
+                                    <select
+                                        value={formData.category}
+                                        onChange={(e) => handleFormChange("category", e.target.value)}
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                    >
+                                        {PARCEL_CATEGORIES.map((cat) => (
+                                            <option key={cat} value={cat}>
+                                                {CATEGORY_LABELS[cat] || cat}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Etiketler (Opsiyonel)</label>
+                                    <input
+                                        type="text"
+                                        value={formData.tags}
+                                        onChange={(e) => handleFormChange("tags", e.target.value)}
+                                        placeholder="deniz manzarası, köşe parsel, yola cepheli"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                    />
+                                    <p className="text-xs text-slate-400 mt-1">Virgülle ayırarak birden fazla etiket ekleyebilirsiniz</p>
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         /* JSON Upload Mode */
                         <div className="space-y-4 h-full flex flex-col">
-                             <div
+                            <div
                                 className={`flex-1 cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors ${dragActive ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-400 hover:bg-slate-50 bg-slate-50/50"
                                     }`}
                                 onDragEnter={handleDrag}
@@ -508,7 +561,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 </div>
 
                 <div className="flex justify-between items-center gap-3 border-t border-slate-100 bg-white p-5">
-                     <button
+                    <button
                         onClick={onClose}
                         className="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors px-2"
                     >

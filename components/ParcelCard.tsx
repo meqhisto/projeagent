@@ -6,7 +6,20 @@ import Link from "next/link";
 import clsx from "clsx";
 import ConfirmDialog from "./ConfirmDialog";
 import ParcelDetailModal from "./ParcelDetailModal";
-import { MapPin, ArrowRight, Building2, Calendar, Trash2, Eye, MoreHorizontal, Edit2 } from "lucide-react";
+import { MapPin, ArrowRight, Building2, Calendar, Trash2, Eye, MoreHorizontal, Edit2, Tag } from "lucide-react";
+
+// Category labels and colors
+const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
+    RESIDENTIAL: { label: "Konut", color: "bg-blue-100 text-blue-700 border-blue-200" },
+    COMMERCIAL: { label: "Ticari", color: "bg-purple-100 text-purple-700 border-purple-200" },
+    INDUSTRIAL: { label: "Sanayi", color: "bg-orange-100 text-orange-700 border-orange-200" },
+    AGRICULTURAL: { label: "Tarım", color: "bg-green-100 text-green-700 border-green-200" },
+    MIXED_USE: { label: "Karma", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+    TOURISM: { label: "Turizm", color: "bg-cyan-100 text-cyan-700 border-cyan-200" },
+    INVESTMENT: { label: "Yatırım", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+    DEVELOPMENT: { label: "Geliştirme", color: "bg-rose-100 text-rose-700 border-rose-200" },
+    UNCATEGORIZED: { label: "Kategorisiz", color: "bg-slate-100 text-slate-600 border-slate-200" },
+};
 
 interface ParcelCardProps {
     id?: number;
@@ -21,6 +34,8 @@ interface ParcelCardProps {
         taks?: number;
         maxHeight?: number;
     } | null;
+    category?: string;
+    tags?: string | null;
 }
 
 export default function ParcelCard({
@@ -31,7 +46,9 @@ export default function ParcelCard({
     parcel,
     status,
     imageUrl,
-    zoning
+    zoning,
+    category,
+    tags
 }: ParcelCardProps) {
     const router = useRouter();
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -129,6 +146,19 @@ export default function ParcelCard({
 
                 {/* Content */}
                 <div className="p-4 flex flex-col flex-1">
+                    {/* Category Badge */}
+                    {category && category !== "UNCATEGORIZED" && (
+                        <div className="mb-3">
+                            <span className={clsx(
+                                "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border",
+                                CATEGORY_CONFIG[category]?.color || CATEGORY_CONFIG.UNCATEGORIZED.color
+                            )}>
+                                <Tag className="h-3 w-3" />
+                                {CATEGORY_CONFIG[category]?.label || category}
+                            </span>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3 mb-4">
                         <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
                             <span className="text-[10px] uppercase text-slate-400 font-semibold">EMSAL</span>

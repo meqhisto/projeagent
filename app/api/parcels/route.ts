@@ -12,6 +12,7 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const island = searchParams.get("island");
         const parsel = searchParams.get("parsel");
+        const category = searchParams.get("category");
 
         // Build query based on role
         const where: any = isAdmin((user as any).role as string)
@@ -29,6 +30,10 @@ export async function GET(request: Request) {
 
         if (parsel) {
             where.parsel = parsel;
+        }
+
+        if (category) {
+            where.category = category;
         }
 
         const parcels = await prisma.parcel.findMany({
@@ -84,7 +89,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { city, district, neighborhood, island, parsel, area, latitude, longitude } = validation.data!;
+        const { city, district, neighborhood, island, parsel, area, latitude, longitude, category, tags } = validation.data!;
 
         const newParcel = await prisma.parcel.create({
             data: {
@@ -97,6 +102,8 @@ export async function POST(request: Request) {
                 latitude: latitude,
                 longitude: longitude,
                 status: "RESEARCHING",
+                category: category || "UNCATEGORIZED",
+                tags: tags || null,
                 ownerId: userId, // Automatically set owner
             },
         });

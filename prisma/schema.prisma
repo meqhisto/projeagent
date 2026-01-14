@@ -10,6 +10,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Parsel Kategori Tipi
+enum ParcelCategory {
+  RESIDENTIAL      // Konut Arsası
+  COMMERCIAL       // Ticari Arsa
+  INDUSTRIAL       // Sanayi Arsası
+  AGRICULTURAL     // Tarım Arazisi
+  MIXED_USE        // Karma Kullanım
+  TOURISM          // Turizm Arsası
+  INVESTMENT       // Yatırım Amaçlı
+  DEVELOPMENT      // Geliştirme Arazisi
+  UNCATEGORIZED    // Kategorisiz
+}
+
 model Parcel {
   id           Int         @id @default(autoincrement())
   city         String
@@ -24,6 +37,8 @@ model Parcel {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   crmStage     String      @default("NEW_LEAD") // "NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"
+  category     ParcelCategory @default(UNCATEGORIZED)  // Arsa kategorisi
+  tags         String?     // Opsiyonel etiketler (virgülle ayrılmış)
   
   ownerId      Int         // User who owns this parcel
   owner        User        @relation("OwnedParcels", fields: [ownerId], references: [id])
