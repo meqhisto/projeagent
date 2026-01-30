@@ -53,6 +53,7 @@ model Parcel {
   stakeholders Customer[]
   properties   Property[]    // Üzerine yapılan gayrimenkuller
   contractorMatches ContractorParcelMatch[]
+  calculations FeasibilityCalculation[]  // Fizibilite hesaplamaları
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
 }
@@ -459,4 +460,38 @@ model ContractorParcelMatch {
   
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+// ==========================================
+// FİZİBİLİTE HESAPLAMA GEÇMİŞİ
+// ==========================================
+
+// Müteahhit Hesabı Kayıtları
+model FeasibilityCalculation {
+  id           Int      @id @default(autoincrement())
+  parcelId     Int
+  parcel       Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  
+  // Input parametreleri
+  arsaM2              Float
+  emsal               Float
+  katKarsiligiOrani   Float
+  ortalamaDaireBrutu  Float
+  insaatMaliyeti      Float
+  satisFiyati         Float
+  bonusFactor         Float?   @default(1.3)
+  katAdedi            Int?     @default(5)
+  
+  // Sonuç özeti (kolay erişim için)
+  toplamDaire         Int
+  muteahhitDaire      Int
+  arsaSahibiDaire     Int
+  netKar              String   // Formatlanmış TL
+  roi                 String   // Yüzde olarak
+  durum               String   // FIRSAT, RİSKLİ, NORMAL
+  
+  // Tam sonuç (JSON)
+  fullResult          String   @db.Text
+  
+  createdAt           DateTime @default(now())
 }
