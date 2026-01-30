@@ -148,24 +148,50 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
                         'textDecorationColor',
                         'columnRuleColor',
                         'fill',
-                        'stroke'
+                        'stroke',
+                        'backgroundImage' // Gradientler burada
                     ];
 
                     properties.forEach(prop => {
-                        const val = style.getPropertyValue(camelToKebab(prop));
+                        const kebabProp = camelToKebab(prop);
+                        const val = style.getPropertyValue(kebabProp);
+
                         if (val) {
-                            // Eğer değerde lab/oklch varsa logla (debug için)
+                            // Gradient kontrolü (Linear gradient içinde lab/oklch varsa patlıyor)
+                            if (prop === 'backgroundImage' && val.includes('gradient') && (val.includes('lab(') || val.includes('oklch('))) {
+                                console.warn('Fixing modern gradient:', val);
+                                // Sorunlu gradienti kaldır
+                                el.style.setProperty('background-image', 'none', 'important');
+
+                                // Eğer elementin kendine ait bir arka plan rengi yoksa (transparent),
+                                // ve üzerinde gradient vardıysa, muhtemelen koyu temalı bir sayfadır.
+                                // Görünmez olmaması için koyu bir renk atayalım.
+                                const currentBg = style.backgroundColor;
+                                if (!currentBg || currentBg === 'rgba(0, 0, 0, 0)' || currentBg === 'transparent') {
+                                    // Gray-900 (rgb(17, 24, 39)) varsayılan koyu arka plan
+                                    el.style.setProperty('background-color', 'rgb(17, 24, 39)', 'important');
+                                }
+                                return;
+                            }
+
+                            // Diğer özellikler için: Değerde lab/oklch varsa veya genel güvenlik için
+                            // Computed değeri (ki tarayıcı bunu RGB'ye çevirmiştir) inline olarak bas.
                             if (val.includes('lab(') || val.includes('oklch(')) {
                                 console.warn(`Found modern color format in ${prop}:`, val, el);
                             }
-                            // Inline stil olarak ata (RGB'ye dönmüş hali)
-                            // !important ekleyerek class stillerini eziyoruz
-                            el.style.setProperty(prop, val, 'important');
+
+                            // Sadece renk içeren özellikleri ezmek daha güvenli
+                            // (BackgroundImage zaten yukarıda halledildi, buraya düşerse url(...) vs olabilir, dokunmayalım)
+                            if (prop !== 'backgroundImage') {
+                                el.style.setProperty(kebabProp, val, 'important');
+                            }
                         }
                     });
 
-                    // Shadow'lar karmaşık olabilir, onları da işlemeye çalışalım
-                    if (style.boxShadow && style.boxShadow !== 'none') {
+                    // Shadow'lar (lab içerebilir)
+                    if (style.boxShadow && style.boxShadow !== 'none' && (style.boxShadow.includes('lab(') || style.boxShadow.includes('oklch('))) {
+                        // Shadow'u RGB'ye çevirmek zor, riskliyse kaldıralım veya computed değeri deneyelim
+                        // Chrome computed value'yu RGB verir genelde.
                         el.style.setProperty('box-shadow', style.boxShadow, 'important');
                     }
 
