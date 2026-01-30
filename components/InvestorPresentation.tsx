@@ -106,7 +106,7 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
-                    logging: true,
+                    logging: false, // Logları kapat
                     letterRendering: true,
                     allowTaint: true
                 },
@@ -117,7 +117,41 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
             // DOM'un hazır olması için kısa bir bekleme
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            await html2pdf().set(opt).from(element).save();
+            // Elementi klonlayıp, görünmez bir alana ekleyip, stilleri hesaplatıp rgb'ye çevirip
+            // sonra html2pdf'e o elementi veriyoruz. Bu sayede lab() hatası alınmaz.
+
+            const elementClone = element.cloneNode(true) as HTMLElement;
+            // Görünmez bir container'a ekle ama render edilsin (display: none olmaz)
+            elementClone.style.position = 'absolute';
+            elementClone.style.left = '-9999px';
+            elementClone.style.top = '0';
+            // Genişliği sabitle ki layout bozulmasın
+            elementClone.style.width = `${element.offsetWidth}px`;
+            document.body.appendChild(elementClone);
+
+            // Tüm renkleri RGB'ye çevir (Recursive)
+            const normalizeColors = (el: HTMLElement) => {
+                const style = window.getComputedStyle(el);
+
+                // Computed style her zaman RGB(a) döner, bu yüzden direkt atamak yeterli
+                if (style.backgroundColor) el.style.backgroundColor = style.backgroundColor;
+                if (style.color) el.style.color = style.color;
+                if (style.borderColor) el.style.borderColor = style.borderColor;
+
+                // Background gradient varsa ve içinde lab/oklch varsa bunu temizlemek zor
+                // ama genelde solid renklerde sorun çıkıyor.
+
+                Array.from(el.children).forEach(child => normalizeColors(child as HTMLElement));
+            };
+
+            // Normalizasyonu başlat
+            normalizeColors(elementClone);
+
+            // html2pdf işlemini başlat
+            await html2pdf().set(opt).from(elementClone).save();
+
+            // Temizlik
+            document.body.removeChild(elementClone);
         } catch (error) {
             console.error("PDF export error:", error);
             alert(`PDF oluşturulurken bir hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
