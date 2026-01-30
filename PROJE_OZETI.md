@@ -224,16 +224,25 @@ projeagent/
 ## 💬 Konuşma Özeti
 
 **Tarih:** 31 Ocak 2026  
-**Konu:** Proje gözden geçirme ve Fizibilite Hesaplama Geçmişi Özelliği
+**Konu:** Yatırımcı Sunum Dosyası Özelliği
 
 ### Yapılan İşler:
-1. Projenin mevcut durumu gözden geçirildi
-2. **Fizibilite Hesaplama Geçmişi** özelliği eklendi:
-   - `FeasibilityCalculation` modeli Prisma şemasına eklendi
-   - API endpoint oluşturuldu: `/api/parcels/[id]/calculations`
-   - FeasibilitySection bileşeni güncellendi (otomatik kaydetme, son 5 hesap tablosu)
-   - Geçmiş hesaplamaları görüntüleme ve silme özellikleri eklendi
-3. Sunucu deployment kuralları dokümante edildi
+1. **Yatırımcı Sunum Dosyası** özelliği geliştirildi:
+   - `UserPresentationSettings` modeli (logo, şirket bilgileri)
+   - `PresentationShare` modeli (paylaşım linkleri)
+   - 4 yeni API endpoint:
+     - `/api/user/presentation-settings` (kullanıcı sunum ayarları)
+     - `/api/parcels/[id]/presentation` (sunum verileri)
+     - `/api/parcels/[id]/presentation/share` (paylaşım linkleri)
+     - `/api/presentation/[token]` (public sunum - auth gerektirmez)
+   - `InvestorPresentation` ana bileşen (PDF export, link yönetimi)
+   - 7 sayfa bileşeni: Cover, Location, Gallery, RegionalAnalysis, Feasibility, Proposal, Contact
+   - Ayarlar sayfasına "Sunum Ayarları" bölümü eklendi
+   - `/parcels/[id]/presentation` sunum önizleme sayfası
+   - `/p/[token]` public sunum sayfası
+2. html2pdf.js ve qrcode.react paketleri eklendi
+3. Parsel detay sayfasına "Sunum Oluştur" butonu eklendi
 
-**Branch:** `feature/feasibility-calculation-history` → `master` (merged)  
-**Commit:** `feat: Fizibilite hesaplama geçmişi özelliği eklendi`
+**Branch:** `feature/investor-presentation` (merge için hazır)
+**Commit:** 3 commit (Faz 1,2,3)
+
