@@ -157,9 +157,13 @@ export default function ParcelDetailPage() {
                                 {parcel.status === "PENDING" ? "Bekliyor" : parcel.status}
                             </span>
                         </div>
-                        <button className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors">
+                        <Link
+                            href={`/parcels/${params.id}/presentation`}
+                            className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors"
+                            title="Yatırımcı Sunumu"
+                        >
                             <Share2 className="h-5 w-5" />
-                        </button>
+                        </Link>
                         <button className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors">
                             <MoreVertical className="h-5 w-5" />
                         </button>
