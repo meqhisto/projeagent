@@ -149,50 +149,46 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
                         'columnRuleColor',
                         'fill',
                         'stroke',
-                        'backgroundImage' // Gradientler burada
+                        'backgroundImage'
                     ];
 
+                    // Bu element için tüm computed stilleri al ve kontrol et
                     properties.forEach(prop => {
                         const kebabProp = camelToKebab(prop);
                         const val = style.getPropertyValue(kebabProp);
 
                         if (val) {
-                            // Gradient kontrolü (Linear gradient içinde lab/oklch varsa patlıyor)
-                            if (prop === 'backgroundImage' && val.includes('gradient') && (val.includes('lab(') || val.includes('oklch('))) {
-                                console.warn('Fixing modern gradient:', val);
-                                // Sorunlu gradienti kaldır
-                                el.style.setProperty('background-image', 'none', 'important');
+                            // 1. Gradient Kontrolü: İçinde lab/oklch varsa yok et
+                            if (val.includes('gradient') && (val.includes('lab(') || val.includes('oklch('))) {
+                                el.style.setProperty(kebabProp, 'none', 'important');
 
-                                // Eğer elementin kendine ait bir arka plan rengi yoksa (transparent),
-                                // ve üzerinde gradient vardıysa, muhtemelen koyu temalı bir sayfadır.
-                                // Görünmez olmaması için koyu bir renk atayalım.
-                                const currentBg = style.backgroundColor;
-                                if (!currentBg || currentBg === 'rgba(0, 0, 0, 0)' || currentBg === 'transparent') {
-                                    // Gray-900 (rgb(17, 24, 39)) varsayılan koyu arka plan
-                                    el.style.setProperty('background-color', 'rgb(17, 24, 39)', 'important');
+                                // Background gitti ise yerine renk atayalım
+                                if (prop === 'backgroundImage') {
+                                    // Eğer arka plan şeffaf ise koyu renk ata (tahmini)
+                                    const bgCol = style.backgroundColor;
+                                    if (!bgCol || bgCol === 'rgba(0, 0, 0, 0)' || bgCol === 'transparent') {
+                                        el.style.setProperty('background-color', 'rgb(17, 24, 39)', 'important');
+                                    }
                                 }
                                 return;
                             }
 
-                            // Diğer özellikler için: Değerde lab/oklch varsa veya genel güvenlik için
-                            // Computed değeri (ki tarayıcı bunu RGB'ye çevirmiştir) inline olarak bas.
+                            // 2. Genel Lab/Oklch Kontrolü: Varsa computed değeri (RGB) bas
                             if (val.includes('lab(') || val.includes('oklch(')) {
-                                console.warn(`Found modern color format in ${prop}:`, val, el);
-                            }
-
-                            // Sadece renk içeren özellikleri ezmek daha güvenli
-                            // (BackgroundImage zaten yukarıda halledildi, buraya düşerse url(...) vs olabilir, dokunmayalım)
-                            if (prop !== 'backgroundImage') {
                                 el.style.setProperty(kebabProp, val, 'important');
                             }
                         }
                     });
 
-                    // Shadow'lar (lab içerebilir)
-                    if (style.boxShadow && style.boxShadow !== 'none' && (style.boxShadow.includes('lab(') || style.boxShadow.includes('oklch('))) {
-                        // Shadow'u RGB'ye çevirmek zor, riskliyse kaldıralım veya computed değeri deneyelim
-                        // Chrome computed value'yu RGB verir genelde.
-                        el.style.setProperty('box-shadow', style.boxShadow, 'important');
+                    // Shadow'lar (lab içerebilir) özel muamele
+                    if (style.boxShadow && style.boxShadow !== 'none') {
+                        // Eğer shadow içinde lab varsa shadow'u tamamen kaldır (riske girme)
+                        if (style.boxShadow.includes('lab(') || style.boxShadow.includes('oklch(')) {
+                            el.style.setProperty('box-shadow', 'none', 'important');
+                        } else {
+                            // Yoksa da inline olarak bas ki class'tan geleni ezmiş olalım (belki class'ta değişken vardır)
+                            el.style.setProperty('box-shadow', style.boxShadow, 'important');
+                        }
                     }
 
                 } catch (e) {
@@ -205,9 +201,28 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
             // Helper: CamelCase to kebab-case
             const camelToKebab = (str: string) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
 
-            // Normalizasyonu başlat
+            // 1. Inline Stil Normalizasyonu (Mevcut elementler için)
             console.log("Starting color normalization...");
             normalizeColors(elementClone);
+
+            // 2. Global Stil Override (Pseudo-elementler ::before, ::after için)
+            // inline style ile pseudo-elementlere müdahale edemeyiz, bu yüzden 
+            // klonlanmış elementin içine bir <style> etiketi gömüyoruz.
+            const styleOverride = document.createElement('style');
+            styleOverride.innerHTML = `
+                *::before, *::after {
+                    background-image: none !important;
+                    box-shadow: none !important; 
+                    backdrop-filter: none !important;
+                }
+                /* Tailwind v4 variable'larını override et (varsa) */
+                :root {
+                    --background: 255 255 255 !important;
+                    --foreground: 0 0 0 !important;
+                }
+            `;
+            elementClone.prepend(styleOverride);
+
             console.log("Color normalization finished.");
 
             // html2pdf işlemini başlat
