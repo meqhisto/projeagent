@@ -94,11 +94,81 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
 
         setExportLoading(true);
         try {
-            // Dynamic import for html2pdf (client-side only)
+            // Dynamic import
             const html2pdfModule = await import("html2pdf.js");
             const html2pdf = html2pdfModule.default || html2pdfModule;
 
-            const element = presentationRef.current;
+            // 1. İzolasyon için Iframe oluştur
+            const iframe = document.createElement('iframe');
+            Object.assign(iframe.style, {
+                position: 'fixed',
+                top: '-9999px',
+                left: '-9999px',
+                width: '1000px',
+                height: '100%',
+                border: 'none',
+                visibility: 'hidden'
+            });
+            document.body.appendChild(iframe);
+
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc) throw new Error("Iframe oluşturulamadı");
+
+            iframeDoc.open();
+            iframeDoc.write('<html><head><style>*, *::before, *::after { box-sizing: border-box; }</style></head><body></body></html>');
+            iframeDoc.close();
+
+            // 2. Elementi klonla
+            const originalElement = presentationRef.current;
+            const clonedContent = originalElement.cloneNode(true) as HTMLElement;
+            iframeDoc.body.appendChild(clonedContent);
+
+            // 3. Computed Style'ları Kopyala (Snapshot)
+            const copyComputedStyles = (source: HTMLElement, target: HTMLElement) => {
+                const computed = window.getComputedStyle(source);
+
+                // Kopyalanacak özellikler
+                const stylingProps = [
+                    'display', 'position', 'top', 'right', 'bottom', 'left',
+                    'width', 'height', 'margin', 'padding',
+                    'border', 'borderRadius', 'boxShadow',
+                    'backgroundColor', 'color', 'opacity', 'zIndex',
+                    'font', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight',
+                    'textAlign', 'textTransform', 'whiteSpace',
+                    'flex', 'flexDirection', 'flexWrap', 'justifyContent', 'alignItems', 'gap',
+                    'gridTemplateColumns', 'gridTemplateRows', 'gridGap',
+                    'overflow', 'visibility',
+                    'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat'
+                ];
+
+                stylingProps.forEach(prop => {
+                    const val = computed[prop as any];
+                    if (val) {
+                        // Gradient temizliği (lab/oklch içeriyorsa)
+                        if (prop === 'backgroundImage' && val.includes('gradient') && (val.includes('lab') || val.includes('oklch'))) {
+                            target.style.backgroundImage = 'none';
+                            target.style.backgroundColor = computed.backgroundColor !== 'rgba(0, 0, 0, 0)' && computed.backgroundColor !== 'transparent'
+                                ? computed.backgroundColor
+                                : 'rgb(255, 255, 255)';
+                        } else {
+                            target.style[prop as any] = val;
+                        }
+                    }
+                });
+
+                // Çocuk elementler
+                for (let i = 0; i < source.children.length; i++) {
+                    if (i < target.children.length) {
+                        copyComputedStyles(source.children[i] as HTMLElement, target.children[i] as HTMLElement);
+                    }
+                }
+            };
+
+            copyComputedStyles(originalElement, clonedContent);
+
+            // 4. PDF Oluştur
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             const opt = {
                 margin: 0,
                 filename: `Yatirimci_Sunumu_${data?.parcel.city}_${data?.parcel.district}_${data?.parcel.parsel}.pdf`,
@@ -106,130 +176,18 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
-                    logging: false, // Logları kapat
-                    letterRendering: true,
-                    allowTaint: true
+                    logging: false,
+                    windowWidth: 1000
                 },
                 jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
                 pagebreak: { mode: ["avoid-all", "css", "legacy"] }
             };
 
-            // DOM'un hazır olması için kısa bir bekleme
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // Elementi klonlayıp, görünmez bir alana ekleyip, stilleri hesaplatıp rgb'ye çevirip
-            // sonra html2pdf'e o elementi veriyoruz. Bu sayede lab() hatası alınmaz.
-
-            const elementClone = element.cloneNode(true) as HTMLElement;
-            // Görünmez bir container'a ekle ama render edilsin (display: none olmaz)
-            elementClone.style.position = 'absolute';
-            elementClone.style.left = '-9999px';
-            elementClone.style.top = '0';
-            // Genişliği sabitle ki layout bozulmasın
-            elementClone.style.width = `${element.offsetWidth}px`;
-            document.body.appendChild(elementClone);
-
-            // Tüm renkleri RGB'ye çevir (Recursive ve Aggressive)
-            const normalizeColors = (el: HTMLElement) => {
-                try {
-                    const style = window.getComputedStyle(el);
-
-                    // html2canvas'ın lab/oklch parser hatasını önlemek için
-                    // kritik renk özelliklerini computed (RGB) değerleriyle inline olarak eziyoruz.
-                    const properties = [
-                        'color',
-                        'backgroundColor',
-                        'borderColor',
-                        'borderTopColor',
-                        'borderRightColor',
-                        'borderBottomColor',
-                        'borderLeftColor',
-                        'outlineColor',
-                        'textDecorationColor',
-                        'columnRuleColor',
-                        'fill',
-                        'stroke',
-                        'backgroundImage'
-                    ];
-
-                    // Bu element için tüm computed stilleri al ve kontrol et
-                    properties.forEach(prop => {
-                        const kebabProp = camelToKebab(prop);
-                        const val = style.getPropertyValue(kebabProp);
-
-                        if (val) {
-                            // 1. Gradient Kontrolü: İçinde lab/oklch varsa yok et
-                            if (val.includes('gradient') && (val.includes('lab(') || val.includes('oklch('))) {
-                                el.style.setProperty(kebabProp, 'none', 'important');
-
-                                // Background gitti ise yerine renk atayalım
-                                if (prop === 'backgroundImage') {
-                                    // Eğer arka plan şeffaf ise koyu renk ata (tahmini)
-                                    const bgCol = style.backgroundColor;
-                                    if (!bgCol || bgCol === 'rgba(0, 0, 0, 0)' || bgCol === 'transparent') {
-                                        el.style.setProperty('background-color', 'rgb(17, 24, 39)', 'important');
-                                    }
-                                }
-                                return;
-                            }
-
-                            // 2. Genel Lab/Oklch Kontrolü: Varsa computed değeri (RGB) bas
-                            if (val.includes('lab(') || val.includes('oklch(')) {
-                                el.style.setProperty(kebabProp, val, 'important');
-                            }
-                        }
-                    });
-
-                    // Shadow'lar (lab içerebilir) özel muamele
-                    if (style.boxShadow && style.boxShadow !== 'none') {
-                        // Eğer shadow içinde lab varsa shadow'u tamamen kaldır (riske girme)
-                        if (style.boxShadow.includes('lab(') || style.boxShadow.includes('oklch(')) {
-                            el.style.setProperty('box-shadow', 'none', 'important');
-                        } else {
-                            // Yoksa da inline olarak bas ki class'tan geleni ezmiş olalım (belki class'ta değişken vardır)
-                            el.style.setProperty('box-shadow', style.boxShadow, 'important');
-                        }
-                    }
-
-                } catch (e) {
-                    console.warn('Error normalizing styles for element:', el, e);
-                }
-
-                Array.from(el.children).forEach(child => normalizeColors(child as HTMLElement));
-            };
-
-            // Helper: CamelCase to kebab-case
-            const camelToKebab = (str: string) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
-
-            // 1. Inline Stil Normalizasyonu (Mevcut elementler için)
-            console.log("Starting color normalization...");
-            normalizeColors(elementClone);
-
-            // 2. Global Stil Override (Pseudo-elementler ::before, ::after için)
-            // inline style ile pseudo-elementlere müdahale edemeyiz, bu yüzden 
-            // klonlanmış elementin içine bir <style> etiketi gömüyoruz.
-            const styleOverride = document.createElement('style');
-            styleOverride.innerHTML = `
-                *::before, *::after {
-                    background-image: none !important;
-                    box-shadow: none !important; 
-                    backdrop-filter: none !important;
-                }
-                /* Tailwind v4 variable'larını override et (varsa) */
-                :root {
-                    --background: 255 255 255 !important;
-                    --foreground: 0 0 0 !important;
-                }
-            `;
-            elementClone.prepend(styleOverride);
-
-            console.log("Color normalization finished.");
-
-            // html2pdf işlemini başlat
-            await html2pdf().set(opt).from(elementClone).save();
+            await html2pdf().set(opt).from(clonedContent).save();
 
             // Temizlik
-            document.body.removeChild(elementClone);
+            document.body.removeChild(iframe);
+
         } catch (error) {
             console.error("PDF export error:", error);
             alert(`PDF oluşturulurken bir hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
