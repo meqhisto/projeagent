@@ -95,22 +95,32 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
         setExportLoading(true);
         try {
             // Dynamic import for html2pdf (client-side only)
-            const html2pdf = (await import("html2pdf.js")).default;
+            const html2pdfModule = await import("html2pdf.js");
+            const html2pdf = html2pdfModule.default || html2pdfModule;
 
             const element = presentationRef.current;
             const opt = {
                 margin: 0,
-                filename: `Yatirimci_Sunumu_${data?.parcel.city}_${data?.parcel.district}_${data?.parcel.island}_${data?.parcel.parsel}.pdf`,
+                filename: `Yatirimci_Sunumu_${data?.parcel.city}_${data?.parcel.district}_${data?.parcel.parsel}.pdf`,
                 image: { type: "jpeg" as const, quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: true,
+                    letterRendering: true,
+                    allowTaint: true
+                },
                 jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
                 pagebreak: { mode: ["avoid-all", "css", "legacy"] }
             };
 
+            // DOM'un hazır olması için kısa bir bekleme
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             await html2pdf().set(opt).from(element).save();
         } catch (error) {
             console.error("PDF export error:", error);
-            alert("PDF oluşturulurken bir hata oluştu.");
+            alert(`PDF oluşturulurken bir hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
         } finally {
             setExportLoading(false);
         }
