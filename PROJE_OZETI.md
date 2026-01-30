@@ -118,6 +118,22 @@ projeagent/
 
 ## 🗄️ Veritabanı Şeması (Prisma)
 
+### ✅ Yatırımcı Sunum Dosyası (TAMAMLANDI)
+- **PDF Export:** `html2pdf.js` ile istemci tarafında PDF oluşturma
+- **Public Link:** Token bazlı, şifresiz erişim (örn: `/p/xyz123`)
+- **İçerik:**
+  - Kapak (Logo, İsim, Tarih, Görsel)
+  - Konum & İmar Durumu
+  - Görsel Galeri
+  - Bölge Analizi (Otomatik + Manuel Emsaller)
+  - Fizibilite Analizi (Kat Karşılığı + Satın Alma Senaryoları)
+  - İletişim Bilgileri (QR Kodlu)
+- **Yönetim:**
+  - Link oluşturma/silme/süreli paylaşım
+  - Görüntülenme sayısı takibi
+  - Ayarlar (Logo, renk, iletişim bilgileri)
+  - Emsal İlan Ekleme (Sahibinden.com linkleri)
+
 ### Ana Modeller:
 - **User** - Kullanıcı yönetimi
 - **Parcel** - Parsel/arsa bilgileri
