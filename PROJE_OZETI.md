@@ -185,6 +185,15 @@ projeagent/
 ## 💬 Konuşma Özeti
 
 **Tarih:** 31 Ocak 2026  
-**Konu:** Proje gözden geçirme
+**Konu:** Proje gözden geçirme ve Fizibilite Hesaplama Geçmişi Özelliği
 
-Kullanıcı ile birlikte projenin mevcut durumunu gözden geçirdik. Tüm ana özellikler (Parsel Yönetimi, CRM, Fizibilite, Portföy, Müteahhit Sistemi) tamamlanmış durumda. Git branch'i master'da ve guncel.
+### Yapılan İşler:
+1. Projenin mevcut durumu gözden geçirildi
+2. **Fizibilite Hesaplama Geçmişi** özelliği eklendi:
+   - `FeasibilityCalculation` modeli Prisma şemasına eklendi
+   - API endpoint oluşturuldu: `/api/parcels/[id]/calculations`
+   - FeasibilitySection bileşeni güncellendi (otomatik kaydetme, son 5 hesap tablosu)
+   - Geçmiş hesaplamaları görüntüleme ve silme özellikleri eklendi
+
+**Branch:** `feature/feasibility-calculation-history`  
+**Commit:** `feat: Fizibilite hesaplama geçmişi özelliği eklendi`
