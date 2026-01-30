@@ -55,6 +55,7 @@ model Parcel {
   contractorMatches ContractorParcelMatch[]
   calculations FeasibilityCalculation[]  // Fizibilite hesaplamaları
   presentationShares PresentationShare[]  // Sunum paylaşım linkleri
+  precedents   ParcelPrecedent[]        // Emsal veriler
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
 }
@@ -538,4 +539,18 @@ model PresentationShare {
   isActive     Boolean  @default(true)
   
   createdAt    DateTime @default(now())
+}
+
+model ParcelPrecedent {
+  id          Int      @id @default(autoincrement())
+  parcelId    Int
+  parcel      Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  title       String
+  price       Float    // TL
+  area        Float?   // m²
+  pricePerM2  Float?   // Hesaplanmış
+  sourceUrl   String?  // Sahibinden vs link
+  source      String?  // "sahibinden", "hepsiemlak", "manuel"
+  notes       String?
+  createdAt   DateTime @default(now())
 }

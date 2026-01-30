@@ -10,7 +10,7 @@ import LocationPage from "./PresentationPages/LocationPage";
 import GalleryPage from "./PresentationPages/GalleryPage";
 import RegionalAnalysisPage from "./PresentationPages/RegionalAnalysisPage";
 import FeasibilityPage from "./PresentationPages/FeasibilityPage";
-import ProposalPage from "./PresentationPages/ProposalPage";
+// ProposalPage kaldırıldı
 import ContactPage from "./PresentationPages/ContactPage";
 
 interface PresentationData {
@@ -20,6 +20,7 @@ interface PresentationData {
     notes: any[];
     feasibility: any;
     regionalData: any[];
+    userPrecedents: any[];
     userSettings: {
         companyName: string;
         email: string;
@@ -291,7 +292,7 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
                 <GalleryPage data={data} />
                 {data.regionalData.length > 0 && <RegionalAnalysisPage data={data} />}
                 {data.feasibility && <FeasibilityPage data={data} />}
-                {data.feasibility && <ProposalPage data={data} />}
+
                 <ContactPage data={data} />
             </div>
 

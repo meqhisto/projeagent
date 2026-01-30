@@ -61,13 +61,19 @@ export async function GET(
             where: { userId }
         });
 
-        // Bölge emsallerini getir (aynı mahalle)
+        // Bölge emsalleri (Otomatik + Manuel)
         const regionalPrecedents = await prisma.zoningPrecedent.findMany({
             where: {
                 city: parcel.city,
                 district: parcel.district
             },
             take: 5
+        });
+
+        // Kullanıcının eklediği emsaller
+        const userPrecedents = await prisma.parcelPrecedent.findMany({
+            where: { parcelId },
+            orderBy: { createdAt: 'desc' }
         });
 
         // Son fizibilite hesaplamasını parse et
@@ -105,6 +111,7 @@ export async function GET(
             notes: parcel.notes,
             feasibility: lastCalculation,
             regionalData: regionalPrecedents,
+            userPrecedents: userPrecedents,
             userSettings: presentationSettings || {
                 companyName: user.name,
                 email: user.email,

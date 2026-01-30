@@ -1,23 +1,37 @@
-import { TrendingUp, MapPin } from "lucide-react";
+import { TrendingUp, MapPin, ExternalLink } from "lucide-react";
 
 interface RegionalAnalysisPageProps {
     data: {
         parcel: any;
         regionalData: any[];
+        userPrecedents?: any[];
     };
 }
 
 export default function RegionalAnalysisPage({ data }: RegionalAnalysisPageProps) {
-    const { parcel, regionalData } = data;
+    const { parcel, regionalData, userPrecedents = [] } = data;
 
-    if (!regionalData || regionalData.length === 0) {
+    // Eğer hiç veri yoksa gösterme
+    if ((!regionalData || regionalData.length === 0) && userPrecedents.length === 0) {
         return null;
     }
 
-    // Bölge ortalaması hesapla
-    const avgKs = regionalData.reduce((sum, r) => sum + (r.ks || 0), 0) / regionalData.filter(r => r.ks).length;
-    const avgTaks = regionalData.reduce((sum, r) => sum + (r.taks || 0), 0) / regionalData.filter(r => r.taks).length;
-    const avgMaxHeight = regionalData.reduce((sum, r) => sum + (r.maxHeight || 0), 0) / regionalData.filter(r => r.maxHeight).length;
+    // Bölge ortalaması hesapla (Sadece ZoningPrecedent'lerden - regionalData)
+    // Manuel girilenlerin Kaks/Taks verisi her zaman olmayabilir, satış fiyatı odaklılar.
+    const avgKs = regionalData.length > 0
+        ? regionalData.reduce((sum, r) => sum + (r.ks || 0), 0) / regionalData.filter(r => r.ks).length
+        : null;
+    const avgTaks = regionalData.length > 0
+        ? regionalData.reduce((sum, r) => sum + (r.taks || 0), 0) / regionalData.filter(r => r.taks).length
+        : null;
+    const avgMaxHeight = regionalData.length > 0
+        ? regionalData.reduce((sum, r) => sum + (r.maxHeight || 0), 0) / regionalData.filter(r => r.maxHeight).length
+        : null;
+
+    // Satış Fiyatı Ortalaması (User Precedents)
+    const avgPricePerM2 = userPrecedents.length > 0
+        ? userPrecedents.reduce((sum, p) => sum + (p.pricePerM2 || 0), 0) / userPrecedents.filter(p => p.pricePerM2).length
+        : null;
 
     return (
         <div
@@ -35,89 +49,133 @@ export default function RegionalAnalysisPage({ data }: RegionalAnalysisPageProps
                 </p>
             </div>
 
-            {/* Bölge Ortalamaları */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 text-center">
-                    <div className="text-xs text-purple-600 uppercase tracking-wide font-medium mb-2">Ortalama Emsal</div>
-                    <div className="text-4xl font-black text-purple-700">
-                        {avgKs ? avgKs.toFixed(2) : '-'}
+            {/* Bölge Ortalamaları Grid */}
+            <div className="grid grid-cols-2 gap-6 mb-8">
+                {/* İmar Ortalamaları */}
+                {avgKs && (
+                    <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                        <h3 className="font-bold text-gray-900 mb-4">İmar Emsalleri</h3>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div className="text-xs text-gray-500 uppercase">Emsal</div>
+                                <div className="text-2xl font-black text-gray-900">{avgKs.toFixed(2)}</div>
+                            </div>
+                            <div>
+                                <div className="text-xs text-gray-500 uppercase">TAKS</div>
+                                <div className="text-2xl font-black text-gray-900">{avgTaks?.toFixed(2) || '-'}</div>
+                            </div>
+                            <div>
+                                <div className="text-xs text-gray-500 uppercase">Hmax</div>
+                                <div className="text-2xl font-black text-gray-900">{avgMaxHeight?.toFixed(2) || '-'}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="text-sm text-purple-500 mt-1">KAKS</div>
-                </div>
+                )}
 
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 text-center">
-                    <div className="text-xs text-blue-600 uppercase tracking-wide font-medium mb-2">Ortalama TAKS</div>
-                    <div className="text-4xl font-black text-blue-700">
-                        {avgTaks ? avgTaks.toFixed(2) : '-'}
+                {/* Fiyat Ortalamaları */}
+                {avgPricePerM2 && (
+                    <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                        <h3 className="font-bold text-purple-900 mb-4">Piyasa Ortalaması</h3>
+                        <div className="text-center">
+                            <div className="text-xs text-purple-600 uppercase mb-1">Ortalama m² Satış Fiyatı</div>
+                            <div className="text-3xl font-black text-purple-700">
+                                {Math.round(avgPricePerM2).toLocaleString('tr-TR')} ₺
+                            </div>
+                            <div className="text-xs text-purple-500 mt-2">
+                                {userPrecedents.length} adet emsal satış verisine göre
+                            </div>
+                        </div>
                     </div>
-                    <div className="text-sm text-blue-500 mt-1">Taban Alanı Oranı</div>
-                </div>
-
-                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 text-center">
-                    <div className="text-xs text-emerald-600 uppercase tracking-wide font-medium mb-2">Ortalama Yükseklik</div>
-                    <div className="text-4xl font-black text-emerald-700">
-                        {avgMaxHeight ? avgMaxHeight.toFixed(1) : '-'}
-                    </div>
-                    <div className="text-sm text-emerald-500 mt-1">metre</div>
-                </div>
+                )}
             </div>
 
-            {/* Emsal Verileri Tablosu */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                <div className="bg-gray-100 px-6 py-3 border-b border-gray-200">
-                    <h3 className="font-semibold text-gray-900">Bölge Emsalleri</h3>
+            {/* Emsal Satış Tablosu (Manuel Girilenler) */}
+            {userPrecedents.length > 0 && (
+                <div className="mb-8">
+                    <div className="bg-gray-100 px-6 py-3 border-b border-gray-200 rounded-t-xl">
+                        <h3 className="font-semibold text-gray-900">Emsal Satış İlanları</h3>
+                    </div>
+                    <div className="border border-gray-200 rounded-b-xl overflow-hidden bg-white">
+                        <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Başlık</th>
+                                    <th className="px-6 py-3 text-right font-semibold text-gray-700">Fiyat</th>
+                                    <th className="px-6 py-3 text-right font-semibold text-gray-700">Alan</th>
+                                    <th className="px-6 py-3 text-right font-semibold text-gray-700">m² / TL</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {userPrecedents.map((p) => (
+                                    <tr key={p.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-3 font-medium text-gray-900">
+                                            <div className="flex flex-col">
+                                                <span>{p.title}</span>
+                                                {p.sourceUrl && (
+                                                    <span className="text-xs text-blue-500 flex items-center gap-1 mt-0.5">
+                                                        Çevrimiçi İlan
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-3 text-right">{p.price.toLocaleString('tr-TR')} ₺</td>
+                                        <td className="px-6 py-3 text-right">{p.area ? `${p.area} m²` : '-'}</td>
+                                        <td className="px-6 py-3 text-right font-bold text-gray-900">
+                                            {p.pricePerM2 ? Math.round(p.pricePerM2).toLocaleString('tr-TR') : '-'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="bg-gray-50 text-left">
-                            <th className="px-6 py-3 font-semibold text-gray-700">Mahalle</th>
-                            <th className="px-6 py-3 font-semibold text-gray-700 text-center">Tip</th>
-                            <th className="px-6 py-3 font-semibold text-gray-700 text-center">Emsal</th>
-                            <th className="px-6 py-3 font-semibold text-gray-700 text-center">TAKS</th>
-                            <th className="px-6 py-3 font-semibold text-gray-700 text-center">Hmax</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {regionalData.map((precedent, index) => (
-                            <tr key={precedent.id || index} className="border-t border-gray-100">
-                                <td className="px-6 py-3">
-                                    <div className="flex items-center gap-2">
-                                        <MapPin className="h-4 w-4 text-gray-400" />
-                                        <span className="font-medium text-gray-900">{precedent.neighborhood}</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-3 text-center">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${precedent.type === 'RESIDENTIAL' ? 'bg-green-100 text-green-700' :
-                                            precedent.type === 'COMMERCIAL' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-purple-100 text-purple-700'
-                                        }`}>
-                                        {precedent.type === 'RESIDENTIAL' ? 'Konut' :
-                                            precedent.type === 'COMMERCIAL' ? 'Ticari' :
-                                                'Karma'}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-3 text-center font-bold text-gray-900">
-                                    {precedent.ks || '-'}
-                                </td>
-                                <td className="px-6 py-3 text-center font-bold text-gray-900">
-                                    {precedent.taks || '-'}
-                                </td>
-                                <td className="px-6 py-3 text-center font-bold text-gray-900">
-                                    {precedent.maxHeight || '-'}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            )}
 
-            {/* Not */}
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                    <strong>Not:</strong> Bu veriler bölgedeki benzer parsellerin ortalama imar değerlerini göstermektedir.
-                    Kesin değerler için belediye imar müdürlüğüne başvurunuz.
-                </p>
-            </div>
+            {/* İmar Emsal Tablosu (Otomatik) */}
+            {regionalData.length > 0 && (
+                <div>
+                    <div className="bg-gray-100 px-6 py-3 border-b border-gray-200 rounded-t-xl">
+                        <h3 className="font-semibold text-gray-900">Bölge İmar Emsalleri</h3>
+                    </div>
+                    <div className="border border-gray-200 rounded-b-xl overflow-hidden bg-white">
+                        <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Konum</th>
+                                    <th className="px-6 py-3 text-center font-semibold text-gray-700">Tip</th>
+                                    <th className="px-6 py-3 text-center font-semibold text-gray-700">Emsal</th>
+                                    <th className="px-6 py-3 text-center font-semibold text-gray-700">TAKS</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {regionalData.map((precedent, index) => (
+                                    <tr key={precedent.id || index} className="hover:bg-gray-50">
+                                        <td className="px-6 py-3">
+                                            <div className="flex items-center gap-2">
+                                                <MapPin className="h-4 w-4 text-gray-400" />
+                                                <span className="text-gray-900">{precedent.neighborhood}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-3 text-center">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${precedent.type === 'RESIDENTIAL' ? 'bg-green-100 text-green-700' :
+                                                    'bg-blue-100 text-blue-700'
+                                                }`}>
+                                                {precedent.type === 'RESIDENTIAL' ? 'Konut' : 'Ticari/Diğer'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-3 text-center font-bold text-gray-900">
+                                            {precedent.ks || '-'}
+                                        </td>
+                                        <td className="px-6 py-3 text-center font-bold text-gray-900">
+                                            {precedent.taks || '-'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,7 +1,9 @@
-import { Calculator, TrendingUp, PieChart, DollarSign } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Building2, Wallet } from "lucide-react";
 
 interface FeasibilityPageProps {
     data: {
+        parcel: any;
+        userPrecedents: any[];
         feasibility: {
             fullResult: any;
             arsaM2: number;
@@ -13,18 +15,61 @@ interface FeasibilityPageProps {
             netKar: string;
             roi: string;
             durum: string;
+            insaatMaliyeti: number;
+            satisFiyati: number;
         };
     };
 }
 
 export default function FeasibilityPage({ data }: FeasibilityPageProps) {
-    const { feasibility } = data;
+    const { feasibility, userPrecedents, parcel } = data;
 
     if (!feasibility) {
         return null;
     }
 
     const result = feasibility.fullResult || {};
+
+    // 1. Senaryo: Kat Karşılığı (Mevcut Veriler)
+    // Müteahhit sadece inşaat maliyetini öder, dairelerin bir kısmını alır.
+
+    // 2. Senaryo: Satın Al - Yap - Sat (Yeni)
+    // Yatırımcı arsayı alır + inşaat yapar, dairelerin tamamını satar.
+
+    // Arsa Değeri Tahmini (Emsallerden veya Arsa Sahibi Payından)
+    let estimatedLandPrice = 0;
+    let landPriceSource = "";
+
+    // Emsallerden hesapla
+    const avgPricePerM2 = userPrecedents && userPrecedents.length > 0
+        ? userPrecedents.reduce((sum, p) => sum + (p.pricePerM2 || 0), 0) / userPrecedents.filter(p => p.pricePerM2).length
+        : 0;
+
+    if (avgPricePerM2 > 0 && parcel.area) {
+        estimatedLandPrice = avgPricePerM2 * parcel.area;
+        landPriceSource = "Bölge Emsallerine Göre";
+    } else {
+        // Fallback: Arsa Sahibi Payının Satış Değeri (Bu daireleri satarak elde edeceği gelir ~= Arsa Değeri)
+        // result.finansal_tablo.beklenen_ciro TOPLAM ciro sanırım?
+        // Arsa sahibi payı oranı * Toplam Ciro = Arsa Değeri
+        const totalRevenue = parseFloat(result.finansal_tablo?.beklenen_ciro?.replace(/\./g, '').replace(/,/g, '.') || "0");
+        const landOwnerShare = feasibility.arsaSahibiDaire / feasibility.toplamDaire;
+        estimatedLandPrice = totalRevenue * landOwnerShare;
+        landPriceSource = "Kat Karşılığı Oranına Göre";
+    }
+
+    // Satın Alma Senaryosu Hesaplamaları
+    const constructionCost = result.finansal_tablo?.toplam_insaat_maliyeti
+        ? parseFloat(result.finansal_tablo.toplam_insaat_maliyeti.replace(/\./g, '').replace(/,/g, '.'))
+        : feasibility.insaatMaliyeti * feasibility.arsaM2 * (feasibility.emsal || 1); // Fallback calc if needed
+
+    const totalDevelopmentCost = estimatedLandPrice + constructionCost;
+
+    // Toplam Gelir (Tüm dairelerin satışı)
+    const totalRevenue = parseFloat(result.finansal_tablo?.beklenen_ciro?.replace(/\./g, '').replace(/,/g, '.') || "0");
+
+    const buyScenarioProfit = totalRevenue - totalDevelopmentCost;
+    const buyScenarioROI = (buyScenarioProfit / totalDevelopmentCost) * 100;
 
     return (
         <div
@@ -35,132 +80,124 @@ export default function FeasibilityPage({ data }: FeasibilityPageProps) {
             <div className="border-b-2 border-gray-800 pb-4 mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
                     <Calculator className="h-6 w-6 text-purple-600" />
-                    Fizibilite Analizi
+                    Yatırım Senaryoları & Fizibilite
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                    Proje geliştirme potansiyeli ve finansal göstergeler
+                    Kat Karşılığı ve Satın Alma Modelleri Karşılaştırması
                 </p>
             </div>
 
-            {/* Durum ve ROI */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className={`rounded-xl p-6 border-2 ${feasibility.durum === 'FIRSAT' ? 'bg-emerald-50 border-emerald-400' :
-                        feasibility.durum === 'RİSKLİ' ? 'bg-red-50 border-red-400' :
-                            'bg-blue-50 border-blue-400'
-                    }`}>
-                    <div className="text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">Karar Desteği</div>
-                    <div className={`text-4xl font-black ${feasibility.durum === 'FIRSAT' ? 'text-emerald-700' :
-                            feasibility.durum === 'RİSKLİ' ? 'text-red-700' :
-                                'text-blue-700'
-                        }`}>
-                        {feasibility.durum}
-                    </div>
-                    {result.karar_destek?.yorum && (
-                        <p className="text-sm text-gray-600 mt-2">{result.karar_destek.yorum}</p>
-                    )}
+            {/* Senaryo 1: Kat Karşılığı (Müteahhit Modeli) */}
+            <div className="mb-10">
+                <div className="flex items-center gap-2 mb-4">
+                    <Building2 className="h-5 w-5 text-purple-600" />
+                    <h3 className="text-xl font-bold text-gray-900">Senaryo A: Kat Karşılığı (Müteahhit)</h3>
                 </div>
 
-                <div className="bg-purple-50 rounded-xl p-6 border-2 border-purple-400">
-                    <div className="text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">Yatırım Getirisi (ROI)</div>
-                    <div className="text-4xl font-black text-purple-700">
-                        {feasibility.roi}
+                <div className="grid grid-cols-3 gap-6">
+                    <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                        <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Kat Karşılığı Oranı</div>
+                        <div className="text-2xl font-black text-gray-900">%{Math.round(feasibility.katKarsiligiOrani * 100)}</div>
+                        <div className="text-xs text-purple-600 mt-1 font-medium">Arsa Sahibine Verilen</div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">Toplam yatırım üzerinden beklenen getiri</p>
-                </div>
-            </div>
 
-            {/* Fiziksel Özet */}
-            <div className="grid grid-cols-4 gap-4 mb-8">
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Arsa Alanı</div>
-                    <div className="text-2xl font-bold text-gray-900">{feasibility.arsaM2.toLocaleString('tr-TR')} m²</div>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Emsal</div>
-                    <div className="text-2xl font-bold text-gray-900">{feasibility.emsal}</div>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Toplam Daire</div>
-                    <div className="text-2xl font-bold text-gray-900">{feasibility.toplamDaire}</div>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Kat Karşılığı</div>
-                    <div className="text-2xl font-bold text-gray-900">%{Math.round(feasibility.katKarsiligiOrani * 100)}</div>
-                </div>
-            </div>
-
-            {/* Daire Paylaşımı */}
-            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-8">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <PieChart className="h-4 w-4 text-gray-500" />
-                    Daire Paylaşımı
-                </h3>
-                <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-purple-100 rounded-xl p-6 text-center">
-                        <div className="text-5xl font-black text-purple-700 mb-2">
-                            {feasibility.muteahhitDaire}
-                        </div>
-                        <div className="text-sm font-medium text-purple-600">Müteahhit Payı</div>
-                        <div className="text-xs text-purple-500 mt-1">
-                            %{Math.round((feasibility.muteahhitDaire / feasibility.toplamDaire) * 100)} oran
-                        </div>
+                    <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                        <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">Müteahhit Payı</div>
+                        <div className="text-2xl font-black text-gray-900">{feasibility.muteahhitDaire} Daire</div>
+                        <div className="text-xs text-gray-500 mt-1">Toplam {feasibility.toplamDaire} daireden</div>
                     </div>
-                    <div className="bg-gray-200 rounded-xl p-6 text-center">
-                        <div className="text-5xl font-black text-gray-700 mb-2">
-                            {feasibility.arsaSahibiDaire}
-                        </div>
-                        <div className="text-sm font-medium text-gray-600">Arsa Sahibi Payı</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                            %{Math.round((feasibility.arsaSahibiDaire / feasibility.toplamDaire) * 100)} oran
-                        </div>
+
+                    <div className={`rounded-xl p-5 border-2 ${feasibility.durum === 'FIRSAT' ? 'bg-emerald-50 border-emerald-200' : 'bg-blue-50 border-blue-200'}`}>
+                        <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">Net Kâr Beklentisi</div>
+                        <div className="text-2xl font-black text-gray-900">{feasibility.netKar}</div>
+                        <div className="text-sm font-bold text-emerald-600 mt-1">ROI: {feasibility.roi}</div>
                     </div>
                 </div>
             </div>
 
-            {/* Finansal Tablo */}
+            <div className="border-t border-gray-200 my-8"></div>
+
+            {/* Senaryo 2: Satın Alma (Yatırımcı Modeli) */}
+            <div className="mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                    <Wallet className="h-5 w-5 text-emerald-600" />
+                    <h3 className="text-xl font-bold text-gray-900">Senaryo B: Satın Al - Yap - Sat (Yatırımcı)</h3>
+                    <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-bold">Tam Mülkiyet</span>
+                </div>
+
+                <div className="bg-emerald-50/50 rounded-2xl border border-emerald-100 p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div>
+                            <div className="text-xs text-gray-500 uppercase font-medium mb-1">Tahmini Arsa Bedeli</div>
+                            <div className="text-xl font-bold text-gray-900">
+                                {estimatedLandPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺
+                            </div>
+                            <div className="text-[10px] text-gray-400 mt-1">{landPriceSource}</div>
+                        </div>
+
+                        <div>
+                            <div className="text-xs text-gray-500 uppercase font-medium mb-1">İnşaat Maliyeti</div>
+                            <div className="text-xl font-bold text-gray-900">
+                                {constructionCost.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg p-3 border border-emerald-100 shadow-sm">
+                            <div className="text-xs text-emerald-600 uppercase font-bold mb-1">Toplam Ciro (Satış)</div>
+                            <div className="text-xl font-black text-emerald-700">
+                                {totalRevenue.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺
+                            </div>
+                            <div className="text-[10px] text-emerald-500 mt-1">Tüm dairelerin satışı</div>
+                        </div>
+
+                        <div className="bg-white rounded-lg p-3 border border-emerald-100 shadow-sm">
+                            <div className="text-xs text-emerald-600 uppercase font-bold mb-1">Net Kâr</div>
+                            <div className="text-xl font-black text-emerald-700">
+                                {buyScenarioProfit.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺
+                            </div>
+                            <div className="text-xs font-bold text-emerald-500 mt-1">ROI: %{buyScenarioROI.toFixed(1)}</div>
+                        </div>
+                    </div>
+
+                    {/* Karşılaştırma Notu */}
+                    <div className="text-sm text-gray-600 bg-white/50 p-4 rounded-lg">
+                        <p>
+                            <strong>Analiz:</strong> Eğer arsayı <strong>{estimatedLandPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺</strong> bedelle satın alırsanız,
+                            proje sonunda <strong>%{buyScenarioROI.toFixed(1)}</strong> oranında getiri elde edebilirsiniz.
+                            Kat karşılığı modeline göre {
+                                buyScenarioROI > parseFloat(feasibility.roi.replace('%', ''))
+                                    ? <span className="text-emerald-600 font-bold">daha kârlı</span>
+                                    : <span className="text-blue-600 font-bold">benzer veya daha düşük</span>
+                            } bir yatırım fırtası sunabilir.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Finansal Detaylar Tablosu (Ortak) */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-gray-500" />
-                    Finansal Göstergeler
-                </h3>
-
-                {result.finansal_tablo ? (
-                    <table className="w-full text-sm">
-                        <tbody>
-                            <tr className="border-b border-gray-200">
-                                <td className="py-3 text-gray-600">Toplam İnşaat Maliyeti</td>
-                                <td className="py-3 text-right font-bold text-red-600">
-                                    -{result.finansal_tablo.toplam_insaat_maliyeti}
-                                </td>
-                            </tr>
-                            <tr className="border-b border-gray-200">
-                                <td className="py-3 text-gray-600">Beklenen Satış Cirosu</td>
-                                <td className="py-3 text-right font-bold text-gray-900">
-                                    {result.finansal_tablo.beklenen_ciro}
-                                </td>
-                            </tr>
-                            {result.serefiye_analizi?.optimize_edilmis_ciro && (
-                                <tr className="border-b border-gray-200">
-                                    <td className="py-3 text-gray-600">Şerefiye Sonrası Ciro</td>
-                                    <td className="py-3 text-right font-bold text-emerald-600">
-                                        {result.serefiye_analizi.optimize_edilmis_ciro}
-                                    </td>
-                                </tr>
-                            )}
-                            <tr className="bg-emerald-50">
-                                <td className="py-4 font-bold text-gray-900">NET KÂR BEKLENTİSİ</td>
-                                <td className="py-4 text-right text-2xl font-black text-emerald-700">
-                                    {feasibility.netKar}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                ) : (
-                    <div className="text-center py-4">
-                        <p className="text-2xl font-bold text-emerald-700">{feasibility.netKar}</p>
-                        <p className="text-sm text-gray-500 mt-1">Net Kâr Beklentisi</p>
+                <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-gray-500" />
+                    Proje Metrikleri
+                </h4>
+                <div className="grid grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div className="text-xs text-gray-500">Arsa Alanı</div>
+                        <div className="font-bold">{feasibility.arsaM2.toLocaleString('tr-TR')} m²</div>
                     </div>
-                )}
+                    <div>
+                        <div className="text-xs text-gray-500">Emsal</div>
+                        <div className="font-bold">{feasibility.emsal}</div>
+                    </div>
+                    <div>
+                        <div className="text-xs text-gray-500">Toplam İnşaat Alanı</div>
+                        <div className="font-bold">{(feasibility.arsaM2 * feasibility.emsal).toLocaleString('tr-TR')} m²</div>
+                    </div>
+                    <div>
+                        <div className="text-xs text-gray-500">Toplam Daire</div>
+                        <div className="font-bold">{feasibility.toplamDaire} Adet</div>
+                    </div>
+                </div>
             </div>
         </div>
     );

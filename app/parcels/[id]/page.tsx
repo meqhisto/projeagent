@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { MapPin, ArrowLeft, Building, Loader2, FileText, ExternalLink, History, Share2, MoreVertical, ChevronRight, Layers, Maximize2, Info, Download, Calculator, Users, FolderOpen } from "lucide-react";
+import { MapPin, ArrowLeft, Building, Loader2, FileText, ExternalLink, History, Share2, MoreVertical, ChevronRight, Layers, Maximize2, Info, Download, Calculator, Users, FolderOpen, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import ZoningEditSection from "@/components/ZoningEditSection";
@@ -14,6 +14,7 @@ import ParcelReportTemplate from "@/components/ParcelReportTemplate";
 import ImageUploadSection from "@/components/ImageUploadSection";
 import DocumentUploadSection from "@/components/DocumentUploadSection";
 import ParcelTaskList from "@/components/ParcelTaskList";
+import PrecedentManager from "@/components/PrecedentManager";
 
 export default function ParcelDetailPage() {
     const params = useParams();
@@ -194,6 +195,9 @@ export default function ParcelDetailPage() {
                             </TabsTrigger>
                             <TabsTrigger value="crm" icon={<Users className="h-4 w-4" />}>
                                 CRM & Müşteriler
+                            </TabsTrigger>
+                            <TabsTrigger value="market" icon={<TrendingUp className="h-4 w-4" />}>
+                                Piyasa & Emsaller
                             </TabsTrigger>
                             <TabsTrigger value="documents" icon={<FolderOpen className="h-4 w-4" />}>
                                 Dökümanlar
@@ -413,6 +417,11 @@ export default function ParcelDetailPage() {
                                 <CRMSection parcelId={parcel.id} />
                                 <ParcelTaskList parcelId={parcel.id} />
                             </div>
+                        </TabsContent>
+
+                        {/* Tab Content: Market Analysis */}
+                        <TabsContent value="market">
+                            <PrecedentManager parcelId={parcel.id} />
                         </TabsContent>
 
                         {/* Tab Content: Documents */}

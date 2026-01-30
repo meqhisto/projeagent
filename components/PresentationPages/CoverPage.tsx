@@ -40,18 +40,6 @@ export default function CoverPage({ data }: CoverPageProps) {
 
             {/* Content */}
             <div className="relative z-10 flex flex-col h-full p-12">
-                {/* Logo */}
-                {data.userSettings.logoUrl && (
-                    <div className="mb-auto">
-                        <img
-                            src={data.userSettings.logoUrl}
-                            alt="Logo"
-                            className="h-16 object-contain"
-                            crossOrigin="anonymous"
-                        />
-                    </div>
-                )}
-
                 {/* Main Content - Centered */}
                 <div className="flex-1 flex flex-col items-center justify-center text-center text-white">
                     <div className="mb-6">
@@ -77,21 +65,36 @@ export default function CoverPage({ data }: CoverPageProps) {
                         </span>
                     </div>
 
+                    {/* Yüzölçüm */}
                     {data.parcel.area && (
                         <div className="mt-8 text-2xl text-purple-300 font-medium">
                             {data.parcel.area.toLocaleString('tr-TR')} m²
                         </div>
                     )}
+
+                    {/* Logo - Yüzölçüm altında */}
+                    {data.userSettings.logoUrl && (
+                        <div className="mt-10">
+                            <img
+                                src={data.userSettings.logoUrl}
+                                alt="Logo"
+                                className="h-16 object-contain mx-auto"
+                                crossOrigin="anonymous"
+                            />
+                        </div>
+                    )}
+
+                    {/* Portföy Sahibi İsmi - Logo altında */}
+                    {data.userSettings.companyName && (
+                        <p className="mt-4 text-xl font-medium text-white">
+                            {data.userSettings.companyName}
+                        </p>
+                    )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-end justify-between text-gray-400 text-sm">
-                    <div>
-                        {data.userSettings.companyName && (
-                            <p className="font-medium text-white text-lg">{data.userSettings.companyName}</p>
-                        )}
-                    </div>
-                    <div className="text-right">
+                <div className="flex items-end justify-center text-gray-400 text-sm">
+                    <div className="text-center">
                         <p>{date}</p>
                     </div>
                 </div>

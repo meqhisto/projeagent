@@ -32,6 +32,17 @@ export default function ContactPage({ data }: ContactPageProps) {
         day: 'numeric'
     });
 
+    // İletişim bilgisi sayısını hesapla
+    const contactItems = [
+        userSettings.phone,
+        userSettings.email,
+        userSettings.website,
+        userSettings.address
+    ].filter(Boolean);
+
+    // Tek satırda gösterilecekse col-1, çiftse col-2
+    const gridCols = contactItems.length === 1 ? "grid-cols-1" : "grid-cols-2";
+
     return (
         <div
             className="min-h-[297mm] bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-12 flex flex-col"
@@ -52,17 +63,17 @@ export default function ContactPage({ data }: ContactPageProps) {
                 )}
 
                 {/* Company Name */}
-                <h2 className="text-4xl font-bold mb-2">
+                <h2 className="text-4xl font-bold mb-2 text-center">
                     {userSettings.companyName || 'İletişim'}
                 </h2>
 
                 <div className="w-24 h-1 bg-purple-500 rounded-full mb-12" />
 
-                {/* Contact Grid */}
-                <div className="grid grid-cols-2 gap-8 max-w-2xl w-full mb-12">
+                {/* Contact Grid - Dinamik */}
+                <div className={`grid ${gridCols} gap-8 max-w-2xl w-full mb-12`}>
                     {userSettings.phone && (
                         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Phone className="h-6 w-6 text-white" />
                             </div>
                             <div>
@@ -74,19 +85,19 @@ export default function ContactPage({ data }: ContactPageProps) {
 
                     {userSettings.email && (
                         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Mail className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <div className="text-xs text-gray-400 uppercase tracking-wide">E-posta</div>
-                                <div className="text-lg font-medium">{userSettings.email}</div>
+                                <div className="text-lg font-medium break-all">{userSettings.email}</div>
                             </div>
                         </div>
                     )}
 
                     {userSettings.website && (
                         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Globe className="h-6 w-6 text-white" />
                             </div>
                             <div>
@@ -98,7 +109,7 @@ export default function ContactPage({ data }: ContactPageProps) {
 
                     {userSettings.address && (
                         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <MapPin className="h-6 w-6 text-white" />
                             </div>
                             <div>
