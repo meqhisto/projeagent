@@ -129,23 +129,60 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
             elementClone.style.width = `${element.offsetWidth}px`;
             document.body.appendChild(elementClone);
 
-            // Tüm renkleri RGB'ye çevir (Recursive)
+            // Tüm renkleri RGB'ye çevir (Recursive ve Aggressive)
             const normalizeColors = (el: HTMLElement) => {
-                const style = window.getComputedStyle(el);
+                try {
+                    const style = window.getComputedStyle(el);
 
-                // Computed style her zaman RGB(a) döner, bu yüzden direkt atamak yeterli
-                if (style.backgroundColor) el.style.backgroundColor = style.backgroundColor;
-                if (style.color) el.style.color = style.color;
-                if (style.borderColor) el.style.borderColor = style.borderColor;
+                    // html2canvas'ın lab/oklch parser hatasını önlemek için
+                    // kritik renk özelliklerini computed (RGB) değerleriyle inline olarak eziyoruz.
+                    const properties = [
+                        'color',
+                        'backgroundColor',
+                        'borderColor',
+                        'borderTopColor',
+                        'borderRightColor',
+                        'borderBottomColor',
+                        'borderLeftColor',
+                        'outlineColor',
+                        'textDecorationColor',
+                        'columnRuleColor',
+                        'fill',
+                        'stroke'
+                    ];
 
-                // Background gradient varsa ve içinde lab/oklch varsa bunu temizlemek zor
-                // ama genelde solid renklerde sorun çıkıyor.
+                    properties.forEach(prop => {
+                        const val = style.getPropertyValue(camelToKebab(prop));
+                        if (val) {
+                            // Eğer değerde lab/oklch varsa logla (debug için)
+                            if (val.includes('lab(') || val.includes('oklch(')) {
+                                console.warn(`Found modern color format in ${prop}:`, val, el);
+                            }
+                            // Inline stil olarak ata (RGB'ye dönmüş hali)
+                            // !important ekleyerek class stillerini eziyoruz
+                            el.style.setProperty(prop, val, 'important');
+                        }
+                    });
+
+                    // Shadow'lar karmaşık olabilir, onları da işlemeye çalışalım
+                    if (style.boxShadow && style.boxShadow !== 'none') {
+                        el.style.setProperty('box-shadow', style.boxShadow, 'important');
+                    }
+
+                } catch (e) {
+                    console.warn('Error normalizing styles for element:', el, e);
+                }
 
                 Array.from(el.children).forEach(child => normalizeColors(child as HTMLElement));
             };
 
+            // Helper: CamelCase to kebab-case
+            const camelToKebab = (str: string) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+
             // Normalizasyonu başlat
+            console.log("Starting color normalization...");
             normalizeColors(elementClone);
+            console.log("Color normalization finished.");
 
             // html2pdf işlemini başlat
             await html2pdf().set(opt).from(elementClone).save();
