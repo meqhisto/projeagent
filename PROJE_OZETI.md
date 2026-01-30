@@ -182,6 +182,45 @@ projeagent/
 
 ---
 
+## 🚀 Sunucu Deployment Kuralları
+
+**Sunucu:** ekip.invecoproje.com  
+**Sunucu OS:** Ubuntu (Node.js v12 - eski, kullanılmamalı)  
+**Proje Docker içinde çalışıyor!**
+
+### ⚠️ ÖNEMLİ KURALLAR
+
+1. **Sunucuda `npx` veya `npm` komutları DOĞRUDAN ÇALIŞTIRILMAZ!**
+   - Sunucunun Node.js versiyonu (v12) çok eski
+   - Tüm komutlar Docker container içinde çalıştırılmalı
+
+2. **Prisma DB Push (Şema Güncellemesi):**
+   ```bash
+   docker exec -it parselmonitor-frontend npx prisma db push
+   ```
+
+3. **Yeni Deployment:**
+   ```bash
+   cd ~/projeagent
+   git pull origin master
+   docker compose down
+   docker compose up -d --build
+   docker exec -it parselmonitor-frontend npx prisma db push
+   ```
+
+4. **Container İçine Girme:**
+   ```bash
+   docker exec -it parselmonitor-frontend sh
+   ```
+
+5. **Container Durumunu Kontrol:**
+   ```bash
+   docker ps
+   docker logs parselmonitor-frontend
+   ```
+
+---
+
 ## 💬 Konuşma Özeti
 
 **Tarih:** 31 Ocak 2026  
@@ -194,6 +233,7 @@ projeagent/
    - API endpoint oluşturuldu: `/api/parcels/[id]/calculations`
    - FeasibilitySection bileşeni güncellendi (otomatik kaydetme, son 5 hesap tablosu)
    - Geçmiş hesaplamaları görüntüleme ve silme özellikleri eklendi
+3. Sunucu deployment kuralları dokümante edildi
 
-**Branch:** `feature/feasibility-calculation-history`  
+**Branch:** `feature/feasibility-calculation-history` → `master` (merged)  
 **Commit:** `feat: Fizibilite hesaplama geçmişi özelliği eklendi`

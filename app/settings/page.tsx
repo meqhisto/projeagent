@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { User, Lock, LogOut, Loader2 } from "lucide-react";
+import { User, Lock, LogOut, Loader2, FileText, Building, Upload, Save } from "lucide-react";
 
 // Password Change Form Component
 function ChangePasswordForm() {
@@ -176,6 +176,218 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
     );
 }
 
+// Presentation Settings Form Component
+function PresentationSettingsForm() {
+    const [settings, setSettings] = useState({
+        companyName: "",
+        logoUrl: "",
+        phone: "",
+        email: "",
+        address: "",
+        website: ""
+    });
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
+
+    // Ayarları yükle
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch("/api/user/presentation-settings");
+                if (res.ok) {
+                    const data = await res.json();
+                    setSettings({
+                        companyName: data.companyName || "",
+                        logoUrl: data.logoUrl || "",
+                        phone: data.phone || "",
+                        email: data.email || "",
+                        address: data.address || "",
+                        website: data.website || ""
+                    });
+                }
+            } catch (error) {
+                console.error("Fetch settings error:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setMessage(null);
+        setSaving(true);
+
+        try {
+            const res = await fetch("/api/user/presentation-settings", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(settings)
+            });
+
+            if (res.ok) {
+                setMessage({ type: "success", text: "Sunum ayarları başarıyla kaydedildi" });
+            } else {
+                setMessage({ type: "error", text: "Kayıt sırasında bir hata oluştu" });
+            }
+        } catch (error) {
+            setMessage({ type: "error", text: "Sunucu hatası" });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+            </div>
+        );
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Company Name */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Şirket / Kişi Adı
+                    </label>
+                    <input
+                        type="text"
+                        value={settings.companyName}
+                        onChange={(e) => setSettings({ ...settings, companyName: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="INVECO Proje"
+                    />
+                </div>
+
+                {/* Phone */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Telefon
+                    </label>
+                    <input
+                        type="tel"
+                        value={settings.phone}
+                        onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="0532 123 45 67"
+                    />
+                </div>
+
+                {/* Email */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        E-posta
+                    </label>
+                    <input
+                        type="email"
+                        value={settings.email}
+                        onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="info@sirket.com"
+                    />
+                </div>
+
+                {/* Website */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Web Sitesi
+                    </label>
+                    <input
+                        type="url"
+                        value={settings.website}
+                        onChange={(e) => setSettings({ ...settings, website: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="https://www.sirket.com"
+                    />
+                </div>
+            </div>
+
+            {/* Address */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Adres
+                </label>
+                <textarea
+                    value={settings.address}
+                    onChange={(e) => setSettings({ ...settings, address: e.target.value })}
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Merkez Mahallesi, İş Merkezi No:1, İstanbul"
+                />
+            </div>
+
+            {/* Logo URL */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Logo URL
+                </label>
+                <input
+                    type="url"
+                    value={settings.logoUrl}
+                    onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="https://example.com/logo.png"
+                />
+                <p className="text-xs text-gray-500 mt-1">Logo için bir URL girin. Önerilen boyut: 200x80 piksel</p>
+                {settings.logoUrl && (
+                    <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-xs text-gray-500 mb-2">Önizleme:</p>
+                        <img
+                            src={settings.logoUrl}
+                            alt="Logo"
+                            className="max-h-16 object-contain"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* Message */}
+            {message && (
+                <div className={`p-3 rounded-lg text-sm ${message.type === "success"
+                    ? "bg-green-50 text-green-800 border border-green-200"
+                    : "bg-red-50 text-red-800 border border-red-200"
+                    }`}>
+                    {message.text}
+                </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+                type="submit"
+                disabled={saving}
+                className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+                {saving ? (
+                    <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Kaydediliyor...
+                    </>
+                ) : (
+                    <>
+                        <Save className="h-4 w-4" />
+                        Kaydet
+                    </>
+                )}
+            </button>
+
+            {/* Info */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                    <strong>💡 İpucu:</strong> Bu bilgiler yatırımcı sunumlarının iletişim bölümünde görüntülenecektir.
+                </p>
+            </div>
+        </form>
+    );
+}
+
 export default function SettingsPage() {
     const { data: session } = useSession();
     const [loading, setLoading] = useState(false);
@@ -256,6 +468,19 @@ export default function SettingsPage() {
                 </div>
 
                 <ChangePasswordForm />
+            </div>
+
+            {/* Presentation Settings Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                    <FileText className="h-5 w-5 text-purple-600" />
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">Sunum Ayarları</h2>
+                        <p className="text-sm text-gray-500">Yatırımcı sunumlarında görünecek şirket bilgileri</p>
+                    </div>
+                </div>
+
+                <PresentationSettingsForm />
             </div>
 
             {/* Logout Section */}

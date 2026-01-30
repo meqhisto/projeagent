@@ -54,6 +54,7 @@ model Parcel {
   properties   Property[]    // Üzerine yapılan gayrimenkuller
   contractorMatches ContractorParcelMatch[]
   calculations FeasibilityCalculation[]  // Fizibilite hesaplamaları
+  presentationShares PresentationShare[]  // Sunum paylaşım linkleri
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
 }
@@ -203,6 +204,10 @@ model User {
   // Contractor relations
   contractors       Contractor[]       @relation("OwnedContractors")
   contractorRatings ContractorRating[] @relation("RatedContractors")
+  
+  // Presentation settings
+  presentationSettings UserPresentationSettings?
+  presentationShares   PresentationShare[]
   
   sessions  Session[]
 }
@@ -494,4 +499,43 @@ model FeasibilityCalculation {
   fullResult          String   @db.Text
   
   createdAt           DateTime @default(now())
+}
+
+// ==========================================
+// YATIRIMCI SUNUM SİSTEMİ
+// ==========================================
+
+// Kullanıcı Sunum Ayarları
+model UserPresentationSettings {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName  String?  // Şirket adı
+  logoUrl      String?  // Logo URL'i
+  phone        String?  // İletişim telefon
+  email        String?  // İletişim e-posta
+  address      String?  // Adres
+  website      String?  // Web sitesi
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Sunum Paylaşım Linki
+model PresentationShare {
+  id           Int      @id @default(autoincrement())
+  token        String   @unique @default(cuid())
+  parcelId     Int
+  parcel       Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  
+  createdById  Int
+  createdBy    User     @relation(fields: [createdById], references: [id])
+  
+  title        String?  // Opsiyonel başlık
+  expiresAt    DateTime?  // Opsiyonel son kullanma tarihi
+  viewCount    Int      @default(0)
+  isActive     Boolean  @default(true)
+  
+  createdAt    DateTime @default(now())
 }
