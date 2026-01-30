@@ -394,6 +394,7 @@ export default function ParcelDetailPage() {
                         <TabsContent value="feasibility">
                             <div className="max-w-5xl mx-auto">
                                 <FeasibilitySection
+                                    parcelId={parcel.id}
                                     parcelArea={parcel.area || 0}
                                     initialKs={parcel.zoning?.ks}
                                     initialTaks={parcel.zoning?.taks}
