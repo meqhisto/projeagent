@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Download, Share2, Eye, Loader2, Copy, Check, Link2, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -54,7 +54,6 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
     const [showShareModal, setShowShareModal] = useState(false);
     const [shareTitle, setShareTitle] = useState("");
     const [copiedId, setCopiedId] = useState<number | null>(null);
-    const presentationRef = useRef<HTMLDivElement>(null);
 
     // Veri yükle
     useEffect(() => {
@@ -88,150 +87,29 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
         fetchShareLinks();
     }, [parcelId]);
 
-    // PDF export
+    // PDF export - Server-side Puppeteer
     const handleExportPDF = async () => {
-        if (!presentationRef.current) return;
-
         setExportLoading(true);
         try {
-            // Dynamic import
-            const html2pdfModule = await import("html2pdf.js");
-            const html2pdf = html2pdfModule.default || html2pdfModule;
+            const response = await fetch(`/api/parcels/${parcelId}/export-pdf`);
 
-            // 1. İzolasyon için Iframe oluştur
-            const iframe = document.createElement('iframe');
-            Object.assign(iframe.style, {
-                position: 'fixed',
-                top: '-9999px',
-                left: '-9999px',
-                width: '1000px',
-                height: '100%',
-                border: 'none',
-                visibility: 'hidden'
-            });
-            document.body.appendChild(iframe);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || "PDF oluşturulamadı");
+            }
 
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-            if (!iframeDoc) throw new Error("Iframe oluşturulamadı");
+            // PDF blob olarak al
+            const blob = await response.blob();
 
-            // document.write yerine DOM metodları (Violation fix)
-            const styleReset = iframeDoc.createElement('style');
-            styleReset.innerHTML = '*, *::before, *::after { box-sizing: border-box; }';
-            iframeDoc.head.appendChild(styleReset);
-
-            // 2. Elementi klonla
-            const originalElement = presentationRef.current;
-            const clonedContent = originalElement.cloneNode(true) as HTMLElement;
-            iframeDoc.body.appendChild(clonedContent);
-
-            // 3. Computed Style'ları Kopyala (Snapshot) with Canvas Normalization
-            const copyComputedStyles = (source: HTMLElement, target: HTMLElement) => {
-                const computed = window.getComputedStyle(source);
-
-                // Canvas Context for color normalization
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-
-                // Helper: Normalize color to Hex/RGB using Canvas
-                const normalizeColor = (colorStr: string) => {
-                    if (!colorStr || !ctx) return colorStr;
-                    // Güvenli ise dokunma (rgb, rgba, hex, named colors)
-                    // lab, oklch, lch, color(display-p3...) gibi modern formatları yakala
-                    if (!colorStr.match(/^(rgb|rgba|#|[a-z]+$)/i)) {
-                        try {
-                            ctx.fillStyle = colorStr;
-                            return ctx.fillStyle;
-                        } catch (e) {
-                            return '#000000';
-                        }
-                    }
-                    return colorStr;
-                };
-
-                // Genişletilmiş kopyalanacak özellikler listesi
-                const stylingProps = [
-                    'display', 'position', 'top', 'right', 'bottom', 'left',
-                    'width', 'height', 'margin', 'padding',
-                    'border', 'borderRadius', 'opacity', 'zIndex',
-                    'font', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight',
-                    'textAlign', 'textTransform', 'whiteSpace',
-                    'flex', 'flexDirection', 'flexWrap', 'justifyContent', 'alignItems', 'gap',
-                    'gridTemplateColumns', 'gridTemplateRows', 'gridGap',
-                    'overflow', 'visibility',
-                    // Renk ve Görsel özellikleri
-                    'color', 'backgroundColor',
-                    'borderColor', 'outlineColor', 'textDecorationColor', 'columnRuleColor',
-                    'fill', 'stroke', // SVG renkleri önemli
-                    'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat',
-                    'boxShadow', 'filter', 'backdropFilter',
-                    'maskImage', 'webkitMaskImage'
-                ];
-
-                stylingProps.forEach(prop => {
-                    const val = computed[prop as any];
-                    if (!val || val === 'none') return;
-
-                    // 1. Direkt Renk Özellikleri
-                    if (['color', 'backgroundColor', 'borderColor', 'outlineColor', 'textDecorationColor', 'columnRuleColor', 'fill', 'stroke'].includes(prop)) {
-                        target.style[prop as any] = normalizeColor(val);
-                    }
-                    // 2. Background Image (Gradient kontrolü)
-                    else if (prop === 'backgroundImage') {
-                        if (val.includes('gradient') && (val.includes('lab') || val.includes('oklch'))) {
-                            target.style.backgroundImage = 'none';
-                            // Background color'ı RGB olarak garanti et
-                            const safeBg = normalizeColor(computed.backgroundColor);
-                            target.style.backgroundColor = (safeBg !== 'rgba(0, 0, 0, 0)' && safeBg !== 'transparent') ? safeBg : '#ffffff';
-                        } else {
-                            target.style.backgroundImage = val;
-                        }
-                    }
-                    // 3. Box Shadow, Filter, Mask (Kompleks değerler)
-                    else if (['boxShadow', 'filter', 'backdropFilter', 'maskImage', 'webkitMaskImage'].includes(prop)) {
-                        if (val.includes('lab') || val.includes('oklch')) {
-                            // Renk içeriyor ve modern formatta ise özelliği iptal et (en güvenli yol)
-                            target.style[prop as any] = 'none';
-                        } else {
-                            target.style[prop as any] = val;
-                        }
-                    }
-                    // 4. Diğerleri
-                    else {
-                        target.style[prop as any] = val;
-                    }
-                });
-
-                // Çocuk elementler
-                for (let i = 0; i < source.children.length; i++) {
-                    if (i < target.children.length) {
-                        copyComputedStyles(source.children[i] as HTMLElement, target.children[i] as HTMLElement);
-                    }
-                }
-            };
-
-            copyComputedStyles(originalElement, clonedContent);
-
-            // 4. PDF Oluştur
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            const opt = {
-                margin: 0,
-                filename: `Yatirimci_Sunumu_${data?.parcel.city}_${data?.parcel.district}_${data?.parcel.parsel}.pdf`,
-                image: { type: "jpeg" as const, quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    windowWidth: 1000
-                },
-                jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
-                pagebreak: { mode: ["avoid-all", "css", "legacy"] }
-            };
-
-            await html2pdf().set(opt).from(clonedContent).save();
-
-            // Temizlik
-            document.body.removeChild(iframe);
+            // Download linki oluştur ve tıkla
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Yatirimci_Sunumu_${data?.parcel.city}_${data?.parcel.district}_${data?.parcel.parsel}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
 
         } catch (error) {
             console.error("PDF export error:", error);
@@ -408,7 +286,6 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
 
             {/* Sunum Önizleme */}
             <div
-                ref={presentationRef}
                 className="bg-white shadow-lg rounded-xl overflow-hidden"
                 style={{ maxWidth: "210mm", margin: "0 auto" }}
             >

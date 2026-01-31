@@ -240,31 +240,26 @@ projeagent/
 ## 💬 Konuşma Özeti
 
 **Tarih:** 31 Ocak 2026  
-**Konu:** Yatırımcı Sunum Dosyası Özelliği
+**Konu:** PDF Export - Sunucu Taraflı Puppeteer Çözümü
 
 ### Yapılan İşler:
-1. **Yatırımcı Sunum Dosyası** özelliği geliştirildi:
-   - `UserPresentationSettings` modeli (logo, şirket bilgileri)
-   - `PresentationShare` modeli (paylaşım linkleri)
-   - 4 yeni API endpoint:
-     - `/api/user/presentation-settings` (kullanıcı sunum ayarları)
-     - `/api/parcels/[id]/presentation` (sunum verileri)
-     - `/api/parcels/[id]/presentation/share` (paylaşım linkleri)
-     - `/api/presentation/[token]` (public sunum - auth gerektirmez)
-   - `InvestorPresentation` ana bileşen (PDF export, link yönetimi)
-   - 7 sayfa bileşeni: Cover, Location, Gallery, RegionalAnalysis, Feasibility, Proposal, Contact
-   - Ayarlar sayfasına "Sunum Ayarları" bölümü eklendi
-   - `/parcels/[id]/presentation` sunum önizleme sayfası
-   - `/p/[token]` public sunum sayfası
-2. html2pdf.js ve qrcode.react paketleri eklendi
-3. Parsel detay sayfasına "Sunum Oluştur" butonu eklendi
+1. **PDF Export Sorunu Çözüldü:**
+   - `html2pdf.js` kütüphanesi Tailwind CSS v4 renk fonksiyonlarını (`lab()`, `oklch()`) desteklemiyordu
+   - Sunucu taraflı Puppeteer ile PDF oluşturma sistemi kuruldu
+   - Dockerfile'a Chromium ve font bağımlılıkları eklendi
+   - `/api/parcels/[id]/export-pdf` API route'u oluşturuldu
+   - `InvestorPresentation.tsx` API çağrısı yapacak şekilde güncellendi
 
-**Branch:** `feature/investor-presentation` (merge için hazır)
+2. **Teknik Değişiklikler:**
+   - Dockerfile: Chromium, fonts-noto, libx11-xcb gibi bağımlılıklar eklendi
+   - PUPPETEER_EXECUTABLE_PATH environment variable kullanılıyor
+   - Geçici paylaşım linki oluşturulup PDF render sonrası siliniyor
+
+**Branch:** `feature/pdf-export-puppeteer` (merge için hazır)
+
 ### 11. Bilinen Sorunlar (Known Issues) ⚠️
-- **PDF Export Hatası:** Yatırımcı sunumu PDF olarak indirilirken `html2pdf.js`, Tailwind CSS v4'ün kullandığı modern renk fonksiyonlarını (`lab()`, `oklch()`) parse edemiyor. 
-  - **Hata Mesajı:** `Error: Attempting to parse an unsupported color function "lab"`
-  - **Durum:** İstemci tarafı çözümleri (Canvas API, Snapshot, Color Normalization) denendi ancak tarayıcı ve kütüphane uyumsuzluğu nedeniyle tam çözüm sağlanamadı.
-  - **Plan:** İlerleyen fazlarda sunucu taraflı (Puppeteer/Playwright) PDF üretimi veya farklı bir kütüphane ile çözülecek. Şu an için PDF indirme özelliği stabil değil.
+- ~~**PDF Export Hatası:** Giderildi - Sunucu taraflı Puppeteer çözümü uygulandı~~
+- **Docker Image Boyutu:** Chromium eklenmesi nedeniyle container boyutu ~200MB artmış olabilir
 
 ---
 
