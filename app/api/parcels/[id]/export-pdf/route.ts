@@ -90,7 +90,7 @@ export async function GET(
 
             // Konsol mesajlarını logla
             page.on("console", msg => console.log("[PDF Export - Page Console]", msg.text()));
-            page.on("pageerror", err => console.error("[PDF Export - Page Error]", err.message));
+            page.on("pageerror", (err) => console.error("[PDF Export - Page Error]", String(err)));
 
             await page.setViewport({
                 width: 794,
