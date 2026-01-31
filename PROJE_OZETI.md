@@ -1,7 +1,7 @@
 # 📋 ParselMonitor - Proje Özeti ve Yapılanlar
 
 **Son Güncelleme:** 31 Ocak 2026  
-**Branch:** master (up to date)  
+**Branch:** master (merged from feature/pdf-export-puppeteer)  
 **Domain:** ekip.invecoproje.com
 
 ---
