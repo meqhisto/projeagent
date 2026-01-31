@@ -123,9 +123,29 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
             const clonedContent = originalElement.cloneNode(true) as HTMLElement;
             iframeDoc.body.appendChild(clonedContent);
 
-            // 3. Computed Style'ları Kopyala (Snapshot)
+            // 3. Computed Style'ları Kopyala (Snapshot) with Canvas Normalization
             const copyComputedStyles = (source: HTMLElement, target: HTMLElement) => {
                 const computed = window.getComputedStyle(source);
+
+                // Canvas Context for color normalization
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Helper: Normalize color to Hex/RGB using Canvas
+                const normalizeColor = (colorStr: string) => {
+                    if (!colorStr || !ctx) return colorStr;
+                    // Eğer zaten güvenli ise dokunma
+                    if (!colorStr.includes('lab(') && !colorStr.includes('oklch(') && !colorStr.includes('lch(')) return colorStr;
+
+                    try {
+                        // Canvas context'e ata ve geri oku -> Tarayıcı bunu Hex/RGB'ye çevirir
+                        ctx.fillStyle = colorStr;
+                        return ctx.fillStyle;
+                    } catch (e) {
+                        console.warn("Color normalization failed:", colorStr);
+                        return '#000000'; // Fallback
+                    }
+                };
 
                 // Kopyalanacak özellikler
                 const stylingProps = [
@@ -138,19 +158,38 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
                     'flex', 'flexDirection', 'flexWrap', 'justifyContent', 'alignItems', 'gap',
                     'gridTemplateColumns', 'gridTemplateRows', 'gridGap',
                     'overflow', 'visibility',
-                    'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat'
+                    'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat',
+                    'borderColor', 'outlineColor', 'textDecorationColor', 'columnRuleColor' // Added color properties
                 ];
 
                 stylingProps.forEach(prop => {
                     const val = computed[prop as any];
                     if (val) {
-                        // Gradient temizliği (lab/oklch içeriyorsa)
-                        if (prop === 'backgroundImage' && val.includes('gradient') && (val.includes('lab') || val.includes('oklch'))) {
-                            target.style.backgroundImage = 'none';
-                            target.style.backgroundColor = computed.backgroundColor !== 'rgba(0, 0, 0, 0)' && computed.backgroundColor !== 'transparent'
-                                ? computed.backgroundColor
-                                : 'rgb(255, 255, 255)';
-                        } else {
+                        // 1. Renk Özelliklerini Kontrol Et ve Normalize Et
+                        if (['color', 'backgroundColor', 'borderColor', 'outlineColor', 'textDecorationColor', 'columnRuleColor'].includes(prop)) {
+                            target.style[prop as any] = normalizeColor(val);
+                        }
+                        // 2. Gradient Temizliği (lab/oklch içeriyorsa)
+                        else if (prop === 'backgroundImage') {
+                            if (val.includes('gradient') && (val.includes('lab') || val.includes('oklch'))) {
+                                target.style.backgroundImage = 'none';
+                                // Background color'ı RGB olarak garanti et
+                                const safeBg = normalizeColor(computed.backgroundColor);
+                                target.style.backgroundColor = (safeBg !== 'rgba(0, 0, 0, 0)' && safeBg !== 'transparent') ? safeBg : '#ffffff';
+                            } else {
+                                target.style.backgroundImage = val;
+                            }
+                        }
+                        // 3. Box Shadow Temizliği
+                        else if (prop === 'boxShadow') {
+                            if (val.includes('lab') || val.includes('oklch')) {
+                                target.style.boxShadow = 'none';
+                            } else {
+                                target.style.boxShadow = val;
+                            }
+                        }
+                        // 4. Diğerleri Aynen
+                        else {
                             target.style[prop as any] = val;
                         }
                     }
@@ -163,6 +202,14 @@ export default function InvestorPresentation({ parcelId }: InvestorPresentationP
                     }
                 }
             };
+
+            // Tüm style etiketlerini temizle (extra güvenlik)
+            const styleTags = iframeDoc.querySelectorAll('style');
+            styleTags.forEach(tag => tag.remove());
+            // Sadece reset style ekle
+            const resetStyle = iframeDoc.createElement('style');
+            resetStyle.innerHTML = '*, *::before, *::after { box-sizing: border-box; }';
+            iframeDoc.head.appendChild(resetStyle);
 
             copyComputedStyles(originalElement, clonedContent);
 
