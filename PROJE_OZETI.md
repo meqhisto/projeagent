@@ -260,5 +260,11 @@ projeagent/
 3. Parsel detay sayfasına "Sunum Oluştur" butonu eklendi
 
 **Branch:** `feature/investor-presentation` (merge için hazır)
-**Commit:** 3 commit (Faz 1,2,3)
+### 11. Bilinen Sorunlar (Known Issues) ⚠️
+- **PDF Export Hatası:** Yatırımcı sunumu PDF olarak indirilirken `html2pdf.js`, Tailwind CSS v4'ün kullandığı modern renk fonksiyonlarını (`lab()`, `oklch()`) parse edemiyor. 
+  - **Hata Mesajı:** `Error: Attempting to parse an unsupported color function "lab"`
+  - **Durum:** İstemci tarafı çözümleri (Canvas API, Snapshot, Color Normalization) denendi ancak tarayıcı ve kütüphane uyumsuzluğu nedeniyle tam çözüm sağlanamadı.
+  - **Plan:** İlerleyen fazlarda sunucu taraflı (Puppeteer/Playwright) PDF üretimi veya farklı bir kütüphane ile çözülecek. Şu an için PDF indirme özelliği stabil değil.
+
+---
 
