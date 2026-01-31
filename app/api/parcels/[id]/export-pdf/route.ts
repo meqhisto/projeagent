@@ -49,9 +49,15 @@ export async function GET(
             }
         });
 
-        // Base URL belirleme
-        const baseUrl = process.env.NEXTAUTH_URL || "https://ekip.invecoproje.com";
+        // Base URL belirleme - request headers'tan al veya fallback
+        const host = request.headers.get("host") || "localhost:3000";
+        const protocol = request.headers.get("x-forwarded-proto") ||
+            (host.includes("localhost") ? "http" : "https");
+        const baseUrl = `${protocol}://${host}`;
         const publicUrl = `${baseUrl}/p/${token}`;
+
+        console.log("[PDF Export] Public URL:", publicUrl);
+        console.log("[PDF Export] Token:", token);
 
         let browser = null;
         let pdfBuffer: Uint8Array;
@@ -79,6 +85,8 @@ export async function GET(
                 height: 1123, // A4 height in pixels at 96 DPI
                 deviceScaleFactor: 2
             });
+
+            console.log("[PDF Export] Navigating to:", publicUrl);
 
             // Sayfaya git ve tam yüklenmesini bekle
             await page.goto(publicUrl, {
