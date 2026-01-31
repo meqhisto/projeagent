@@ -49,14 +49,18 @@ export async function GET(
             }
         });
 
-        // Base URL belirleme - request headers'tan al veya fallback
-        const host = request.headers.get("host") || "localhost:3000";
-        const protocol = request.headers.get("x-forwarded-proto") ||
-            (host.includes("localhost") ? "http" : "https");
-        const baseUrl = `${protocol}://${host}`;
-        const publicUrl = `${baseUrl}/p/${token}`;
+        // Puppeteer için INTERNAL URL kullan (container içinden kendi kendine erişim)
+        // Dış URL (host header'dan) kullanmak yerine localhost:3000 kullanıyoruz
+        // çünkü Puppeteer aynı container'da çalışıyor
+        const internalUrl = `http://localhost:3000/p/${token}`;
 
-        console.log("[PDF Export] Public URL:", publicUrl);
+        // Debug log için dış URL'i de göster
+        const host = request.headers.get("host") || "localhost:3000";
+        const protocol = request.headers.get("x-forwarded-proto") || "https";
+        const externalUrl = `${protocol}://${host}/p/${token}`;
+
+        console.log("[PDF Export] External URL:", externalUrl);
+        console.log("[PDF Export] Internal URL (Puppeteer will use):", internalUrl);
         console.log("[PDF Export] Token:", token);
 
         let browser = null;
@@ -86,10 +90,10 @@ export async function GET(
                 deviceScaleFactor: 2
             });
 
-            console.log("[PDF Export] Navigating to:", publicUrl);
+            console.log("[PDF Export] Navigating to:", internalUrl);
 
             // Sayfaya git ve tam yüklenmesini bekle
-            await page.goto(publicUrl, {
+            await page.goto(internalUrl, {
                 waitUntil: "networkidle0",
                 timeout: 30000
             });
