@@ -4,8 +4,12 @@ import { NextResponse } from "next/server";
 export default auth((req) => {
     const isLoggedIn = !!req.auth;
     const isAuthPage = req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/register');
-    const isPublicPage = req.nextUrl.pathname.startsWith('/public') || req.nextUrl.pathname.startsWith('/test-ui');
-    const isApiAuth_or_Webhooks = req.nextUrl.pathname.startsWith('/api/auth') || req.nextUrl.pathname.startsWith('/api/webhooks');
+    const isPublicPage = req.nextUrl.pathname.startsWith('/public') ||
+        req.nextUrl.pathname.startsWith('/test-ui') ||
+        req.nextUrl.pathname.startsWith('/p/'); // Public presentation pages
+    const isApiAuth_or_Webhooks = req.nextUrl.pathname.startsWith('/api/auth') ||
+        req.nextUrl.pathname.startsWith('/api/webhooks') ||
+        req.nextUrl.pathname.startsWith('/api/presentation/'); // Public presentation API
 
     // Allow static files and next internals
     if (req.nextUrl.pathname.startsWith('/_next') || req.nextUrl.pathname.includes('.')) {
