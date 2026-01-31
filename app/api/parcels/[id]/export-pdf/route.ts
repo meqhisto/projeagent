@@ -9,6 +9,7 @@ export async function GET(
     props: { params: Promise<{ id: string }> }
 ) {
     const { id } = await props.params;
+    let shareLinkId: number | null = null;
 
     try {
         const user = await requireAuth();
@@ -44,30 +45,32 @@ export async function GET(
                 token,
                 parcelId,
                 createdById: userId,
-                title: "__PDF_EXPORT_TEMP__", // Internal marker
+                title: "__PDF_EXPORT_TEMP__",
                 isActive: true
             }
         });
+        shareLinkId = shareLink.id;
 
-        // Puppeteer için INTERNAL URL kullan (container içinden kendi kendine erişim)
-        // Dış URL (host header'dan) kullanmak yerine localhost:3000 kullanıyoruz
-        // çünkü Puppeteer aynı container'da çalışıyor
+        console.log("[PDF Export] Share link created with ID:", shareLinkId);
+
+        // Puppeteer için INTERNAL URL kullan
         const internalUrl = `http://localhost:3000/p/${token}`;
 
-        // Debug log için dış URL'i de göster
+        // Debug log
         const host = request.headers.get("host") || "localhost:3000";
         const protocol = request.headers.get("x-forwarded-proto") || "https";
         const externalUrl = `${protocol}://${host}/p/${token}`;
 
         console.log("[PDF Export] External URL:", externalUrl);
-        console.log("[PDF Export] Internal URL (Puppeteer will use):", internalUrl);
+        console.log("[PDF Export] Internal URL:", internalUrl);
         console.log("[PDF Export] Token:", token);
 
         let browser = null;
         let pdfBuffer: Uint8Array;
 
         try {
-            // Puppeteer başlat
+            console.log("[PDF Export] Launching Puppeteer...");
+
             browser = await puppeteer.launch({
                 headless: true,
                 args: [
@@ -81,25 +84,38 @@ export async function GET(
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
             });
 
+            console.log("[PDF Export] Puppeteer launched successfully");
+
             const page = await browser.newPage();
 
-            // Viewport ayarla (A4 boyutunda)
+            // Konsol mesajlarını logla
+            page.on("console", msg => console.log("[PDF Export - Page Console]", msg.text()));
+            page.on("pageerror", err => console.error("[PDF Export - Page Error]", err.message));
+
             await page.setViewport({
-                width: 794,  // A4 width in pixels at 96 DPI
-                height: 1123, // A4 height in pixels at 96 DPI
+                width: 794,
+                height: 1123,
                 deviceScaleFactor: 2
             });
 
             console.log("[PDF Export] Navigating to:", internalUrl);
 
-            // Sayfaya git ve tam yüklenmesini bekle
-            await page.goto(internalUrl, {
+            // Sayfaya git
+            const response = await page.goto(internalUrl, {
                 waitUntil: "networkidle0",
                 timeout: 30000
             });
 
-            // Ekstra bekleme (dinamik içerik için)
+            console.log("[PDF Export] Navigation complete, status:", response?.status());
+
+            // Sayfa içeriğini kontrol et
+            const pageTitle = await page.title();
+            console.log("[PDF Export] Page title:", pageTitle);
+
+            // Ekstra bekleme
             await new Promise(resolve => setTimeout(resolve, 2000));
+
+            console.log("[PDF Export] Creating PDF...");
 
             // PDF oluştur
             pdfBuffer = await page.pdf({
@@ -114,16 +130,21 @@ export async function GET(
                 preferCSSPageSize: false
             });
 
+            console.log("[PDF Export] PDF created, size:", pdfBuffer.length, "bytes");
+
         } finally {
-            // Browser'ı kapat
             if (browser) {
                 await browser.close();
+                console.log("[PDF Export] Browser closed");
             }
+        }
 
-            // Geçici share linkini sil
+        // PDF başarıyla oluşturulduktan SONRA token'ı sil
+        if (shareLinkId) {
             await prisma.presentationShare.delete({
-                where: { id: shareLink.id }
+                where: { id: shareLinkId }
             });
+            console.log("[PDF Export] Temp share link deleted");
         }
 
         // PDF dosya adı
@@ -131,10 +152,10 @@ export async function GET(
             .replace(/\s+/g, "_")
             .replace(/[^a-zA-Z0-9_.-]/g, "");
 
-        // Uint8Array'i Buffer'a dönüştür
         const buffer = Buffer.from(pdfBuffer);
 
-        // PDF'i response olarak döndür
+        console.log("[PDF Export] Sending PDF response:", filename);
+
         return new NextResponse(buffer, {
             status: 200,
             headers: {
@@ -145,12 +166,27 @@ export async function GET(
         });
 
     } catch (error: any) {
+        console.error("[PDF Export] Error:", error.message);
+        console.error("[PDF Export] Stack:", error.stack);
+
+        // Hata durumunda da temp share link'i temizle
+        if (shareLinkId) {
+            try {
+                await prisma.presentationShare.delete({
+                    where: { id: shareLinkId }
+                });
+                console.log("[PDF Export] Cleaned up share link after error");
+            } catch (deleteError) {
+                console.error("[PDF Export] Failed to cleanup share link:", deleteError);
+            }
+        }
+
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-        console.error("PDF export error:", error);
+
         return NextResponse.json(
-            { error: "PDF oluşturulurken bir hata oluştu" },
+            { error: "PDF oluşturulurken bir hata oluştu: " + error.message },
             { status: 500 }
         );
     }
