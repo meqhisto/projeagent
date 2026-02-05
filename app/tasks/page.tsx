@@ -175,7 +175,7 @@ export default function TasksPage() {
                         setEditingTaskId(undefined);
                         setIsModalOpen(true);
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] font-semibold shadow-sm"
                 >
                     <Plus className="h-5 w-5" />
                     Yeni Görev

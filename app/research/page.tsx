@@ -8,7 +8,7 @@ export default function ResearchPage() {
         <div className="space-y-6">
             <div className="flex items-center gap-4">
                 <div className="p-3 bg-emerald-100 rounded-full">
-                    <BookOpen className="h-6 w-6 text-emerald-600" />
+                    <BookOpen className="h-6 w-6 text-[#0071e3]" />
                 </div>
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Mevzuat ve İmar Araştırması</h1>
@@ -26,19 +26,19 @@ export default function ResearchPage() {
                         <h3 className="font-semibold text-gray-900 mb-4">Nasıl Çalışır?</h3>
                         <ul className="space-y-3 text-sm text-gray-600">
                             <li className="flex items-start gap-2">
-                                <span className="font-bold text-emerald-600">1.</span>
+                                <span className="font-bold text-[#0071e3]">1.</span>
                                 İlgili belediyenin plan notlarını veya imar yönetmeliğini PDF olarak yükleyin.
                             </li>
                             <li className="flex items-start gap-2">
-                                <span className="font-bold text-emerald-600">2.</span>
+                                <span className="font-bold text-[#0071e3]">2.</span>
                                 Sistem belgeyi okur, analiz eder ve "vektör hafızasına" kaydeder.
                             </li>
                             <li className="flex items-start gap-2">
-                                <span className="font-bold text-emerald-600">3.</span>
+                                <span className="font-bold text-[#0071e3]">3.</span>
                                 "Çatı arası piyes yapılabilir mi?" gibi sorular sorun.
                             </li>
                             <li className="flex items-start gap-2">
-                                <span className="font-bold text-emerald-600">4.</span>
+                                <span className="font-bold text-[#0071e3]">4.</span>
                                 Asistan ilgili maddeleri bulup size getirir.
                             </li>
                         </ul>

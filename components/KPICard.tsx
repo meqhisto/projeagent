@@ -1,50 +1,86 @@
 "use client";
 
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import clsx from "clsx";
 
 interface KPICardProps {
     title: string;
     value: string | number;
     icon: LucideIcon;
     trend?: string;
-    color: "blue" | "purple" | "green" | "yellow" | "indigo" | "pink";
+    color: "blue" | "purple" | "green" | "yellow" | "indigo" | "pink" | "teal";
 }
 
 export default function KPICard({ title, value, icon: Icon, trend, color }: KPICardProps) {
-    const gradients = {
-        blue: "from-blue-500 to-blue-600",
-        purple: "from-purple-500 to-purple-600",
-        green: "from-green-500 to-green-600",
-        yellow: "from-yellow-500 to-yellow-600",
-        indigo: "from-indigo-500 to-indigo-600",
-        pink: "from-pink-500 to-pink-600"
+    // Apple-style color configurations
+    const colorConfig = {
+        blue: {
+            iconBg: "bg-[#0071e3]/10",
+            iconColor: "text-[#0071e3]",
+        },
+        purple: {
+            iconBg: "bg-[#af52de]/10",
+            iconColor: "text-[#af52de]",
+        },
+        green: {
+            iconBg: "bg-[#34c759]/10",
+            iconColor: "text-[#248a3d]",
+        },
+        yellow: {
+            iconBg: "bg-[#ff9500]/10",
+            iconColor: "text-[#c93400]",
+        },
+        indigo: {
+            iconBg: "bg-[#5856d6]/10",
+            iconColor: "text-[#5856d6]",
+        },
+        pink: {
+            iconBg: "bg-[#ff2d55]/10",
+            iconColor: "text-[#ff2d55]",
+        },
+        teal: {
+            iconBg: "bg-[#5ac8fa]/10",
+            iconColor: "text-[#0077ed]",
+        },
     };
 
-    const iconBgs = {
-        blue: "bg-blue-100",
-        purple: "bg-purple-100",
-        green: "bg-green-100",
-        yellow: "bg-yellow-100",
-        indigo: "bg-indigo-100",
-        pink: "bg-pink-100"
-    };
+    const config = colorConfig[color] || colorConfig.blue;
+    const trendUp = trend && (trend.includes('+') || !trend.includes('-'));
+    const TrendIcon = trendUp ? TrendingUp : TrendingDown;
 
     return (
-        <div className={`bg-gradient-to-br ${gradients[color]} rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow`}>
+        <div className="card p-5 hover:shadow-lg transition-all duration-300">
+            {/* Header */}
             <div className="flex items-start justify-between mb-4">
-                <div className={`${iconBgs[color]} ${color === 'yellow' ? 'text-yellow-700' : `text-${color}-700`} p-3 rounded-lg`}>
-                    <Icon className="h-6 w-6" />
+                <div className={clsx(
+                    "p-2.5 rounded-xl",
+                    config.iconBg
+                )}>
+                    <Icon className={clsx("h-5 w-5", config.iconColor)} />
                 </div>
+
                 {trend && (
-                    <span className="text-xs bg-white/20 px-2 py-1 rounded-full font-medium">
-                        {trend}
-                    </span>
+                    <div className={clsx(
+                        "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
+                        trendUp
+                            ? "bg-[#34c759]/10 text-[#248a3d]"
+                            : "bg-[#ff3b30]/10 text-[#d70015]"
+                    )}>
+                        <TrendIcon className="h-3 w-3" />
+                        <span>{trend}</span>
+                    </div>
                 )}
             </div>
-            <div className="mb-1">
-                <div className="text-3xl font-bold">{value}</div>
+
+            {/* Value */}
+            <div className="text-3xl font-display font-semibold text-[#1d1d1f] tracking-tight mb-1">
+                {value}
             </div>
-            <div className="text-sm opacity-90">{title}</div>
+
+            {/* Title */}
+            <div className="text-sm text-[#6e6e73]">
+                {title}
+            </div>
         </div>
     );
 }

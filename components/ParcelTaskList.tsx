@@ -107,7 +107,7 @@ export default function ParcelTaskList({ parcelId }: ParcelTaskListProps) {
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mt-6">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-emerald-600" />
+                    <Calendar className="h-5 w-5 text-[#0071e3]" />
                     Görevler
                 </h3>
                 <button
@@ -115,7 +115,7 @@ export default function ParcelTaskList({ parcelId }: ParcelTaskListProps) {
                         setEditingTaskId(undefined);
                         setIsModalOpen(true);
                     }}
-                    className="text-sm bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-emerald-700 flex items-center gap-1"
+                    className="text-sm bg-[#0071e3] text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-[#0077ed] flex items-center gap-1"
                 >
                     <Plus className="h-4 w-4" />
                     Yeni Görev

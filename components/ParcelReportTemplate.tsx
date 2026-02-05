@@ -116,14 +116,14 @@ export default function ParcelReportTemplate({ parcel, feasibilityResult }: Parc
                                 {feasibilityResult.serefiye_analizi && (
                                     <tr>
                                         <td className="p-2 border border-gray-200">Şerefiye Sonrası Ciro (Optimize)</td>
-                                        <td className="p-2 border border-gray-200 text-right font-medium text-emerald-600">
+                                        <td className="p-2 border border-gray-200 text-right font-medium text-[#0071e3]">
                                             {feasibilityResult.serefiye_analizi.optimize_edilmis_ciro}
                                         </td>
                                     </tr>
                                 )}
-                                <tr className="bg-emerald-50">
+                                <tr className="bg-[#0071e3]/10">
                                     <td className="p-2 border border-emerald-100 font-bold text-gray-900">NET KÂR BEKLENTİSİ</td>
-                                    <td className="p-2 border border-emerald-100 text-right font-bold text-xl text-emerald-700">{feasibilityResult.finansal_tablo.net_kar}</td>
+                                    <td className="p-2 border border-emerald-100 text-right font-bold text-xl text-[#0077ed]">{feasibilityResult.finansal_tablo.net_kar}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -135,7 +135,7 @@ export default function ParcelReportTemplate({ parcel, feasibilityResult }: Parc
                             </div>
                             <div className="flex-1 bg-white p-4 rounded border border-gray-200">
                                 <h4 className="font-bold text-sm mb-2 text-gray-900">Karar Destek</h4>
-                                <p className={`text-lg font-bold ${feasibilityResult.karar_destek.durum === "FIRSAT" ? "text-emerald-600" :
+                                <p className={`text-lg font-bold ${feasibilityResult.karar_destek.durum === "FIRSAT" ? "text-[#0071e3]" :
                                     feasibilityResult.karar_destek.durum === "RİSKLİ" ? "text-red-600" : "text-blue-600"
                                     }`}>
                                     {feasibilityResult.karar_destek.durum}

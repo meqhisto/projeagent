@@ -142,7 +142,7 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
                 <div className="flex-1 overflow-y-auto p-6 bg-white">
                     {fetching ? (
                         <div className="flex items-center justify-center h-40">
-                            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+                            <Loader2 className="h-8 w-8 animate-spin text-[#0071e3]" />
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -152,7 +152,7 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
                                 <select
                                     value={formData.category}
                                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                                    className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                    className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                 >
                                     {PARCEL_CATEGORIES.map((cat) => (
                                         <option key={cat} value={cat}>
@@ -170,7 +170,7 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
                                     value={formData.tags}
                                     onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
                                     placeholder="deniz manzarası, köşe parsel, yola cepheli"
-                                    className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                    className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                 />
                                 <p className="text-xs text-slate-400">Virgülle ayırarak birden fazla etiket ekleyebilirsiniz</p>
                             </div>
@@ -210,7 +210,7 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
                     <button
                         onClick={handleSubmit}
                         disabled={loading || fetching}
-                        className="flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
+                        className="flex items-center justify-center rounded-xl bg-[#0071e3] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#0077ed] shadow-lg shadow-[#0071e3]/20 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
                     >
                         {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                         Kaydet

@@ -162,7 +162,7 @@ export default function AddTransactionModal({
                                 handleChange('type', e.target.value as TransactionType);
                                 handleChange('category', '');
                             }}
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                         >
                             {Object.entries(TransactionTypeLabels).map(([value, label]) => (
                                 <option key={value} value={value}>{label}</option>
@@ -184,7 +184,7 @@ export default function AddTransactionModal({
                                 required
                                 min={0}
                                 step={0.01}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
                         <div>
@@ -196,7 +196,7 @@ export default function AddTransactionModal({
                                 value={formData.date}
                                 onChange={(e) => handleChange('date', e.target.value)}
                                 required
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
                     </div>
@@ -210,7 +210,7 @@ export default function AddTransactionModal({
                             <select
                                 value={formData.category || ""}
                                 onChange={(e) => handleChange('category', e.target.value || undefined)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                             >
                                 <option value="">Seçiniz</option>
                                 {transactionCategories[formData.type]?.map(cat => (
@@ -226,7 +226,7 @@ export default function AddTransactionModal({
                                 <select
                                     value={formData.unitId || ""}
                                     onChange={(e) => handleChange('unitId', e.target.value ? parseInt(e.target.value) : undefined)}
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                                 >
                                     <option value="">Tüm Gayrimenkul</option>
                                     {units.map(unit => (
@@ -247,7 +247,7 @@ export default function AddTransactionModal({
                             value={formData.description || ""}
                             onChange={(e) => handleChange('description', e.target.value || undefined)}
                             placeholder="İşlem hakkında not..."
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none"
                         />
                     </div>
 
@@ -267,7 +267,7 @@ export default function AddTransactionModal({
                                 onChange={(e) => handleChange('isPaid', e.target.checked)}
                                 className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0071e3]"></div>
                         </label>
                     </div>
 
@@ -281,7 +281,7 @@ export default function AddTransactionModal({
                                 type="date"
                                 value={formData.dueDate || ""}
                                 onChange={(e) => handleChange('dueDate', e.target.value || undefined)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
                     )}

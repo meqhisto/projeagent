@@ -128,14 +128,14 @@ export default function LocationPage({ data }: LocationPageProps) {
                     {zoning && parcel.area && zoning.ks && (
                         <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200">
                             <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <Layers className="h-4 w-4 text-emerald-600" />
+                                <Layers className="h-4 w-4 text-[#0071e3]" />
                                 İnşaat Potansiyeli
                             </h3>
                             <div className="text-center py-4">
-                                <div className="text-4xl font-black text-emerald-700">
+                                <div className="text-4xl font-black text-[#0077ed]">
                                     {Math.round(parcel.area * zoning.ks).toLocaleString('tr-TR')} m²
                                 </div>
-                                <div className="text-sm text-emerald-600 mt-1">Toplam İnşaat Alanı</div>
+                                <div className="text-sm text-[#0071e3] mt-1">Toplam İnşaat Alanı</div>
                                 <div className="text-xs text-gray-500 mt-2">
                                     ({parcel.area.toLocaleString('tr-TR')} m² × {zoning.ks} emsal)
                                 </div>

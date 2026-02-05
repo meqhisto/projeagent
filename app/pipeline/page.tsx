@@ -25,7 +25,7 @@ const STAGES = {
     "CONTACTED": { label: "Görüşülüyor", color: "bg-amber-50 border-amber-200 text-amber-700" },
     "ANALYSIS": { label: "Analiz Yapıldı", color: "bg-purple-50 border-purple-200 text-purple-700" },
     "OFFER_SENT": { label: "Teklif Verildi", color: "bg-orange-50 border-orange-200 text-orange-700" },
-    "CONTRACT": { label: "Sözleşme / Kapora", color: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+    "CONTRACT": { label: "Sözleşme / Kapora", color: "bg-[#0071e3]/10 border-emerald-200 text-[#0077ed]" },
     "LOST": { label: "Kaybedildi", color: "bg-gray-50 border-gray-200 text-gray-500" }
 };
 
@@ -50,7 +50,10 @@ export default function PipelinePage() {
                 "OFFER_SENT": [], "CONTRACT": [], "LOST": []
             };
 
-            data.forEach((p: any) => {
+            // Handle both array and { parcels: [...] } response formats
+            const parcels = Array.isArray(data) ? data : (data.parcels || []);
+
+            parcels.forEach((p: any) => {
                 const stage = p.crmStage || "NEW_LEAD";
                 if (grouped[stage]) grouped[stage].push(p);
                 else grouped["NEW_LEAD"].push(p); // Fallback
@@ -101,7 +104,7 @@ export default function PipelinePage() {
         }
     };
 
-    if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-emerald-600" /></div>;
+    if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-[#0071e3]" /></div>;
 
     return (
         <div className="h-[calc(100vh-theme(spacing.20))] flex flex-col">
@@ -123,7 +126,7 @@ export default function PipelinePage() {
                         </button>
                     </div>
                 </div>
-                <Link href="/" className="inline-flex items-center px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">
+                <Link href="/" className="inline-flex items-center px-4 py-2 rounded-lg bg-[#0071e3] text-white text-sm font-medium hover:bg-[#0077ed]">
                     <Plus className="mr-2 h-4 w-4" /> Yeni Parsel
                 </Link>
             </div>
@@ -175,7 +178,7 @@ export default function PipelinePage() {
                                                             </div>
 
                                                             <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                                                                <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+                                                                <span className="text-xs font-medium text-[#0071e3] bg-[#0071e3]/10 px-2 py-1 rounded">
                                                                     {parcel.area ? `${parcel.area} m²` : '-'}
                                                                 </span>
                                                                 {parcel.zoning?.ks && (

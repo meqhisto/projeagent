@@ -133,7 +133,7 @@ export default function PropertyDetailPage({
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
@@ -244,7 +244,7 @@ export default function PropertyDetailPage({
             <div className="grid grid-cols-4 gap-4">
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
                     <p className="text-gray-500 text-sm mb-1">Mevcut Değer</p>
-                    <p className="text-xl font-bold text-emerald-600">
+                    <p className="text-xl font-bold text-[#0071e3]">
                         {formatCurrency(property.currentValue)}
                     </p>
                 </div>
@@ -275,7 +275,7 @@ export default function PropertyDetailPage({
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
-                            ? 'text-emerald-600 border-b-2 border-emerald-600'
+                            ? 'text-[#0071e3] border-b-2 border-[#0071e3]'
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
@@ -334,7 +334,7 @@ export default function PropertyDetailPage({
                                 className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                             >
                                 <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                                    <Home className="w-6 h-6 text-emerald-600" />
+                                    <Home className="w-6 h-6 text-[#0071e3]" />
                                 </div>
                                 <div>
                                     <p className="text-gray-900 font-medium">
@@ -372,7 +372,7 @@ export default function PropertyDetailPage({
                         <h3 className="text-lg font-semibold text-gray-900">Birimler</h3>
                         <button
                             onClick={() => { setEditUnit(null); setShowUnitModal(true); }}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             Birim Ekle
@@ -393,7 +393,7 @@ export default function PropertyDetailPage({
                                                 {unit.roomType ? RoomTypeLabels[unit.roomType as keyof typeof RoomTypeLabels] : '-'}
                                                 {unit.area && ` • ${unit.area} m²`}
                                                 {unit.tenant && (
-                                                    <span className="ml-2 text-emerald-600">• Kiracı: {unit.tenant.name}</span>
+                                                    <span className="ml-2 text-[#0071e3]">• Kiracı: {unit.tenant.name}</span>
                                                 )}
                                             </p>
                                         </div>
@@ -432,7 +432,7 @@ export default function PropertyDetailPage({
                             <p className="text-gray-500 mb-3">Henüz birim eklenmemiş</p>
                             <button
                                 onClick={() => { setEditUnit(null); setShowUnitModal(true); }}
-                                className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors"
+                                className="px-4 py-2 bg-emerald-100 text-[#0077ed] rounded-lg hover:bg-emerald-200 transition-colors"
                             >
                                 İlk Birimi Ekle
                             </button>
@@ -447,7 +447,7 @@ export default function PropertyDetailPage({
                         <h3 className="text-lg font-semibold text-gray-900">Son İşlemler</h3>
                         <button
                             onClick={() => { setEditTransaction(null); setShowTransactionModal(true); }}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             İşlem Ekle
@@ -503,7 +503,7 @@ export default function PropertyDetailPage({
                             <p className="text-gray-500 mb-3">Henüz işlem kaydı yok</p>
                             <button
                                 onClick={() => { setEditTransaction(null); setShowTransactionModal(true); }}
-                                className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors"
+                                className="px-4 py-2 bg-emerald-100 text-[#0077ed] rounded-lg hover:bg-emerald-200 transition-colors"
                             >
                                 İlk İşlemi Ekle
                             </button>

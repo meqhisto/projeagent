@@ -79,8 +79,8 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${isOpen
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-emerald-500 hover:text-emerald-600"
+                    ? "border-[#0071e3] bg-[#0071e3]/10 text-[#0077ed]"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-[#0071e3] hover:text-[#0071e3]"
                     }`}
             >
                 <Filter className="h-4 w-4" />
@@ -106,7 +106,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                             <select
                                 value={filters.city}
                                 onChange={(e) => handleChange("city", e.target.value)}
-                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-[#0071e3] focus:outline-none"
                             >
                                 <option value="">Tümü</option>
                                 {availableCities.map(city => (
@@ -123,7 +123,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                                 value={filters.district}
                                 onChange={(e) => handleChange("district", e.target.value)}
                                 placeholder="İlçe ara..."
-                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
 
@@ -136,7 +136,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                                     value={filters.areaMin}
                                     onChange={(e) => handleChange("areaMin", e.target.value)}
                                     placeholder="0"
-                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-[#0071e3] focus:outline-none"
                                 />
                             </div>
                             <div>
@@ -146,7 +146,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                                     value={filters.areaMax}
                                     onChange={(e) => handleChange("areaMax", e.target.value)}
                                     placeholder="INF"
-                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-[#0071e3] focus:outline-none"
                                 />
                             </div>
                         </div>
@@ -157,7 +157,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                             <select
                                 value={filters.status}
                                 onChange={(e) => handleChange("status", e.target.value)}
-                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-[#0071e3] focus:outline-none"
                             >
                                 <option value="">Tümü</option>
                                 <option value="NEW">Yeni</option>
@@ -172,7 +172,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                             <select
                                 value={filters.hasZoning}
                                 onChange={(e) => handleChange("hasZoning", e.target.value)}
-                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-[#0071e3] focus:outline-none"
                             >
                                 <option value="">Farketmez</option>
                                 <option value="true">İmarlı</option>
@@ -186,7 +186,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                             <select
                                 value={filters.category}
                                 onChange={(e) => handleChange("category", e.target.value)}
-                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-[#0071e3] focus:outline-none"
                             >
                                 <option value="">Tümü</option>
                                 {PARCEL_CATEGORIES.map((cat) => (
@@ -208,7 +208,7 @@ export default function AdvancedFilterPanel({ onFilterChange, availableCities }:
                         </button>
                         <button
                             onClick={applyFilters}
-                            className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                            className="flex items-center gap-2 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:bg-[#0077ed]"
                         >
                             <Check className="h-4 w-4" />
                             Uygula

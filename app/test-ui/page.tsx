@@ -77,7 +77,7 @@ export default function TestUIPage() {
           </div>
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm font-medium"
+            className="px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] transition-colors shadow-sm font-medium"
           >
             + Add New Parcel
           </button>

@@ -102,7 +102,7 @@ export default function ProposalPage({ data }: ProposalPageProps) {
                         </div>
                         <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
                             <span className="text-gray-700">Arsa Sahibi Alacağı Daire</span>
-                            <span className="text-2xl font-black text-emerald-700">
+                            <span className="text-2xl font-black text-[#0077ed]">
                                 {feasibility.arsaSahibiDaire} Adet
                             </span>
                         </div>
@@ -119,26 +119,26 @@ export default function ProposalPage({ data }: ProposalPageProps) {
             {/* Avantajlar */}
             <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200">
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                    <CheckCircle className="h-5 w-5 text-[#0071e3]" />
                     Arsa Sahibi Avantajları
                 </h3>
                 <ul className="space-y-3">
                     <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
                         <span className="text-gray-700">Yatırım yapmadan, arsanızı değerlendirme fırsatı</span>
                     </li>
                     <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
                         <span className="text-gray-700">
                             {feasibility.arsaSahibiDaire} adet modern, satışa hazır daire
                         </span>
                     </li>
                     <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
                         <span className="text-gray-700">Tüm inşaat ve ruhsat süreçleri müteahhit tarafından yürütülür</span>
                     </li>
                     <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-[#0071e3] mt-0.5 flex-shrink-0" />
                         <span className="text-gray-700">Her aşamada yasal güvence ile korunan haklar</span>
                     </li>
                 </ul>

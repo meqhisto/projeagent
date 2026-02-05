@@ -63,7 +63,7 @@ export default function ParcelsPage() {
                     <p className="text-slate-500 mt-2 max-w-2xl">
                         Portföyünüzdeki tüm arsaları buradan yönetebilir, filtreleyebilir ve detaylı analizlerine ulaşabilirsiniz.
                         {filteredParcels.length > 0 && (
-                            <span className="ml-1 font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                            <span className="ml-1 font-medium text-[#0071e3] bg-[#0071e3]/10 px-2 py-0.5 rounded-full text-xs">
                                 {filteredParcels.length} kayıt
                             </span>
                         )}
@@ -77,7 +77,7 @@ export default function ParcelsPage() {
                     <ExportButton parcels={filteredParcels} />
                     <button
                         onClick={() => setIsDrawerOpen(true)}
-                        className="flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all hover:-translate-y-0.5"
+                        className="flex items-center rounded-xl bg-[#0071e3] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0077ed] shadow-lg shadow-[#0071e3]/20 transition-all hover:-translate-y-0.5"
                     >
                         <Plus className="mr-2 h-4 w-4" />
                         Yeni Parsel Ekle
@@ -124,7 +124,7 @@ export default function ParcelsPage() {
                     </p>
                     <button
                         onClick={() => setFilters({})}
-                        className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors"
+                        className="text-sm font-semibold text-[#0071e3] hover:text-[#0077ed] hover:bg-[#0071e3]/10 px-4 py-2 rounded-lg transition-colors"
                     >
                         Filtreleri Temizle
                     </button>

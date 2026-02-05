@@ -7,19 +7,25 @@ import clsx from "clsx";
 import ConfirmDialog from "./ConfirmDialog";
 import ParcelDetailModal from "./ParcelDetailModal";
 import EditParcelDrawer from "./EditParcelDrawer";
-import { MapPin, ArrowRight, Building2, Calendar, Trash2, Eye, MoreHorizontal, Edit2, Tag } from "lucide-react";
+import { MapPin, ArrowRight, Calendar, Trash2, Eye, Edit2, Tag } from "lucide-react";
 
-// Category labels and colors
 const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
-    RESIDENTIAL: { label: "Konut", color: "bg-blue-100 text-blue-700 border-blue-200" },
-    COMMERCIAL: { label: "Ticari", color: "bg-purple-100 text-purple-700 border-purple-200" },
-    INDUSTRIAL: { label: "Sanayi", color: "bg-orange-100 text-orange-700 border-orange-200" },
-    AGRICULTURAL: { label: "Tarım", color: "bg-green-100 text-green-700 border-green-200" },
-    MIXED_USE: { label: "Karma", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
-    TOURISM: { label: "Turizm", color: "bg-cyan-100 text-cyan-700 border-cyan-200" },
-    INVESTMENT: { label: "Yatırım", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
-    DEVELOPMENT: { label: "Geliştirme", color: "bg-rose-100 text-rose-700 border-rose-200" },
-    UNCATEGORIZED: { label: "Kategorisiz", color: "bg-slate-100 text-slate-600 border-slate-200" },
+    RESIDENTIAL: { label: "Konut", color: "bg-[#0071e3]/10 text-[#0071e3]" },
+    COMMERCIAL: { label: "Ticari", color: "bg-[#5856d6]/10 text-[#5856d6]" },
+    INDUSTRIAL: { label: "Sanayi", color: "bg-[#ff9500]/10 text-[#c93400]" },
+    AGRICULTURAL: { label: "Tarım", color: "bg-[#34c759]/10 text-[#248a3d]" },
+    MIXED_USE: { label: "Karma", color: "bg-[#af52de]/10 text-[#af52de]" },
+    TOURISM: { label: "Turizm", color: "bg-[#5ac8fa]/10 text-[#0077ed]" },
+    INVESTMENT: { label: "Yatırım", color: "bg-[#ff9500]/10 text-[#c93400]" },
+    DEVELOPMENT: { label: "Geliştirme", color: "bg-[#ff2d55]/10 text-[#ff2d55]" },
+    UNCATEGORIZED: { label: "Kategorisiz", color: "bg-black/[0.04] text-[#6e6e73]" },
+};
+
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+    COMPLETED: { label: "Tamamlandı", color: "bg-[#34c759]/10 text-[#248a3d]" },
+    RESEARCHING: { label: "Araştırılıyor", color: "bg-[#ff9500]/10 text-[#c93400]" },
+    PENDING: { label: "Bekliyor", color: "bg-black/[0.04] text-[#6e6e73]" },
+    FAILED: { label: "Başarısız", color: "bg-[#ff3b30]/10 text-[#d70015]" },
 };
 
 interface ParcelCardProps {
@@ -49,7 +55,6 @@ export default function ParcelCard({
     imageUrl,
     zoning,
     category,
-    tags
 }: ParcelCardProps) {
     const router = useRouter();
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -61,12 +66,8 @@ export default function ParcelCard({
         if (!id) return;
         setIsDeleting(true);
         try {
-            const response = await fetch(`/api/parcels/${id}`, {
-                method: 'DELETE',
-            });
-
+            const response = await fetch(`/api/parcels/${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Silme işlemi başarısız');
-
             setIsDeleteOpen(false);
             router.refresh();
         } catch (error) {
@@ -77,55 +78,41 @@ export default function ParcelCard({
         }
     };
 
+    const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.PENDING;
+    const categoryConfig = CATEGORY_CONFIG[category || 'UNCATEGORIZED'];
+
     return (
         <>
-            <div className="group relative bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
-                {/* Image Area */}
-                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                    {/* Status Badge */}
-                    <div className="absolute top-3 left-3 z-20">
+            <div className="group card overflow-hidden flex flex-col h-full">
+                {/* Image */}
+                <div className="relative h-44 w-full overflow-hidden bg-[#f5f5f7]">
+                    {/* Status */}
+                    <div className="absolute top-3 left-3 z-10">
                         <span className={clsx(
-                            "px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase shadow-sm border",
-                            status === 'COMPLETED' ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
-                                status === 'RESEARCHING' ? "bg-amber-100 text-amber-700 border-amber-200" :
-                                    "bg-slate-100 text-slate-600 border-slate-200"
+                            "px-2.5 py-1 rounded-full text-[11px] font-medium",
+                            statusConfig.color
                         )}>
-                            {status === 'RESEARCHING' ? 'Araştırılıyor' : status === 'COMPLETED' ? 'Tamamlandı' : 'Bekliyor'}
+                            {statusConfig.label}
                         </span>
                     </div>
 
-                    {/* Action Buttons (Hover Only) */}
-                    <div className="absolute top-3 right-3 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform translate-y-[-10px] group-hover:translate-y-0">
+                    {/* Actions */}
+                    <div className="absolute top-3 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setIsQuickViewOpen(true);
-                            }}
-                            className="p-2 rounded-lg bg-white/90 text-slate-600 hover:text-emerald-600 shadow-sm hover:shadow-md transition-all"
-                            title="Hızlı Bakış"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsQuickViewOpen(true); }}
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
                         >
                             <Eye className="h-4 w-4" />
                         </button>
                         <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setIsEditOpen(true);
-                            }}
-                            className="p-2 rounded-lg bg-white/90 text-slate-600 hover:text-blue-600 shadow-sm hover:shadow-md transition-all"
-                            title="Düzenle"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditOpen(true); }}
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
                         >
                             <Edit2 className="h-4 w-4" />
                         </button>
                         <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setIsDeleteOpen(true);
-                            }}
-                            className="p-2 rounded-lg bg-white/90 text-slate-600 hover:text-red-600 shadow-sm hover:shadow-md transition-all"
-                            title="Parseli Sil"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsDeleteOpen(true); }}
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#ff3b30] shadow-sm transition-colors"
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>
@@ -134,71 +121,71 @@ export default function ParcelCard({
                     <Link href={`/parcels/${id || '#'}`} className="block h-full w-full">
                         {imageUrl ? (
                             <div
-                                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                                 style={{ backgroundImage: `url(${imageUrl})` }}
                             />
                         ) : (
-                            <div className="flex h-full items-center justify-center bg-slate-50">
-                                <MapPin className="h-10 w-10 text-slate-300" />
+                            <div className="flex h-full items-center justify-center">
+                                <MapPin className="h-10 w-10 text-[#86868b]" />
                             </div>
                         )}
-                        {/* Gradient for text readability */}
-                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-
-                        <div className="absolute bottom-3 left-3 right-3 text-white">
-                            <div className="flex items-center gap-1.5 text-slate-200 text-xs font-medium uppercase tracking-wide mb-0.5">
-                                <MapPin className="h-3 w-3" />
-                                {city}, {district}
-                            </div>
-                            <h3 className="text-xl font-bold tracking-tight text-white drop-shadow-sm truncate">
-                                Ada {island} / Parsel {parcel}
-                            </h3>
-                        </div>
                     </Link>
                 </div>
 
                 {/* Content */}
                 <div className="p-4 flex flex-col flex-1">
-                    {/* Category Badge */}
+                    {/* Location */}
+                    <div className="flex items-center gap-1.5 text-[12px] text-[#6e6e73] mb-1">
+                        <MapPin className="h-3 w-3" />
+                        {city}, {district}
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-[17px] font-semibold text-[#1d1d1f] mb-3">
+                        Ada {island} / Parsel {parcel}
+                    </h3>
+
+                    {/* Category */}
                     {category && category !== "UNCATEGORIZED" && (
                         <div className="mb-3">
                             <span className={clsx(
-                                "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border",
-                                CATEGORY_CONFIG[category]?.color || CATEGORY_CONFIG.UNCATEGORIZED.color
+                                "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium",
+                                categoryConfig.color
                             )}>
                                 <Tag className="h-3 w-3" />
-                                {CATEGORY_CONFIG[category]?.label || category}
+                                {categoryConfig.label}
                             </span>
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                            <span className="text-[10px] uppercase text-slate-400 font-semibold">EMSAL</span>
-                            <span className="text-lg font-bold text-slate-700">
-                                {zoning?.ks ? zoning.ks.toFixed(2) : "-"}
-                            </span>
+                    {/* Zoning */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="p-3 rounded-xl bg-[#f5f5f7] text-center">
+                            <div className="text-[10px] uppercase text-[#86868b] font-medium mb-0.5">EMSAL</div>
+                            <div className="text-lg font-semibold text-[#1d1d1f]">
+                                {zoning?.ks ? zoning.ks.toFixed(2) : "—"}
+                            </div>
                         </div>
-                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                            <span className="text-[10px] uppercase text-slate-400 font-semibold">TAKS</span>
-                            <span className="text-lg font-bold text-slate-700">
-                                {zoning?.taks ? zoning.taks.toFixed(2) : "-"}
-                            </span>
+                        <div className="p-3 rounded-xl bg-[#f5f5f7] text-center">
+                            <div className="text-[10px] uppercase text-[#86868b] font-medium mb-0.5">TAKS</div>
+                            <div className="text-lg font-semibold text-[#1d1d1f]">
+                                {zoning?.taks ? zoning.taks.toFixed(2) : "—"}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                    {/* Footer */}
+                    <div className="mt-auto pt-3 border-t border-black/[0.04] flex items-center justify-between">
+                        <span className="text-[12px] text-[#86868b] flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             Bugün
                         </span>
-
                         <Link
                             href={`/parcels/${id || '#'}`}
-                            className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group/link"
+                            className="text-[13px] font-medium text-[#0071e3] hover:text-[#0077ed] flex items-center gap-1 transition-colors"
                         >
-                            Detayları Gör
-                            <ArrowRight className="h-3 w-3 transition-transform group-hover/link:translate-x-1" />
+                            Detaylar
+                            <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                     </div>
                 </div>
@@ -209,8 +196,8 @@ export default function ParcelCard({
                 onClose={() => setIsDeleteOpen(false)}
                 onConfirm={handleDelete}
                 title="Parseli Sil"
-                message="Bu parseli silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
-                confirmText="Evet, Sil"
+                message="Bu parseli silmek istediğinize emin misiniz?"
+                confirmText="Sil"
                 variant="danger"
                 isLoading={isDeleting}
             />

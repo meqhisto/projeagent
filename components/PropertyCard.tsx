@@ -73,7 +73,7 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                 <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Link
                         href={`/properties/${property.id}`}
-                        className="p-2 bg-white/90 rounded-lg hover:bg-emerald-500 hover:text-white text-gray-600 transition-colors shadow-sm"
+                        className="p-2 bg-white/90 rounded-lg hover:bg-[#0071e3] hover:text-white text-gray-600 transition-colors shadow-sm"
                     >
                         <Eye className="w-4 h-4" />
                     </Link>
@@ -100,7 +100,7 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
             <div className="p-4">
                 {/* Title */}
                 <Link href={`/properties/${property.id}`}>
-                    <h3 className="text-base font-semibold text-gray-900 mb-1 hover:text-emerald-600 transition-colors line-clamp-1">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1 hover:text-[#0071e3] transition-colors line-clamp-1">
                         {property.title}
                     </h3>
                 </Link>
@@ -154,7 +154,7 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                     {property.currentValue && (
                         <div>
                             <p className="text-xs text-gray-400">Değer</p>
-                            <p className="text-base font-bold text-emerald-600">
+                            <p className="text-base font-bold text-[#0071e3]">
                                 {formatCurrency(property.currentValue)}
                             </p>
                         </div>
@@ -174,7 +174,7 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                     <div className="mt-3 pt-3 border-t border-gray-100">
                         <Link
                             href={`/parcels/${property.parcel.id}`}
-                            className="flex items-center gap-2 text-xs text-gray-500 hover:text-emerald-600 transition-colors"
+                            className="flex items-center gap-2 text-xs text-gray-500 hover:text-[#0071e3] transition-colors"
                         >
                             <Home className="w-3 h-3" />
                             <span>Parsel: {property.parcel.island}/{property.parcel.parsel}</span>

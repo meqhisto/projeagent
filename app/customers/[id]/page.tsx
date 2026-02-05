@@ -46,7 +46,7 @@ export default function CustomerDetailPage() {
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center">
-                <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+                <Loader2 className="h-10 w-10 animate-spin text-[#0071e3]" />
             </div>
         );
     }
@@ -55,7 +55,7 @@ export default function CustomerDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center h-full pt-20">
                 <h2 className="text-xl font-bold text-gray-900">Müşteri Bulunamadı</h2>
-                <Link href="/customers" className="mt-4 text-emerald-600 hover:underline flex items-center">
+                <Link href="/customers" className="mt-4 text-[#0071e3] hover:underline flex items-center">
                     <ArrowLeft className="mr-2 h-4 w-4" /> Geri Dön
                 </Link>
             </div>
@@ -84,7 +84,7 @@ export default function CustomerDetailPage() {
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
                             {/* Avatar */}
-                            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-emerald-400 to-[#0071e3] flex items-center justify-center text-white text-3xl font-bold shadow-lg">
                                 {customer.name.charAt(0).toUpperCase()}
                             </div>
 
@@ -99,7 +99,7 @@ export default function CustomerDetailPage() {
 
                         <button
                             onClick={() => setEditMode(!editMode)}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] transition-colors"
                         >
                             <Edit className="h-4 w-4" />
                             Düzenle
@@ -109,13 +109,13 @@ export default function CustomerDetailPage() {
                     {/* Quick Contact Info */}
                     <div className="mt-6 flex flex-wrap gap-4">
                         {customer.phone && (
-                            <a href={`tel:${customer.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-emerald-600">
+                            <a href={`tel:${customer.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-[#0071e3]">
                                 <Phone className="h-4 w-4" />
                                 <span className="text-sm font-medium">{customer.phone}</span>
                             </a>
                         )}
                         {customer.email && (
-                            <a href={`mailto:${customer.email}`} className="flex items-center gap-2 text-gray-600 hover:text-emerald-600">
+                            <a href={`mailto:${customer.email}`} className="flex items-center gap-2 text-gray-600 hover:text-[#0071e3]">
                                 <Mail className="h-4 w-4" />
                                 <span className="text-sm font-medium">{customer.email}</span>
                             </a>
@@ -191,7 +191,7 @@ export default function CustomerDetailPage() {
                                     >
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex items-center gap-2">
-                                                <MapPin className="h-5 w-5 text-emerald-600" />
+                                                <MapPin className="h-5 w-5 text-[#0071e3]" />
                                                 <h3 className="font-bold text-gray-900">{parcel.city}</h3>
                                             </div>
                                         </div>

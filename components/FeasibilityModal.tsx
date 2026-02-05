@@ -124,11 +124,11 @@ export default function FeasibilityModal({ isOpen, onClose, data }: FeasibilityM
                                 <div className="divide-y divide-gray-100">
                                     <div className="flex justify-between p-3 text-sm">
                                         <span className="text-gray-600">Balkonlar</span>
-                                        <span className="font-medium text-emerald-600">+{report.emsal_harici_kazanimlar.balkonlar_toplam}</span>
+                                        <span className="font-medium text-[#0071e3]">+{report.emsal_harici_kazanimlar.balkonlar_toplam}</span>
                                     </div>
                                     <div className="flex justify-between p-3 text-sm">
                                         <span className="text-gray-600">Ortak Alanlar</span>
-                                        <span className="font-medium text-emerald-600">+{report.emsal_harici_kazanimlar.ortak_alanlar}</span>
+                                        <span className="font-medium text-[#0071e3]">+{report.emsal_harici_kazanimlar.ortak_alanlar}</span>
                                     </div>
                                     <div className="flex justify-between p-3 text-sm">
                                         <span className="text-gray-600">Bodrum/Depo</span>

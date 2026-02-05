@@ -176,7 +176,7 @@ export default function KanbanPage() {
                                     </div>
 
                                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${parcel.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${parcel.status === 'COMPLETED' ? 'bg-emerald-100 text-[#0077ed]' :
                                             parcel.status === 'RESEARCHING' ? 'bg-amber-100 text-amber-700' :
                                                 'bg-gray-100 text-gray-600'
                                             }`}>

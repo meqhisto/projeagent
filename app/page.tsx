@@ -90,7 +90,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-        <Loader2 className="h-12 w-12 animate-spin text-emerald-500" />
+        <Loader2 className="h-12 w-12 animate-spin text-[#0071e3]" />
       </div>
     );
   }
@@ -111,7 +111,7 @@ export default function Home() {
           <ExportButton parcels={filteredParcels} />
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all hover:-translate-y-0.5"
+            className="flex items-center justify-center rounded-xl bg-[#0071e3] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0077ed] shadow-lg shadow-[#0071e3]/20 transition-all hover:-translate-y-0.5"
           >
             <Plus className="h-4 w-4 lg:mr-2" />
             <span className="hidden lg:inline">Yeni Parsel Ekle</span>
@@ -188,7 +188,7 @@ export default function Home() {
               <span className="text-sm text-slate-500 font-medium">
                 {filteredParcels.length} sonuç
               </span>
-              <a href="/parcels" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">
+              <a href="/parcels" className="text-sm font-semibold text-[#0071e3] hover:text-[#0077ed] hover:underline">
                 Tümünü Gör →
               </a>
             </div>

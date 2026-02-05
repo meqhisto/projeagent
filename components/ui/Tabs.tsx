@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import clsx from "clsx";
 
 interface TabsContextType {
     activeTab: string;
@@ -34,7 +35,10 @@ interface TabsListProps {
 
 export function TabsList({ children, className = "" }: TabsListProps) {
     return (
-        <div className={`flex border-b border-gray-200 ${className}`}>
+        <div className={clsx(
+            "flex gap-1 p-1 bg-slate-100/80 rounded-xl border border-slate-200/50",
+            className
+        )}>
             {children}
         </div>
     );
@@ -57,17 +61,22 @@ export function TabsTrigger({ value, children, className = "", icon }: TabsTrigg
     return (
         <button
             onClick={() => setActiveTab(value)}
-            className={`
-                px-4 py-3 text-sm font-medium border-b-2 transition-all
-                flex items-center gap-2
-                ${isActive
-                    ? "text-emerald-600 border-emerald-600"
-                    : "text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300"
-                }
-                ${className}
-            `}
+            className={clsx(
+                "px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2",
+                isActive
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-white/50",
+                className
+            )}
         >
-            {icon && <span className={isActive ? "text-emerald-600" : "text-gray-400"}>{icon}</span>}
+            {icon && (
+                <span className={clsx(
+                    "transition-colors",
+                    isActive ? "text-teal-600" : "text-slate-400"
+                )}>
+                    {icon}
+                </span>
+            )}
             {children}
         </button>
     );
@@ -88,7 +97,7 @@ export function TabsContent({ value, children, className = "" }: TabsContentProp
     if (activeTab !== value) return null;
 
     return (
-        <div className={`py-6 animate-fadeIn ${className}`}>
+        <div className={clsx("py-6 animate-fade-in", className)}>
             {children}
         </div>
     );

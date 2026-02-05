@@ -157,7 +157,7 @@ export default function AddStakeholderModal({ isOpen, onClose, onSuccess, parcel
                                             </div>
                                             <button
                                                 onClick={() => connectCustomer(customer.id)}
-                                                className="text-xs bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-colors"
+                                                className="text-xs bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium hover:bg-[#0071e3]/10 hover:text-[#0077ed] hover:border-emerald-200 transition-colors"
                                             >
                                                 Seç ve Ekle
                                             </button>
