@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Upload, Check, AlertCircle, Loader2, FileJson, FormInput, Tag, Folder } from "lucide-react";
 import { createNotification } from "@/lib/notifications";
+import { useToast } from "@/components/ui/Toast";
 import { PARCEL_CATEGORIES } from "@/lib/validations";
 import clsx from "clsx";
 
@@ -41,6 +42,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParcelModalProps) {
+    const toast = useToast();
     const [mode, setMode] = useState<InputMode>("manual");
     const [jsonInput, setJsonInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -173,6 +175,8 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 message: `${formData.city} - ${formData.district} parseli başarıyla eklendi ve araştırma başlatıldı.`,
             });
 
+            toast.success("Parsel Eklendi", `${formData.city} - ${formData.district} parseli başarıyla eklendi.`);
+
             // Reset form
             setFormData({
                 city: "",
@@ -191,6 +195,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
             onClose();
         } catch (err: any) {
             setError(err.message);
+            toast.error("Hata", err.message);
         } finally {
             setLoading(false);
         }
@@ -304,6 +309,8 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 title: `${successCount} Yeni Parsel Eklendi`,
                 message: `${successCount} adet parsel başarıyla sisteme eklendi ve araştırma başlatıldı.`,
             });
+
+            toast.success("İçe Aktarma Başarılı", `${successCount} parsel başarıyla eklendi.`);
 
             setJsonInput("");
             onSuccess();

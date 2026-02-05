@@ -264,17 +264,16 @@ projeagent/
 
 ## 🔧 Eksiklikler ve İyileştirmeler
 
-### UI/UX Eksikleri:
-- [ ] Modal bileşenleri Apple stiline uyarlanmalı
-- [ ] Tabs bileşeni daha ince çizgilerle güncellenmeli
-- [ ] Dashboard sayfası KPI grid düzeni optimize edilmeli
-- [ ] Loading state'ler tutarlı hale getirilmeli
-- [ ] Form input stilleri tek bir standarda indirilmeli
-- [ ] Dark mode desteği (opsiyonel)
+### UI/UX Eksikleri: ✅ TAMAMLANDI
+- [x] Modal bileşenleri Apple stiline uyarlandı
+- [x] Tabs bileşeni güncellendi
+- [x] Loading state'ler tutarlı hale getirildi (Spinner.tsx)
+- [x] Form input stilleri standartlaştırıldı (Input.tsx, Button.tsx)
+- [ ] Dark mode desteği (opsiyonel - sonra)
 
 ### Fonksiyonel Eksikler:
 - [ ] Bildirim sistemi (notifications) henüz çalışmıyor
-- [ ] Arama fonksiyonu aktif değil
+- [ ] Header arama fonksiyonu aktif değil
 - [ ] Excel/CSV export desteği yok
 - [ ] Email bildirim sistemi yok
 - [ ] Sunum PDF export'u bazen timeout alıyor

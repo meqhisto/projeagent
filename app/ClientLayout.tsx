@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import AuthProvider from "@/components/AuthProvider";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { ToastProvider } from "@/components/ui/Toast";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
     const { status } = useSession();
@@ -59,7 +60,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     return (
         <AuthProvider>
-            <LayoutContent>{children}</LayoutContent>
+            <ToastProvider>
+                <LayoutContent>{children}</LayoutContent>
+            </ToastProvider>
         </AuthProvider>
     );
 }
