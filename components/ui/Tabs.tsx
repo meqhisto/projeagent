@@ -36,7 +36,7 @@ interface TabsListProps {
 export function TabsList({ children, className = "" }: TabsListProps) {
     return (
         <div className={clsx(
-            "flex gap-1 p-1 bg-slate-100/80 rounded-xl border border-slate-200/50",
+            "flex gap-0.5 p-1 bg-[#f5f5f7] rounded-xl",
             className
         )}>
             {children}
@@ -62,17 +62,17 @@ export function TabsTrigger({ value, children, className = "", icon }: TabsTrigg
         <button
             onClick={() => setActiveTab(value)}
             className={clsx(
-                "px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2",
+                "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2",
                 isActive
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700 hover:bg-white/50",
+                    ? "bg-white text-[#1d1d1f] shadow-sm"
+                    : "text-[#6e6e73] hover:text-[#1d1d1f]",
                 className
             )}
         >
             {icon && (
                 <span className={clsx(
                     "transition-colors",
-                    isActive ? "text-teal-600" : "text-slate-400"
+                    isActive ? "text-[#0071e3]" : "text-[#86868b]"
                 )}>
                     {icon}
                 </span>

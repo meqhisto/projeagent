@@ -239,27 +239,65 @@ projeagent/
 
 ## 💬 Konuşma Özeti
 
-**Tarih:** 31 Ocak 2026  
-**Konu:** PDF Export - Sunucu Taraflı Puppeteer Çözümü
+**Tarih:** 6 Şubat 2026  
+**Konu:** Apple Liquid Design UI Yenileme
 
 ### Yapılan İşler:
-1. **PDF Export Sorunu Çözüldü:**
-   - `html2pdf.js` kütüphanesi Tailwind CSS v4 renk fonksiyonlarını (`lab()`, `oklch()`) desteklemiyordu
-   - Sunucu taraflı Puppeteer ile PDF oluşturma sistemi kuruldu
-   - Dockerfile'a Chromium ve font bağımlılıkları eklendi
-   - `/api/parcels/[id]/export-pdf` API route'u oluşturuldu
-   - `InvestorPresentation.tsx` API çağrısı yapacak şekilde güncellendi
+1. **UI Tasarım Değişikliği:**
+   - İlk önce "Gradient Maximalist" (mor-pembe) tema denendi - kullanıcı beğenmedi
+   - **Apple Liquid Design** uygulandı: temiz beyaz arka planlar, mavi aksan (#0071e3)
+   - Tüm yeşil (emerald) butonlar Apple mavi ile değiştirildi (50+ dosya)
 
-2. **Teknik Değişiklikler:**
-   - Dockerfile: Chromium, fonts-noto, libx11-xcb gibi bağımlılıklar eklendi
-   - PUPPETEER_EXECUTABLE_PATH environment variable kullanılıyor
-   - Geçici paylaşım linki oluşturulup PDF render sonrası siliniyor
+2. **Güncellenen Dosyalar:**
+   - `globals.css` - Apple renk paleti, SF Pro tipografi
+   - `ClientLayout.tsx`, `Sidebar.tsx`, `Header.tsx`
+   - `KPICard.tsx`, `ParcelCard.tsx`
+   - `login/page.tsx` - Liquid blob efektleri
+   - Tüm components ve app sayfalarında emerald→blue renk değişimi
 
-**Branch:** `feature/pdf-export-puppeteer` (merge için hazır)
+3. **Bug Fix:**
+   - `pipeline/page.tsx` - API yanıt formatı düzeltildi (`data.forEach` hatası)
 
-### 11. Bilinen Sorunlar (Known Issues) ⚠️
-- ~~**PDF Export Hatası:** Giderildi - Sunucu taraflı Puppeteer çözümü uygulandı~~
-- **Docker Image Boyutu:** Chromium eklenmesi nedeniyle container boyutu ~200MB artmış olabilir
+**Branch:** `feature/modern-ui-redesign` (master'a merge edildi)
 
 ---
 
+## 🔧 Eksiklikler ve İyileştirmeler
+
+### UI/UX Eksikleri:
+- [ ] Modal bileşenleri Apple stiline uyarlanmalı
+- [ ] Tabs bileşeni daha ince çizgilerle güncellenmeli
+- [ ] Dashboard sayfası KPI grid düzeni optimize edilmeli
+- [ ] Loading state'ler tutarlı hale getirilmeli
+- [ ] Form input stilleri tek bir standarda indirilmeli
+- [ ] Dark mode desteği (opsiyonel)
+
+### Fonksiyonel Eksikler:
+- [ ] Bildirim sistemi (notifications) henüz çalışmıyor
+- [ ] Arama fonksiyonu aktif değil
+- [ ] Excel/CSV export desteği yok
+- [ ] Email bildirim sistemi yok
+- [ ] Sunum PDF export'u bazen timeout alıyor
+
+### Teknik Borç:
+- [ ] Bazı componetlerde hala inline stiller var
+- [ ] TypeScript any kullanımları temizlenmeli
+- [ ] API error handling tutarlı hale getirilmeli
+- [ ] Test coverage eklenmeli
+
+---
+
+## 📊 Git Geçmişi (Son 15 Commit)
+
+1. `feat(ui): Apple Liquid Design - temiz mavi tema, glassmorphism ve liquid efektler`
+2. `feat: Add EditParcelDrawer for editing category/tags on existing parcels`
+3. `feat: Add parcel categorization system with 9 categories and tags support`
+4. `fix: Task endpoint'ine GET metodu eklendi`
+5. `fix: test-ui sayfasındaki AddParcelDrawer prop hatası düzeltildi`
+6. `feat: İnşaat firması ve arsa eşleştirme sistemi`
+7. `feat(ui): implement Clean Light theme and UI/UX overhaul`
+8. `fix: login sayfasına Suspense boundary eklendi`
+9. `feat: Mobile responsive UI implementation`
+10. `feat: Phase 5 Portfolio Dashboard - Stats API and KPI widgets`
+
+---

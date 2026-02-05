@@ -24,7 +24,6 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = "md
         };
     }, [isOpen]);
 
-    // Handle escape key
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === "Escape" && isOpen) {
@@ -50,23 +49,24 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = "md
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             onClick={onClose}
         >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm animate-fade-in" />
+            {/* Backdrop - Apple style with subtle blur */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" />
 
-            {/* Modal */}
+            {/* Modal - Clean Apple card */}
             <div
                 className={clsx(
                     "relative w-full bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] animate-scale-in",
+                    "border border-black/[0.04]",
                     maxWidthClasses[maxWidth]
                 )}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                    <h3 className="font-display text-lg font-bold text-slate-900">{title}</h3>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.06]">
+                    <h3 className="font-display text-[17px] font-semibold text-[#1d1d1f]">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="p-2 -mr-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-xl transition-all"
+                        className="p-2 -mr-2 text-[#86868b] hover:bg-black/[0.04] hover:text-[#1d1d1f] rounded-lg transition-all"
                     >
                         <X className="w-5 h-5" />
                     </button>
