@@ -52,7 +52,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
     PLANNED: { label: "Görüşme Planlandı", color: "bg-blue-100 text-blue-700" },
     MET: { label: "Görüşüldü", color: "bg-purple-100 text-purple-700" },
     OFFER_RECEIVED: { label: "Teklif Alındı", color: "bg-yellow-100 text-yellow-700" },
-    AGREED: { label: "Anlaşıldı", color: "bg-emerald-100 text-emerald-700" },
+    AGREED: { label: "Anlaşıldı", color: "bg-emerald-100 text-[#0077ed]" },
     REJECTED: { label: "Reddedildi", color: "bg-red-100 text-red-700" },
 };
 

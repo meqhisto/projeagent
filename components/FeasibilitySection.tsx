@@ -322,10 +322,10 @@ export default function FeasibilitySection({
 
                                 {/* Decision Card */}
                                 <div className={`p-4 rounded-xl border flex items-start gap-4 ${result.karar_destek.durum === "RİSKLİ" ? "bg-red-50 border-red-100 text-red-900" :
-                                    result.karar_destek.durum === "FIRSAT" ? "bg-emerald-50 border-emerald-100 text-emerald-900" :
+                                    result.karar_destek.durum === "FIRSAT" ? "bg-[#0071e3]/10 border-emerald-100 text-emerald-900" :
                                         "bg-blue-50 border-blue-100 text-blue-900"
                                     }`}>
-                                    {result.karar_destek.durum === "RİSKLİ" ? <AlertTriangle className="h-8 w-8 text-red-600 shrink-0" /> : <CheckCircle className="h-8 w-8 text-emerald-600 shrink-0" />}
+                                    {result.karar_destek.durum === "RİSKLİ" ? <AlertTriangle className="h-8 w-8 text-red-600 shrink-0" /> : <CheckCircle className="h-8 w-8 text-[#0071e3] shrink-0" />}
                                     <div>
                                         <h4 className="font-bold text-xl mb-1">{result.karar_destek.durum} - ROI: {result.finansal_tablo.yatirim_donus_orani_roi}</h4>
                                         <p className="text-sm opacity-90 leading-relaxed font-medium">{result.karar_destek.yorum}</p>
@@ -364,9 +364,9 @@ export default function FeasibilitySection({
                                             <span className="text-gray-600">Toplam İnşaat Maliyeti</span>
                                             <span className="font-medium text-red-600">-{result.finansal_tablo.toplam_insaat_maliyeti}</span>
                                         </div>
-                                        <div className="flex justify-between p-4 text-base bg-emerald-50/30">
+                                        <div className="flex justify-between p-4 text-base bg-[#0071e3]/10/30">
                                             <span className="font-bold text-gray-800">NET KÂR</span>
-                                            <span className="font-bold text-emerald-600 text-lg">{result.finansal_tablo.net_kar}</span>
+                                            <span className="font-bold text-[#0071e3] text-lg">{result.finansal_tablo.net_kar}</span>
                                         </div>
                                     </div>
 
@@ -473,7 +473,7 @@ export default function FeasibilitySection({
                                                 <td className="p-3 text-center text-gray-900 font-medium">
                                                     {calc.toplamDaire}
                                                 </td>
-                                                <td className="p-3 text-center text-emerald-600 font-bold">
+                                                <td className="p-3 text-center text-[#0071e3] font-bold">
                                                     {calc.netKar}
                                                 </td>
                                                 <td className="p-3 text-center text-purple-700 font-medium">
@@ -481,7 +481,7 @@ export default function FeasibilitySection({
                                                 </td>
                                                 <td className="p-3 text-center">
                                                     <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${calc.durum === "FIRSAT"
-                                                            ? "bg-emerald-100 text-emerald-700"
+                                                            ? "bg-emerald-100 text-[#0077ed]"
                                                             : calc.durum === "RİSKLİ"
                                                                 ? "bg-red-100 text-red-700"
                                                                 : "bg-blue-100 text-blue-700"

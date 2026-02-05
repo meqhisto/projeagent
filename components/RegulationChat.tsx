@@ -69,7 +69,7 @@ export default function RegulationChat() {
             {/* Header */}
             <div className="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <Bot className="h-5 w-5 text-emerald-600" />
+                    <Bot className="h-5 w-5 text-[#0071e3]" />
                     <h3 className="font-semibold text-gray-800">İmar Asistanı (RAG)</h3>
                 </div>
 
@@ -96,7 +96,7 @@ export default function RegulationChat() {
                 {messages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[80%] rounded-lg px-4 py-2 text-sm shadow-sm whitespace-pre-wrap ${msg.role === 'user'
-                                ? 'bg-emerald-600 text-white rounded-br-none'
+                                ? 'bg-[#0071e3] text-white rounded-br-none'
                                 : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                             }`}>
                             {msg.content}
@@ -106,7 +106,7 @@ export default function RegulationChat() {
                 {loading && (
                     <div className="flex justify-start">
                         <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 rounded-bl-none shadow-sm">
-                            <Loader2 className="animate-spin h-4 w-4 text-emerald-600" />
+                            <Loader2 className="animate-spin h-4 w-4 text-[#0071e3]" />
                         </div>
                     </div>
                 )}
@@ -120,12 +120,12 @@ export default function RegulationChat() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Örn: Çatı katında teras yapılabilir mi?"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0071e3]"
                 />
                 <button
                     onClick={handleSend}
                     disabled={loading || !input.trim()}
-                    className="bg-emerald-600 text-white p-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#0071e3] text-white p-2 rounded-lg hover:bg-[#0077ed] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <Send className="h-4 w-4" />
                 </button>

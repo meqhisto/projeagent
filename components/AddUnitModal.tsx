@@ -138,7 +138,7 @@ export default function AddUnitModal({
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                            <Building2 className="w-5 h-5 text-emerald-600" />
+                            <Building2 className="w-5 h-5 text-[#0071e3]" />
                         </div>
                         <div>
                             <h2 className="text-lg font-semibold text-gray-900">
@@ -175,7 +175,7 @@ export default function AddUnitModal({
                                 onChange={(e) => handleChange('unitNumber', e.target.value)}
                                 placeholder="Örn: A-12, Daire 5"
                                 required
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] focus:outline-none"
                             />
                         </div>
                         <div>
@@ -185,7 +185,7 @@ export default function AddUnitModal({
                             <select
                                 value={formData.status}
                                 onChange={(e) => handleChange('status', e.target.value as PropertyStatus)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                             >
                                 {Object.entries(PropertyStatusLabels).map(([value, label]) => (
                                     <option key={value} value={value}>{label}</option>
@@ -203,7 +203,7 @@ export default function AddUnitModal({
                             <select
                                 value={formData.roomType || ""}
                                 onChange={(e) => handleChange('roomType', e.target.value || undefined)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                             >
                                 <option value="">Seçiniz</option>
                                 {Object.entries(RoomTypeLabels).map(([value, label]) => (
@@ -220,7 +220,7 @@ export default function AddUnitModal({
                                 value={formData.area || ""}
                                 onChange={(e) => handleChange('area', e.target.value ? parseFloat(e.target.value) : undefined)}
                                 placeholder="100"
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
                         <div>
@@ -232,7 +232,7 @@ export default function AddUnitModal({
                                 value={formData.floorNumber || ""}
                                 onChange={(e) => handleChange('floorNumber', e.target.value ? parseInt(e.target.value) : undefined)}
                                 placeholder="3"
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
                     </div>
@@ -248,7 +248,7 @@ export default function AddUnitModal({
                                 value={formData.monthlyRent || ""}
                                 onChange={(e) => handleChange('monthlyRent', e.target.value ? parseFloat(e.target.value) : undefined)}
                                 placeholder="15000"
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
                         <div>
@@ -260,7 +260,7 @@ export default function AddUnitModal({
                                 value={formData.currentValue || ""}
                                 onChange={(e) => handleChange('currentValue', e.target.value ? parseFloat(e.target.value) : undefined)}
                                 placeholder="2500000"
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none"
                             />
                         </div>
                     </div>
@@ -279,7 +279,7 @@ export default function AddUnitModal({
                             <select
                                 value={formData.tenantId || ""}
                                 onChange={(e) => handleChange('tenantId', e.target.value ? parseInt(e.target.value) : undefined)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none bg-white"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none bg-white"
                             >
                                 <option value="">Kiracı yok</option>
                                 {customers.map(customer => (
@@ -300,7 +300,7 @@ export default function AddUnitModal({
                                         type="date"
                                         value={formData.leaseStart || ""}
                                         onChange={(e) => handleChange('leaseStart', e.target.value || undefined)}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none bg-white"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none bg-white"
                                     />
                                 </div>
                                 <div>
@@ -311,7 +311,7 @@ export default function AddUnitModal({
                                         type="date"
                                         value={formData.leaseEnd || ""}
                                         onChange={(e) => handleChange('leaseEnd', e.target.value || undefined)}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none bg-white"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none bg-white"
                                     />
                                 </div>
                             </div>
@@ -328,7 +328,7 @@ export default function AddUnitModal({
                             onChange={(e) => handleChange('notes', e.target.value || undefined)}
                             rows={3}
                             placeholder="Birim hakkında ek notlar..."
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none resize-none"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none resize-none"
                         />
                     </div>
                 </form>
@@ -346,7 +346,7 @@ export default function AddUnitModal({
                         type="submit"
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                        className="px-6 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
                         {loading ? (
                             <>

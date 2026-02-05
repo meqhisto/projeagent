@@ -68,7 +68,7 @@ export default function AdminUsersPage() {
                             setEditingUser(null);
                             setShowModal(true);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] transition-colors"
                     >
                         <Plus className="h-4 w-4" />
                         Yeni Kullanıcı
@@ -267,7 +267,7 @@ function UserModal({ user, onClose, onSuccess }: { user: User | null; onClose: (
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                            className="flex-1 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] disabled:opacity-50"
                         >
                             {loading ? "Kaydediliyor..." : "Kaydet"}
                         </button>

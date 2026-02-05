@@ -100,7 +100,7 @@ export default function ParcelDetailPage() {
         // ...
         return (
             <div className="flex h-screen items-center justify-center">
-                <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+                <Loader2 className="h-10 w-10 animate-spin text-[#0071e3]" />
             </div>
         );
     }
@@ -110,7 +110,7 @@ export default function ParcelDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center h-full pt-20">
                 <h2 className="text-xl font-bold text-gray-900">Parsel Bulunamadı</h2>
-                <Link href="/" className="mt-4 text-emerald-600 hover:underline flex items-center">
+                <Link href="/" className="mt-4 text-[#0071e3] hover:underline flex items-center">
                     <ArrowLeft className="mr-2 h-4 w-4" /> Geri Dön
                 </Link>
             </div>
@@ -151,7 +151,7 @@ export default function ParcelDetailPage() {
                     <div className="flex items-center gap-3">
                         <div className="hidden md:flex flex-col items-end mr-2">
                             <span className="text-xs text-gray-500 font-medium">Durum</span>
-                            <span className={`text-sm font-bold px-2 py-0.5 rounded-full border ${parcel.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                            <span className={`text-sm font-bold px-2 py-0.5 rounded-full border ${parcel.status === 'COMPLETED' ? 'bg-[#0071e3]/10 text-[#0071e3] border-emerald-100' :
                                 parcel.status === 'RESEARCHING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                                     'bg-gray-100 text-gray-600 border-gray-200'
                                 }`}>
@@ -275,7 +275,7 @@ export default function ParcelDetailPage() {
                                     {/* Info Card */}
                                     <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
                                         <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                                            <Building className="mr-2 h-4 w-4 text-emerald-500" />
+                                            <Building className="mr-2 h-4 w-4 text-[#0071e3]" />
                                             Künye
                                         </h3>
                                         <dl className="divide-y divide-gray-100 text-sm">
@@ -310,12 +310,12 @@ export default function ParcelDetailPage() {
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                                         <div className="flex items-center justify-between mb-4">
                                             <h3 className="font-semibold text-gray-900 flex items-center">
-                                                <Info className="mr-2 h-4 w-4 text-emerald-500" />
+                                                <Info className="mr-2 h-4 w-4 text-[#0071e3]" />
                                                 Manuel İmar Verisi
                                             </h3>
                                             <button
                                                 onClick={() => setIsZoningModalOpen(true)}
-                                                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-100"
+                                                className="text-xs font-bold text-[#0071e3] hover:text-[#0077ed] bg-[#0071e3]/10 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-100"
                                             >
                                                 Düzenle
                                             </button>

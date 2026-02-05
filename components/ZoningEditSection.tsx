@@ -182,7 +182,7 @@ export default function ZoningEditSection({
         <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100 mt-6">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 flex items-center">
-                    <Info className="mr-2 h-4 w-4 text-emerald-500" />
+                    <Info className="mr-2 h-4 w-4 text-[#0071e3]" />
                     Manuel İmar Verisi Girişi (Mahalle Hafızası)
                 </h3>
             </div>
@@ -194,7 +194,7 @@ export default function ZoningEditSection({
                         key={type}
                         onClick={() => setActiveTab(type)}
                         className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === type
-                            ? "border-emerald-500 text-emerald-700"
+                            ? "border-[#0071e3] text-[#0077ed]"
                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200"
                             }`}
                     >
@@ -210,7 +210,7 @@ export default function ZoningEditSection({
                     <input
                         type="number" step="0.01"
                         value={ks} onChange={e => setKs(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
                         placeholder="Örn: 1.50"
                     />
                 </div>
@@ -219,7 +219,7 @@ export default function ZoningEditSection({
                     <input
                         type="number" step="0.01"
                         value={taks} onChange={e => setTaks(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
                         placeholder="Örn: 0.40"
                     />
                 </div>
@@ -228,7 +228,7 @@ export default function ZoningEditSection({
                     <input
                         type="number" step="0.5"
                         value={maxHeight} onChange={e => setMaxHeight(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
                         placeholder="Örn: 12.50"
                     />
                 </div>
@@ -252,7 +252,7 @@ export default function ZoningEditSection({
                 <textarea
                     rows={3}
                     value={notes} onChange={e => setNotes(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
                     placeholder="Bu imar kuralı hakkında notlar..."
                 />
             </div>
@@ -261,7 +261,7 @@ export default function ZoningEditSection({
                 <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                    className="flex items-center rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:bg-[#0077ed] disabled:opacity-50 transition-colors"
                 >
                     {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                     Kaydet ve Parsele Uygula

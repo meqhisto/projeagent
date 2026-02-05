@@ -1,21 +1,34 @@
 "use client";
 
-import { Home, Map as MapIcon, Settings, LayoutGrid, KanbanSquare, Users, Shield, Building2, X, LogOut, HardHat, ChevronRight } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
 import clsx from "clsx";
+import {
+    LayoutDashboard,
+    MapPin,
+    Users,
+    Building2,
+    Trello,
+    Map,
+    ListChecks,
+    Settings,
+    LogOut,
+    X,
+    HardHat
+} from "lucide-react";
 
 const allNavigation = [
-    { name: "Anasayfa", href: "/", icon: Home, roles: ["USER", "ADMIN"] },
-    { name: "Parsel Listesi", href: "/parcels", icon: LayoutGrid, roles: ["USER", "ADMIN"] },
-    { name: "Gayrimenkul Portföyü", href: "/properties", icon: Building2, roles: ["USER", "ADMIN"] },
-    { name: "İş Akışı (Kanban)", href: "/kanban", icon: KanbanSquare, roles: ["USER", "ADMIN"] },
-    { name: "Kişiler (Directory)", href: "/customers", icon: Users, roles: ["USER", "ADMIN"] },
-    { name: "İnşaat Firmaları", href: "/contractors", icon: HardHat, roles: ["USER", "ADMIN"] },
-    { name: "Harita Görünümü", href: "/map", icon: MapIcon, roles: ["USER", "ADMIN"] },
-    { name: "Admin Panel", href: "/admin/users", icon: Shield, roles: ["ADMIN"] },
+    { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["USER", "ADMIN"] },
+    { name: "Arsalar", href: "/parcels", icon: MapPin, roles: ["USER", "ADMIN"] },
+    { name: "Pipeline", href: "/pipeline", icon: Trello, roles: ["USER", "ADMIN"] },
+    { name: "Harita", href: "/map", icon: Map, roles: ["USER", "ADMIN"] },
+    { name: "Görevler", href: "/tasks", icon: ListChecks, roles: ["USER", "ADMIN"] },
+    { name: "Müşteriler", href: "/customers", icon: Users, roles: ["USER", "ADMIN"] },
+    { name: "Gayrimenkuller", href: "/properties", icon: Building2, roles: ["USER", "ADMIN"] },
+    { name: "Müteahhitler", href: "/contractors", icon: HardHat, roles: ["USER", "ADMIN"] },
     { name: "Ayarlar", href: "/settings", icon: Settings, roles: ["USER", "ADMIN"] },
+    { name: "Kullanıcı Yönetimi", href: "/admin/users", icon: Users, roles: ["ADMIN"] },
 ];
 
 interface SidebarProps {
@@ -23,136 +36,111 @@ interface SidebarProps {
     onClose?: () => void;
 }
 
-export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
-    const pathname = usePathname();
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     const { data: session } = useSession();
+    const pathname = usePathname();
 
-    // Filter navigation based on user role
     const navigation = allNavigation.filter(item =>
         item.roles.includes((session?.user as any)?.role || "USER")
     );
 
+    const handleSignOut = () => {
+        signOut({ callbackUrl: "/login" });
+    };
+
     return (
         <>
-            {/* Mobile Overlay Backdrop */}
+            {/* Mobile Overlay */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9998] lg:hidden transition-opacity duration-300"
+                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden animate-fade-in"
                     onClick={onClose}
-                    aria-hidden="true"
                 />
             )}
 
             {/* Sidebar */}
-            <div className={clsx(
-                "flex h-screen flex-col fixed left-0 top-0 z-[9999] transition-all duration-300 ease-out",
-                // Premium dark sidebar with gradient
-                "bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800",
-                // Desktop: always visible
-                "lg:w-72 lg:translate-x-0",
-                // Mobile: slide in/out
-                isOpen ? "w-72 translate-x-0 shadow-2xl" : "w-72 -translate-x-full lg:translate-x-0"
-            )}>
-                {/* Logo Section */}
-                <div className="flex h-20 items-center justify-between px-6 border-b border-white/[0.06]">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/25">
-                            <LayoutGrid className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="font-display font-bold text-lg tracking-tight text-white">
-                                PARSEL<span className="text-teal-400">MONITOR</span>
+            <aside
+                className={clsx(
+                    "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-black/[0.06] transform transition-transform duration-300 ease-out",
+                    "lg:translate-x-0",
+                    isOpen ? "translate-x-0" : "-translate-x-full"
+                )}
+            >
+                <div className="h-full flex flex-col">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 h-16 border-b border-black/[0.06]">
+                        <Link href="/" className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-[#0071e3] flex items-center justify-center">
+                                <span className="text-white font-bold text-sm">PM</span>
+                            </div>
+                            <span className="font-display text-[17px] font-semibold text-[#1d1d1f]">
+                                ParselMonitor
                             </span>
+                        </Link>
+
+                        <button
+                            onClick={onClose}
+                            className="lg:hidden p-1.5 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 px-3 py-4 overflow-y-auto">
+                        <ul className="space-y-0.5">
+                            {navigation.map((item) => {
+                                const isActive = pathname === item.href;
+                                const Icon = item.icon;
+
+                                return (
+                                    <li key={item.name}>
+                                        <Link
+                                            href={item.href}
+                                            className={clsx(
+                                                "flex items-center gap-3 px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150",
+                                                isActive
+                                                    ? "bg-[#0071e3] text-white"
+                                                    : "text-[#1d1d1f] hover:bg-black/[0.04]"
+                                            )}
+                                        >
+                                            <Icon className={clsx(
+                                                "h-[18px] w-[18px]",
+                                                isActive ? "text-white" : "text-[#6e6e73]"
+                                            )} />
+                                            <span>{item.name}</span>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </nav>
+
+                    {/* User Section */}
+                    <div className="p-3 border-t border-black/[0.06]">
+                        <div className="flex items-center gap-3 px-3 py-2">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0071e3] to-[#5856d6] flex items-center justify-center text-white font-semibold text-sm">
+                                {session?.user?.name?.[0]?.toUpperCase() || "U"}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-[14px] font-medium text-[#1d1d1f] truncate">
+                                    {session?.user?.name || "Kullanıcı"}
+                                </div>
+                                <div className="text-[12px] text-[#6e6e73] truncate">
+                                    {(session?.user as any)?.role === "ADMIN" ? "Yönetici" : "Kullanıcı"}
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleSignOut}
+                                className="p-2 text-[#6e6e73] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10 rounded-lg transition-colors"
+                                title="Çıkış Yap"
+                            >
+                                <LogOut className="h-4 w-4" />
+                            </button>
                         </div>
                     </div>
-                    {/* Mobile Close Button */}
-                    <button
-                        onClick={onClose}
-                        className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-                        aria-label="Menüyü kapat"
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
                 </div>
-
-                {/* Navigation */}
-                <div className="flex flex-1 flex-col overflow-y-auto py-6 px-3 space-y-1">
-                    <div className="px-4 mb-3 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-                        Menü
-                    </div>
-                    <nav className="space-y-1">
-                        {navigation.map((item) => {
-                            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    onClick={onClose}
-                                    className={clsx(
-                                        "group flex items-center justify-between rounded-xl px-4 py-3 text-sm transition-all duration-200",
-                                        isActive
-                                            ? "bg-teal-500/15 text-teal-300"
-                                            : "text-slate-400 hover:bg-white/[0.04] hover:text-white"
-                                    )}
-                                >
-                                    <div className="flex items-center">
-                                        <item.icon
-                                            className={clsx(
-                                                "mr-3 h-5 w-5 transition-colors",
-                                                isActive ? "text-teal-400" : "text-slate-500 group-hover:text-slate-300"
-                                            )}
-                                            aria-hidden="true"
-                                        />
-                                        <span className="font-medium">{item.name}</span>
-                                    </div>
-                                    {isActive && (
-                                        <ChevronRight className="h-4 w-4 text-teal-400" />
-                                    )}
-                                </Link>
-                            );
-                        })}
-                    </nav>
-                </div>
-
-                {/* User Profile */}
-                <UserProfile />
-            </div>
+            </aside>
         </>
-    );
-}
-
-function UserProfile() {
-    const { data: session } = useSession();
-
-    if (!session || !session.user) return null;
-
-    const initials = session.user.name
-        ?.split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2) || 'US';
-
-    return (
-        <div className="p-4 border-t border-white/[0.06]">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors cursor-pointer group">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-teal-500/20">
-                    {initials}
-                </div>
-                <div className="flex flex-col flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{session.user.name || 'User'}</p>
-                    <p className="text-xs text-slate-500 truncate">
-                        {session.user.email}
-                    </p>
-                </div>
-                <button
-                    onClick={() => signOut()}
-                    className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                    title="Çıkış Yap"
-                >
-                    <LogOut className="h-4 w-4" />
-                </button>
-            </div>
-        </div>
     );
 }

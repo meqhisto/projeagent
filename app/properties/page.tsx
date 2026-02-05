@@ -168,7 +168,7 @@ export default function PropertiesPage() {
 
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] transition-colors shadow-sm"
                 >
                     <Plus className="w-4 h-4" />
                     Yeni Gayrimenkul
@@ -206,12 +206,12 @@ export default function PropertiesPage() {
                 </div>
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center">
-                            <Wallet className="w-5 h-5 text-emerald-600" />
+                        <div className="w-9 h-9 bg-[#0071e3]/10 rounded-lg flex items-center justify-center">
+                            <Wallet className="w-5 h-5 text-[#0071e3]" />
                         </div>
                         <p className="text-gray-500 text-sm">Toplam Değer</p>
                     </div>
-                    <p className="text-2xl font-bold text-emerald-600">
+                    <p className="text-2xl font-bold text-[#0071e3]">
                         {new Intl.NumberFormat('tr-TR', {
                             style: 'currency',
                             currency: 'TRY',
@@ -256,35 +256,35 @@ export default function PropertiesPage() {
                         placeholder="Gayrimenkul ara..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] focus:outline-none"
                     />
                 </div>
 
                 <button
                     onClick={() => setShowFilters(!showFilters)}
                     className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors ${showFilters || hasActiveFilters
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                        ? 'bg-[#0071e3]/10 border-emerald-200 text-[#0077ed]'
                         : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         }`}
                 >
                     <SlidersHorizontal className="w-5 h-5" />
                     Filtreler
                     {hasActiveFilters && (
-                        <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                        <span className="w-2 h-2 bg-[#0071e3] rounded-full" />
                     )}
                 </button>
 
                 <div className="flex gap-1 p-1 bg-white rounded-lg border border-gray-200">
                     <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-400 hover:text-gray-600'
+                        className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-emerald-100 text-[#0077ed]' : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
                         <Grid className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-400 hover:text-gray-600'
+                        className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-emerald-100 text-[#0077ed]' : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
                         <List className="w-5 h-5" />
@@ -314,7 +314,7 @@ export default function PropertiesPage() {
                                 setFilters(prev => ({ ...prev, type: e.target.value as PropertyType | "" }));
                                 setTimeout(fetchProperties, 100);
                             }}
-                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                         >
                             <option value="">Tüm Tipler</option>
                             {Object.entries(PropertyTypeLabels).map(([value, label]) => (
@@ -328,7 +328,7 @@ export default function PropertiesPage() {
                                 setFilters(prev => ({ ...prev, status: e.target.value as PropertyStatus | "" }));
                                 setTimeout(fetchProperties, 100);
                             }}
-                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                         >
                             <option value="">Tüm Durumlar</option>
                             {Object.entries(PropertyStatusLabels).map(([value, label]) => (
@@ -342,7 +342,7 @@ export default function PropertiesPage() {
                                 setFilters(prev => ({ ...prev, roomType: e.target.value as RoomType | "" }));
                                 setTimeout(fetchProperties, 100);
                             }}
-                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-emerald-500 focus:outline-none"
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:border-[#0071e3] focus:outline-none"
                         >
                             <option value="">Tüm Oda Sayıları</option>
                             {Object.entries(RoomTypeLabels).map(([value, label]) => (
@@ -358,7 +358,7 @@ export default function PropertiesPage() {
                                 setFilters(prev => ({ ...prev, city: e.target.value }));
                             }}
                             onBlur={fetchProperties}
-                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
+                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-[#0071e3] focus:outline-none"
                         />
                     </div>
                 </div>
@@ -367,7 +367,7 @@ export default function PropertiesPage() {
             {/* Content */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
                 </div>
             ) : error ? (
                 <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
@@ -401,7 +401,7 @@ export default function PropertiesPage() {
                     ) : (
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                            className="px-6 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed]"
                         >
                             Gayrimenkul Ekle
                         </button>

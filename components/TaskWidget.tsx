@@ -211,7 +211,7 @@ export default function TaskWidget() {
             {/* New Task Button */}
             <button
                 onClick={() => setIsModalOpen(true)}
-                className="w-full mt-2 py-2 text-sm bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-2 py-2 text-sm bg-[#0071e3] text-white rounded-lg font-semibold hover:bg-[#0077ed] transition-colors flex items-center justify-center gap-2"
             >
                 <Plus className="h-4 w-4" />
                 Yeni Görev

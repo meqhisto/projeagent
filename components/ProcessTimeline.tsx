@@ -33,11 +33,11 @@ export default function ProcessTimeline({ currentStage, onStageChange }: { curre
 
                             {/* Connecting Line (Right) */}
                             {index !== STAGES.length - 1 && (
-                                <div className={`absolute top-4 left-1/2 w-full h-1 z-0 ${isCompleted ? 'bg-emerald-500' : 'bg-gray-100'}`}></div>
+                                <div className={`absolute top-4 left-1/2 w-full h-1 z-0 ${isCompleted ? 'bg-[#0071e3]' : 'bg-gray-100'}`}></div>
                             )}
 
                             {/* Circle Node */}
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 border-2 transition-all duration-300 ${isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' :
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 border-2 transition-all duration-300 ${isCompleted ? 'bg-[#0071e3] border-[#0071e3] text-white' :
                                     isCurrent ? 'bg-white border-purple-600 text-purple-600 ring-4 ring-purple-100' :
                                         'bg-white border-gray-300 text-gray-300'
                                 }`}>
@@ -48,7 +48,7 @@ export default function ProcessTimeline({ currentStage, onStageChange }: { curre
 
                             {/* Text Info */}
                             <div className="mt-3 text-center">
-                                <span className={`text-xs font-bold block ${isCurrent ? 'text-purple-700' : isCompleted ? 'text-emerald-700' : 'text-gray-400'}`}>
+                                <span className={`text-xs font-bold block ${isCurrent ? 'text-purple-700' : isCompleted ? 'text-[#0077ed]' : 'text-gray-400'}`}>
                                     {stage.label}
                                 </span>
                                 <span className="text-[10px] text-gray-400 hidden group-hover:block transition-all absolute top-full w-32 left-1/2 -translate-x-1/2 mt-1 bg-gray-800 text-white p-1 rounded z-20">

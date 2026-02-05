@@ -12,97 +12,75 @@ interface KPICardProps {
 }
 
 export default function KPICard({ title, value, icon: Icon, trend, color }: KPICardProps) {
-    // Premium color configurations
+    // Apple-style color configurations
     const colorConfig = {
         blue: {
-            bg: "bg-gradient-to-br from-blue-500 to-blue-600",
-            iconBg: "bg-blue-400/20",
-            iconColor: "text-blue-100",
-            glow: "shadow-blue-500/25",
+            iconBg: "bg-[#0071e3]/10",
+            iconColor: "text-[#0071e3]",
         },
         purple: {
-            bg: "bg-gradient-to-br from-violet-500 to-purple-600",
-            iconBg: "bg-violet-400/20",
-            iconColor: "text-violet-100",
-            glow: "shadow-violet-500/25",
+            iconBg: "bg-[#af52de]/10",
+            iconColor: "text-[#af52de]",
         },
         green: {
-            bg: "bg-gradient-to-br from-emerald-500 to-teal-600",
-            iconBg: "bg-emerald-400/20",
-            iconColor: "text-emerald-100",
-            glow: "shadow-emerald-500/25",
+            iconBg: "bg-[#34c759]/10",
+            iconColor: "text-[#248a3d]",
         },
         yellow: {
-            bg: "bg-gradient-to-br from-amber-400 to-orange-500",
-            iconBg: "bg-amber-300/20",
-            iconColor: "text-amber-100",
-            glow: "shadow-amber-500/25",
+            iconBg: "bg-[#ff9500]/10",
+            iconColor: "text-[#c93400]",
         },
         indigo: {
-            bg: "bg-gradient-to-br from-indigo-500 to-indigo-600",
-            iconBg: "bg-indigo-400/20",
-            iconColor: "text-indigo-100",
-            glow: "shadow-indigo-500/25",
+            iconBg: "bg-[#5856d6]/10",
+            iconColor: "text-[#5856d6]",
         },
         pink: {
-            bg: "bg-gradient-to-br from-pink-500 to-rose-600",
-            iconBg: "bg-pink-400/20",
-            iconColor: "text-pink-100",
-            glow: "shadow-pink-500/25",
+            iconBg: "bg-[#ff2d55]/10",
+            iconColor: "text-[#ff2d55]",
         },
         teal: {
-            bg: "bg-gradient-to-br from-teal-500 to-cyan-600",
-            iconBg: "bg-teal-400/20",
-            iconColor: "text-teal-100",
-            glow: "shadow-teal-500/25",
+            iconBg: "bg-[#5ac8fa]/10",
+            iconColor: "text-[#0077ed]",
         },
     };
 
-    const config = colorConfig[color] || colorConfig.teal;
-
-    // Parse trend to determine direction
+    const config = colorConfig[color] || colorConfig.blue;
     const trendUp = trend && (trend.includes('+') || !trend.includes('-'));
     const TrendIcon = trendUp ? TrendingUp : TrendingDown;
 
     return (
-        <div
-            className={clsx(
-                config.bg,
-                "rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1",
-                config.glow
-            )}
-        >
-            {/* Header Row */}
+        <div className="card p-5 hover:shadow-lg transition-all duration-300">
+            {/* Header */}
             <div className="flex items-start justify-between mb-4">
                 <div className={clsx(
-                    "p-3 rounded-xl",
+                    "p-2.5 rounded-xl",
                     config.iconBg
                 )}>
                     <Icon className={clsx("h-5 w-5", config.iconColor)} />
                 </div>
 
                 {trend && (
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm">
+                    <div className={clsx(
+                        "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
+                        trendUp
+                            ? "bg-[#34c759]/10 text-[#248a3d]"
+                            : "bg-[#ff3b30]/10 text-[#d70015]"
+                    )}>
                         <TrendIcon className="h-3 w-3" />
-                        <span className="text-xs font-semibold">{trend}</span>
+                        <span>{trend}</span>
                     </div>
                 )}
             </div>
 
             {/* Value */}
-            <div className="mb-1">
-                <div className="text-3xl font-display font-bold tracking-tight">
-                    {value}
-                </div>
+            <div className="text-3xl font-display font-semibold text-[#1d1d1f] tracking-tight mb-1">
+                {value}
             </div>
 
             {/* Title */}
-            <div className="text-sm font-medium text-white/80">
+            <div className="text-sm text-[#6e6e73]">
                 {title}
             </div>
-
-            {/* Decorative Element */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
         </div>
     );
 }

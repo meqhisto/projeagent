@@ -118,11 +118,11 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                                 className="group relative bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all min-w-[200px] flex items-start gap-3 cursor-pointer"
                             >
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm
-                                    ${c.role === 'Land Owner' ? 'bg-indigo-500' : c.role === 'Investor' ? 'bg-emerald-500' : 'bg-gray-400'}`}>
+                                    ${c.role === 'Land Owner' ? 'bg-indigo-500' : c.role === 'Investor' ? 'bg-[#0071e3]' : 'bg-gray-400'}`}>
                                     {c.name.charAt(0)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-bold text-gray-900 text-sm truncate group-hover:text-emerald-600 transition-colors">{c.name}</div>
+                                    <div className="font-bold text-gray-900 text-sm truncate group-hover:text-[#0071e3] transition-colors">{c.name}</div>
                                     <div className="text-xs text-purple-600 font-medium">{c.role === 'Land Owner' ? 'Mal Sahibi' : c.role === 'Agent' ? 'Emlakçı' : c.role}</div>
 
                                     {(c.phone || c.email) && (
@@ -205,7 +205,7 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                             <div className="absolute bottom-3 right-3">
                                 <button
                                     onClick={handleAddInteraction}
-                                    className="bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-emerald-700 shadow-md transition-all flex items-center gap-2"
+                                    className="bg-[#0071e3] text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-[#0077ed] shadow-md transition-all flex items-center gap-2"
                                 >
                                     <Plus className="w-4 h-4" />
                                     Kaydet
@@ -234,7 +234,7 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                             <div className="flex flex-col items-center z-10">
                                 <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white ${interaction.type === 'OFFER' ? 'bg-amber-100 text-amber-700' :
                                     interaction.type === 'MEETING' ? 'bg-blue-100 text-blue-700' :
-                                        interaction.type === 'CALL' ? 'bg-emerald-100 text-emerald-700' :
+                                        interaction.type === 'CALL' ? 'bg-emerald-100 text-[#0077ed]' :
                                             'bg-gray-100 text-gray-700'
                                     }`}>
                                     {interaction.type === 'CALL' ? <Phone className="h-4 w-4" /> :

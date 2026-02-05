@@ -347,7 +347,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                         onClick={() => setMode("manual")}
                         className={clsx(
                             "flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all",
-                            mode === "manual" ? "bg-emerald-50 text-emerald-700 shadow-sm" : "text-slate-600 hover:bg-slate-50"
+                            mode === "manual" ? "bg-[#0071e3]/10 text-[#0077ed] shadow-sm" : "text-slate-600 hover:bg-slate-50"
                         )}
                     >
                         <FormInput className="h-4 w-4" />
@@ -357,7 +357,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                         onClick={() => setMode("json")}
                         className={clsx(
                             "flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all",
-                            mode === "json" ? "bg-emerald-50 text-emerald-700 shadow-sm" : "text-slate-600 hover:bg-slate-50"
+                            mode === "json" ? "bg-[#0071e3]/10 text-[#0077ed] shadow-sm" : "text-slate-600 hover:bg-slate-50"
                         )}
                     >
                         <FileJson className="h-4 w-4" />
@@ -379,7 +379,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                             value={formData.city}
                                             onChange={(e) => handleFormChange("city", e.target.value)}
                                             placeholder="İstanbul"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                         />
                                     </div>
                                     <div>
@@ -389,7 +389,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                             value={formData.district}
                                             onChange={(e) => handleFormChange("district", e.target.value)}
                                             placeholder="Kadıköy"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                         />
                                     </div>
                                 </div>
@@ -400,7 +400,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                         value={formData.neighborhood}
                                         onChange={(e) => handleFormChange("neighborhood", e.target.value)}
                                         placeholder="Moda (Opsiyonel)"
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                     />
                                 </div>
                             </div>
@@ -417,7 +417,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                             value={formData.island}
                                             onChange={(e) => handleFormChange("island", e.target.value)}
                                             placeholder="123"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                         />
                                     </div>
                                     <div>
@@ -427,7 +427,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                             value={formData.parsel}
                                             onChange={(e) => handleFormChange("parsel", e.target.value)}
                                             placeholder="45"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                         />
                                     </div>
                                 </div>
@@ -439,7 +439,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                         onChange={(e) => handleFormChange("area", e.target.value)}
                                         placeholder="500.50"
                                         step="0.01"
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                     />
                                 </div>
                             </div>
@@ -457,7 +457,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                             onChange={(e) => handleFormChange("latitude", e.target.value)}
                                             placeholder="40.9923"
                                             step="any"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                         />
                                     </div>
                                     <div>
@@ -468,7 +468,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                             onChange={(e) => handleFormChange("longitude", e.target.value)}
                                             placeholder="29.0254"
                                             step="any"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                         />
                                     </div>
                                 </div>
@@ -483,7 +483,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                     <select
                                         value={formData.category}
                                         onChange={(e) => handleFormChange("category", e.target.value)}
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                     >
                                         {PARCEL_CATEGORIES.map((cat) => (
                                             <option key={cat} value={cat}>
@@ -499,7 +499,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                         value={formData.tags}
                                         onChange={(e) => handleFormChange("tags", e.target.value)}
                                         placeholder="deniz manzarası, köşe parsel, yola cepheli"
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors bg-slate-50/50"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                     />
                                     <p className="text-xs text-slate-400 mt-1">Virgülle ayırarak birden fazla etiket ekleyebilirsiniz</p>
                                 </div>
@@ -509,7 +509,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                         /* JSON Upload Mode */
                         <div className="space-y-4 h-full flex flex-col">
                             <div
-                                className={`flex-1 cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors ${dragActive ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-400 hover:bg-slate-50 bg-slate-50/50"
+                                className={`flex-1 cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors ${dragActive ? "border-[#0071e3] bg-[#0071e3]/10" : "border-slate-200 hover:border-emerald-400 hover:bg-slate-50 bg-slate-50/50"
                                     }`}
                                 onDragEnter={handleDrag}
                                 onDragLeave={handleDrag}
@@ -525,7 +525,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                     onChange={handleFileChange}
                                 />
                                 <div className="rounded-full bg-white p-4 shadow-sm ring-1 ring-slate-100 mb-4">
-                                    <Upload className={`h-8 w-8 ${dragActive ? 'text-emerald-500' : 'text-slate-400'}`} />
+                                    <Upload className={`h-8 w-8 ${dragActive ? 'text-[#0071e3]' : 'text-slate-400'}`} />
                                 </div>
                                 <p className="text-sm font-medium text-slate-900 text-center">Dosyayı sürükleyip bırakın</p>
                                 <p className="text-xs text-slate-500 mt-1 text-center">veya seçmek için tıklayın (.json)</p>
@@ -545,7 +545,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                 <textarea
                                     value={jsonInput}
                                     onChange={(e) => setJsonInput(e.target.value)}
-                                    className="h-40 w-full rounded-lg border border-slate-200 p-3 text-xs focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono text-slate-600 bg-slate-50/50 resize-none"
+                                    className="h-40 w-full rounded-lg border border-slate-200 p-3 text-xs focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] font-mono text-slate-600 bg-slate-50/50 resize-none"
                                     placeholder={`GeoJSON FeatureCollection veya JSON Array...\n\nÖrnek:\n{"features":[{"properties":{"ParselNo":"2","Ada":"1115",...}}]}`}
                                 />
                             </div>
@@ -570,7 +570,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                     <button
                         onClick={mode === "manual" ? handleManualSubmit : handleJsonSubmit}
                         disabled={loading || (mode === "manual" ? false : !jsonInput)}
-                        className="flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
+                        className="flex items-center justify-center rounded-xl bg-[#0071e3] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#0077ed] shadow-lg shadow-[#0071e3]/20 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
                     >
                         {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Check className="h-4 w-4 mr-2" />}
                         {mode === "manual" ? "Kaydet" : "Yükle ve Kaydet"}

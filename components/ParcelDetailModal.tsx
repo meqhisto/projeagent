@@ -53,7 +53,7 @@ export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelD
 
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center min-h-[300px]">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0071e3]"></div>
                     </div>
                 ) : parcel ? (
                     <div className="flex-1 overflow-y-auto p-6">
@@ -76,7 +76,7 @@ export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelD
                             {/* Info */}
                             <div className="w-full md:w-1/2 space-y-4">
                                 <div>
-                                    <div className="text-xs text-emerald-600 font-bold uppercase tracking-wide mb-1 flex items-center gap-1">
+                                    <div className="text-xs text-[#0071e3] font-bold uppercase tracking-wide mb-1 flex items-center gap-1">
                                         <Building2 className="w-3 h-3" /> {parcel.city} / {parcel.district}
                                     </div>
                                     <h2 className="text-2xl font-bold text-gray-900">{parcel.island} Ada / {parcel.parsel} Parsel</h2>
@@ -142,7 +142,7 @@ export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelD
                     </button>
                     <Link
                         href={`/parcels/${parcelId}`}
-                        className="px-4 py-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                        className="px-4 py-2 text-sm font-bold text-white bg-[#0071e3] hover:bg-[#0077ed] rounded-lg shadow-sm transition-colors flex items-center gap-2"
                         onClick={onClose}
                     >
                         Tam Detayları Gör <ArrowRight className="w-4 h-4" />

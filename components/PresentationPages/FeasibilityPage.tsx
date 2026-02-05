@@ -110,7 +110,7 @@ export default function FeasibilityPage({ data }: FeasibilityPageProps) {
                     <div className={`rounded-xl p-5 border-2 ${feasibility.durum === 'FIRSAT' ? 'bg-emerald-50 border-emerald-200' : 'bg-blue-50 border-blue-200'}`}>
                         <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">Net Kâr Beklentisi</div>
                         <div className="text-2xl font-black text-gray-900">{feasibility.netKar}</div>
-                        <div className="text-sm font-bold text-emerald-600 mt-1">ROI: {feasibility.roi}</div>
+                        <div className="text-sm font-bold text-[#0071e3] mt-1">ROI: {feasibility.roi}</div>
                     </div>
                 </div>
             </div>
@@ -120,7 +120,7 @@ export default function FeasibilityPage({ data }: FeasibilityPageProps) {
             {/* Senaryo 2: Satın Alma (Yatırımcı Modeli) */}
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
-                    <Wallet className="h-5 w-5 text-emerald-600" />
+                    <Wallet className="h-5 w-5 text-[#0071e3]" />
                     <h3 className="text-xl font-bold text-gray-900">Senaryo B: Satın Al - Yap - Sat (Yatırımcı)</h3>
                     <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-bold">Tam Mülkiyet</span>
                 </div>
@@ -143,19 +143,19 @@ export default function FeasibilityPage({ data }: FeasibilityPageProps) {
                         </div>
 
                         <div className="bg-white rounded-lg p-3 border border-emerald-100 shadow-sm">
-                            <div className="text-xs text-emerald-600 uppercase font-bold mb-1">Toplam Ciro (Satış)</div>
-                            <div className="text-xl font-black text-emerald-700">
+                            <div className="text-xs text-[#0071e3] uppercase font-bold mb-1">Toplam Ciro (Satış)</div>
+                            <div className="text-xl font-black text-[#0077ed]">
                                 {totalRevenue.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺
                             </div>
-                            <div className="text-[10px] text-emerald-500 mt-1">Tüm dairelerin satışı</div>
+                            <div className="text-[10px] text-[#0071e3] mt-1">Tüm dairelerin satışı</div>
                         </div>
 
                         <div className="bg-white rounded-lg p-3 border border-emerald-100 shadow-sm">
-                            <div className="text-xs text-emerald-600 uppercase font-bold mb-1">Net Kâr</div>
-                            <div className="text-xl font-black text-emerald-700">
+                            <div className="text-xs text-[#0071e3] uppercase font-bold mb-1">Net Kâr</div>
+                            <div className="text-xl font-black text-[#0077ed]">
                                 {buyScenarioProfit.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺
                             </div>
-                            <div className="text-xs font-bold text-emerald-500 mt-1">ROI: %{buyScenarioROI.toFixed(1)}</div>
+                            <div className="text-xs font-bold text-[#0071e3] mt-1">ROI: %{buyScenarioROI.toFixed(1)}</div>
                         </div>
                     </div>
 
@@ -166,7 +166,7 @@ export default function FeasibilityPage({ data }: FeasibilityPageProps) {
                             proje sonunda <strong>%{buyScenarioROI.toFixed(1)}</strong> oranında getiri elde edebilirsiniz.
                             Kat karşılığı modeline göre {
                                 buyScenarioROI > parseFloat(feasibility.roi.replace('%', ''))
-                                    ? <span className="text-emerald-600 font-bold">daha kârlı</span>
+                                    ? <span className="text-[#0071e3] font-bold">daha kârlı</span>
                                     : <span className="text-blue-600 font-bold">benzer veya daha düşük</span>
                             } bir yatırım fırtası sunabilir.
                         </p>

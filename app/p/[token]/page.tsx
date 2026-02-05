@@ -197,16 +197,16 @@ export default function PublicPresentationPage() {
                                 <div className="text-xs text-gray-500 uppercase">Arsa Sahibi Payı</div>
                                 <div className="text-2xl font-bold text-gray-900">{data.feasibility.arsaSahibiDaire}</div>
                             </div>
-                            <div className="bg-emerald-50 rounded-lg p-4 text-center">
-                                <div className="text-xs text-emerald-600 uppercase">ROI</div>
+                            <div className="bg-[#0071e3]/10 rounded-lg p-4 text-center">
+                                <div className="text-xs text-[#0071e3] uppercase">ROI</div>
                                 <div className="text-2xl font-bold text-emerald-900">{data.feasibility.roi}</div>
                             </div>
-                            <div className={`rounded-lg p-4 text-center ${data.feasibility.durum === 'FIRSAT' ? 'bg-emerald-50' :
+                            <div className={`rounded-lg p-4 text-center ${data.feasibility.durum === 'FIRSAT' ? 'bg-[#0071e3]/10' :
                                     data.feasibility.durum === 'RİSKLİ' ? 'bg-red-50' :
                                         'bg-blue-50'
                                 }`}>
                                 <div className="text-xs text-gray-500 uppercase">Durum</div>
-                                <div className={`text-lg font-bold ${data.feasibility.durum === 'FIRSAT' ? 'text-emerald-700' :
+                                <div className={`text-lg font-bold ${data.feasibility.durum === 'FIRSAT' ? 'text-[#0077ed]' :
                                         data.feasibility.durum === 'RİSKLİ' ? 'text-red-700' :
                                             'text-blue-700'
                                     }`}>
@@ -215,9 +215,9 @@ export default function PublicPresentationPage() {
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg p-4 text-center">
-                            <div className="text-sm text-emerald-600">Net Kâr Beklentisi</div>
-                            <div className="text-3xl font-black text-emerald-700">{data.feasibility.netKar}</div>
+                        <div className="bg-gradient-to-r from-[#0071e3]/10 to-emerald-100 rounded-lg p-4 text-center">
+                            <div className="text-sm text-[#0071e3]">Net Kâr Beklentisi</div>
+                            <div className="text-3xl font-black text-[#0077ed]">{data.feasibility.netKar}</div>
                         </div>
                     </div>
                 )}

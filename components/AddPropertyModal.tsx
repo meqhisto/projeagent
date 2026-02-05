@@ -184,7 +184,7 @@ export default function AddPropertyModal({
                                         type="text"
                                         value={formData.title}
                                         onChange={(e) => handleChange('title', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="Örn: Ataşehir 3+1 Daire"
                                         required
                                     />
@@ -195,7 +195,7 @@ export default function AddPropertyModal({
                                     <select
                                         value={formData.type}
                                         onChange={(e) => handleChange('type', e.target.value as PropertyType)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                     >
                                         {Object.entries(PropertyTypeLabels).map(([value, label]) => (
                                             <option key={value} value={value}>{label}</option>
@@ -208,7 +208,7 @@ export default function AddPropertyModal({
                                     <select
                                         value={formData.status}
                                         onChange={(e) => handleChange('status', e.target.value as PropertyStatus)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                     >
                                         {Object.entries(PropertyStatusLabels).map(([value, label]) => (
                                             <option key={value} value={value}>{label}</option>
@@ -221,7 +221,7 @@ export default function AddPropertyModal({
                                     <select
                                         value={formData.roomType || ""}
                                         onChange={(e) => handleChange('roomType', e.target.value || undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                     >
                                         <option value="">Seçiniz</option>
                                         {Object.entries(RoomTypeLabels).map(([value, label]) => (
@@ -235,7 +235,7 @@ export default function AddPropertyModal({
                                     <select
                                         value={formData.parcelId || ""}
                                         onChange={(e) => handleChange('parcelId', e.target.value ? parseInt(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                     >
                                         <option value="">Parsel Seçiniz (Opsiyonel)</option>
                                         {parcels.map(p => (
@@ -251,7 +251,7 @@ export default function AddPropertyModal({
                                     <textarea
                                         value={formData.notes || ""}
                                         onChange={(e) => handleChange('notes', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none resize-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none resize-none"
                                         rows={3}
                                         placeholder="Ek bilgiler..."
                                     />
@@ -268,7 +268,7 @@ export default function AddPropertyModal({
                                         type="text"
                                         value={formData.city}
                                         onChange={(e) => handleChange('city', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="İstanbul"
                                         required
                                     />
@@ -280,7 +280,7 @@ export default function AddPropertyModal({
                                         type="text"
                                         value={formData.district}
                                         onChange={(e) => handleChange('district', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="Kadıköy"
                                         required
                                     />
@@ -292,7 +292,7 @@ export default function AddPropertyModal({
                                         type="text"
                                         value={formData.neighborhood}
                                         onChange={(e) => handleChange('neighborhood', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="Caferağa"
                                         required
                                     />
@@ -304,7 +304,7 @@ export default function AddPropertyModal({
                                         type="text"
                                         value={formData.address || ""}
                                         onChange={(e) => handleChange('address', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="Sokak, Bina No"
                                     />
                                 </div>
@@ -316,7 +316,7 @@ export default function AddPropertyModal({
                                         step="any"
                                         value={formData.latitude || ""}
                                         onChange={(e) => handleChange('latitude', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="41.0082"
                                     />
                                 </div>
@@ -328,7 +328,7 @@ export default function AddPropertyModal({
                                         step="any"
                                         value={formData.longitude || ""}
                                         onChange={(e) => handleChange('longitude', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="28.9784"
                                     />
                                 </div>
@@ -344,7 +344,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.grossArea || ""}
                                         onChange={(e) => handleChange('grossArea', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="120"
                                     />
                                 </div>
@@ -355,7 +355,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.netArea || ""}
                                         onChange={(e) => handleChange('netArea', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="100"
                                     />
                                 </div>
@@ -366,7 +366,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.floorNumber || ""}
                                         onChange={(e) => handleChange('floorNumber', e.target.value ? parseInt(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="3"
                                     />
                                 </div>
@@ -377,7 +377,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.totalFloors || ""}
                                         onChange={(e) => handleChange('totalFloors', e.target.value ? parseInt(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="10"
                                     />
                                 </div>
@@ -388,7 +388,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.buildYear || ""}
                                         onChange={(e) => handleChange('buildYear', e.target.value ? parseInt(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="2020"
                                     />
                                 </div>
@@ -398,7 +398,7 @@ export default function AddPropertyModal({
                                     <select
                                         value={formData.heatingType || ""}
                                         onChange={(e) => handleChange('heatingType', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                     >
                                         <option value="">Seçiniz</option>
                                         <option value="Doğalgaz (Kombi)">Doğalgaz (Kombi)</option>
@@ -415,7 +415,7 @@ export default function AddPropertyModal({
                                             type="checkbox"
                                             checked={formData.hasElevator}
                                             onChange={(e) => handleChange('hasElevator', e.target.checked)}
-                                            className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500"
+                                            className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-[#0071e3] focus:ring-[#0071e3]"
                                         />
                                         <span className="text-slate-300">Asansör</span>
                                     </label>
@@ -425,7 +425,7 @@ export default function AddPropertyModal({
                                             type="checkbox"
                                             checked={formData.hasParking}
                                             onChange={(e) => handleChange('hasParking', e.target.checked)}
-                                            className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500"
+                                            className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-[#0071e3] focus:ring-[#0071e3]"
                                         />
                                         <span className="text-slate-300">Otopark</span>
                                     </label>
@@ -442,7 +442,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.purchasePrice || ""}
                                         onChange={(e) => handleChange('purchasePrice', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="2500000"
                                     />
                                 </div>
@@ -453,7 +453,7 @@ export default function AddPropertyModal({
                                         type="date"
                                         value={formData.purchaseDate || ""}
                                         onChange={(e) => handleChange('purchaseDate', e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                     />
                                 </div>
 
@@ -463,7 +463,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.currentValue || ""}
                                         onChange={(e) => handleChange('currentValue', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="3000000"
                                     />
                                 </div>
@@ -474,7 +474,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.listingPrice || ""}
                                         onChange={(e) => handleChange('listingPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="3200000"
                                     />
                                 </div>
@@ -485,7 +485,7 @@ export default function AddPropertyModal({
                                         type="number"
                                         value={formData.monthlyRent || ""}
                                         onChange={(e) => handleChange('monthlyRent', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                         placeholder="15000"
                                     />
                                 </div>
@@ -505,7 +505,7 @@ export default function AddPropertyModal({
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                            className="px-6 py-2.5 bg-[#0071e3] text-white rounded-lg hover:bg-[#0071e3] transition-colors disabled:opacity-50"
                         >
                             {loading ? "Kaydediliyor..." : (editProperty ? "Güncelle" : "Kaydet")}
                         </button>

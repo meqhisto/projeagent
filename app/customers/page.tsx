@@ -79,7 +79,7 @@ export default function CustomersPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                     <h1 className="text-lg lg:text-2xl font-bold text-gray-900 flex items-center gap-2 lg:gap-3">
-                        <Users className="h-5 w-5 lg:h-8 lg:w-8 text-emerald-600 flex-shrink-0" />
+                        <Users className="h-5 w-5 lg:h-8 lg:w-8 text-[#0071e3] flex-shrink-0" />
                         <span className="truncate">Kişi Rehberi</span>
                     </h1>
                     <p className="text-gray-500 text-xs lg:text-sm mt-1 truncate">
@@ -88,7 +88,7 @@ export default function CustomersPage() {
                 </div>
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center justify-center px-3 lg:px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 hover:shadow-lg transition-all flex-shrink-0"
+                    className="inline-flex items-center justify-center px-3 lg:px-4 py-2 rounded-lg bg-[#0071e3] text-white text-sm font-medium hover:bg-[#0077ed] hover:shadow-lg transition-all flex-shrink-0"
                 >
                     <Plus className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Yeni Kişi</span>
@@ -103,7 +103,7 @@ export default function CustomersPage() {
                     <input
                         type="text"
                         placeholder="İsim, telefon veya e-posta ara..."
-                        className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -170,7 +170,7 @@ export default function CustomersPage() {
                         <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between gap-2">
                             <button
                                 onClick={() => setEditingCustomer(customer)}
-                                className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
+                                className="text-sm font-medium text-[#0071e3] hover:text-[#0077ed]"
                             >
                                 Düzenle
                             </button>
@@ -242,11 +242,11 @@ function AddCustomerModal({ onClose, onRefresh }: { onClose: () => void, onRefre
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-bold text-gray-800">İsim Soyisim</label>
-                        <input name="name" required className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="Ad Soyad" />
+                        <input name="name" required className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" placeholder="Ad Soyad" />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">Rol</label>
-                        <select name="role" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none">
+                        <select name="role" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none">
                             <option value="Land Owner">Mal Sahibi</option>
                             <option value="Investor">Yatırımcı</option>
                             <option value="Agent">Emlakçı</option>
@@ -255,19 +255,19 @@ function AddCustomerModal({ onClose, onRefresh }: { onClose: () => void, onRefre
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">Telefon</label>
-                        <input name="phone" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="05XX..." />
+                        <input name="phone" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" placeholder="05XX..." />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">E-Posta</label>
-                        <input name="email" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="email@example.com" />
+                        <input name="email" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" placeholder="email@example.com" />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">Notlar</label>
-                        <textarea name="notes" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" rows={3} placeholder="Notlar..." />
+                        <textarea name="notes" className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" rows={3} placeholder="Notlar..." />
                     </div>
                     <div className="flex justify-end gap-2 mt-6">
                         <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-gray-700 font-medium hover:bg-gray-100">İptal</button>
-                        <button type="submit" disabled={loading} className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700">Kaydet</button>
+                        <button type="submit" disabled={loading} className="px-4 py-2 rounded-lg bg-[#0071e3] text-white font-bold hover:bg-[#0077ed]">Kaydet</button>
                     </div>
                 </form>
             </div>
@@ -312,11 +312,11 @@ function EditCustomerModal({ customer, onClose, onRefresh }: { customer: Custome
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-bold text-gray-800">İsim Soyisim</label>
-                        <input name="name" required defaultValue={customer.name} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="Ad Soyad" />
+                        <input name="name" required defaultValue={customer.name} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" placeholder="Ad Soyad" />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">Rol</label>
-                        <select name="role" defaultValue={customer.role} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none">
+                        <select name="role" defaultValue={customer.role} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none">
                             <option value="Land Owner">Mal Sahibi</option>
                             <option value="Investor">Yatırımcı</option>
                             <option value="Agent">Emlakçı</option>
@@ -325,19 +325,19 @@ function EditCustomerModal({ customer, onClose, onRefresh }: { customer: Custome
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">Telefon</label>
-                        <input name="phone" defaultValue={customer.phone || ""} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="05XX..." />
+                        <input name="phone" defaultValue={customer.phone || ""} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" placeholder="05XX..." />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">E-Posta</label>
-                        <input name="email" defaultValue={customer.email || ""} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="email@example.com" />
+                        <input name="email" defaultValue={customer.email || ""} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" placeholder="email@example.com" />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-800">Notlar</label>
-                        <textarea name="notes" defaultValue={customer.notes || ""} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" rows={3} placeholder="Notlar..." />
+                        <textarea name="notes" defaultValue={customer.notes || ""} className="w-full mt-1 p-2 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder:text-gray-500 focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] outline-none" rows={3} placeholder="Notlar..." />
                     </div>
                     <div className="flex justify-end gap-2 mt-6">
                         <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-gray-700 font-medium hover:bg-gray-100">İptal</button>
-                        <button type="submit" disabled={loading} className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700">Güncelle</button>
+                        <button type="submit" disabled={loading} className="px-4 py-2 rounded-lg bg-[#0071e3] text-white font-bold hover:bg-[#0077ed]">Güncelle</button>
                     </div>
                 </form>
             </div>

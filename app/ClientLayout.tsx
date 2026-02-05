@@ -1,50 +1,65 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import AuthProvider from "@/components/AuthProvider";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
-import AuthProvider from "@/components/AuthProvider";
-import AuthGuard from "@/components/AuthGuard";
 
-interface ClientLayoutProps {
-    children: React.ReactNode;
-}
-
-export default function ClientLayout({ children }: ClientLayoutProps) {
+function LayoutContent({ children }: { children: React.ReactNode }) {
+    const { status } = useSession();
     const pathname = usePathname();
+    const router = useRouter();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     const isLoginPage = pathname === "/login";
     const isTestUiPage = pathname === "/test-ui";
     const isPublicPresentation = pathname?.startsWith("/p/");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-    const closeSidebar = () => setIsSidebarOpen(false);
+    useEffect(() => {
+        if (status === "unauthenticated" && !isLoginPage && !isTestUiPage && !isPublicPresentation) {
+            router.push("/login");
+        }
+    }, [status, router, isLoginPage, isTestUiPage, isPublicPresentation]);
 
-    // Public pages without auth
     if (isLoginPage || isTestUiPage || isPublicPresentation) {
-        return <AuthProvider>{children}</AuthProvider>;
+        return <>{children}</>;
+    }
+
+    if (status === "loading") {
+        return (
+            <div className="min-h-screen bg-subtle flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 rounded-full border-2 border-[#0071e3] border-t-transparent animate-spin" />
+                    <span className="text-sm text-[#6e6e73]">Yükleniyor...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (status === "unauthenticated") {
+        return null;
     }
 
     return (
+        <div className="min-h-screen bg-[#f5f5f7]">
+            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+            <div className="lg:pl-64">
+                <Header onMenuClick={() => setSidebarOpen(true)} />
+                <main className="p-4 sm:p-6 lg:p-8">
+                    {children}
+                </main>
+            </div>
+        </div>
+    );
+}
+
+export default function ClientLayout({ children }: { children: React.ReactNode }) {
+    return (
         <AuthProvider>
-            <AuthGuard>
-                <div className="flex min-h-screen bg-gradient-subtle relative">
-                    {/* Subtle texture overlay */}
-                    <div className="texture-noise fixed inset-0 pointer-events-none" />
-
-                    <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
-
-                    <div className="flex flex-1 flex-col lg:pl-72 pl-0 transition-all duration-300 relative z-10">
-                        <Header onMenuClick={toggleSidebar} />
-                        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-                            <div className="animate-fade-in">
-                                {children}
-                            </div>
-                        </main>
-                    </div>
-                </div>
-            </AuthGuard>
+            <LayoutContent>{children}</LayoutContent>
         </AuthProvider>
     );
 }
