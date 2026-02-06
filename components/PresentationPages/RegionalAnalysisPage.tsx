@@ -1,10 +1,12 @@
 import { TrendingUp, MapPin, ExternalLink } from "lucide-react";
 
+import type { Parcel, RegionalData, UserPrecedent } from "@/types";
+
 interface RegionalAnalysisPageProps {
     data: {
-        parcel: any;
-        regionalData: any[];
-        userPrecedents?: any[];
+        parcel: Parcel;
+        regionalData: RegionalData[];
+        userPrecedents?: UserPrecedent[];
     };
 }
 
@@ -158,7 +160,7 @@ export default function RegionalAnalysisPage({ data }: RegionalAnalysisPageProps
                                         </td>
                                         <td className="px-6 py-3 text-center">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${precedent.type === 'RESIDENTIAL' ? 'bg-green-100 text-green-700' :
-                                                    'bg-blue-100 text-blue-700'
+                                                'bg-blue-100 text-blue-700'
                                                 }`}>
                                                 {precedent.type === 'RESIDENTIAL' ? 'Konut' : 'Ticari/Diğer'}
                                             </span>

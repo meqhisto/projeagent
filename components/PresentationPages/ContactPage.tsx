@@ -3,17 +3,12 @@
 import { Phone, Mail, Globe, MapPin, Building } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
+import type { Parcel, PresentationUserSettings } from "@/types";
+
 interface ContactPageProps {
     data: {
-        parcel: any;
-        userSettings: {
-            companyName: string;
-            email: string;
-            phone: string | null;
-            logoUrl: string | null;
-            address: string | null;
-            website: string | null;
-        };
+        parcel: Parcel;
+        userSettings: PresentationUserSettings;
         generatedAt: string;
     };
 }

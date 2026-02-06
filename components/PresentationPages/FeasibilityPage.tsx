@@ -1,23 +1,12 @@
 import { Calculator, TrendingUp, DollarSign, Building2, Wallet } from "lucide-react";
 
+import type { Parcel, FeasibilityCalculation, UserPrecedent } from "@/types";
+
 interface FeasibilityPageProps {
     data: {
-        parcel: any;
-        userPrecedents: any[];
-        feasibility: {
-            fullResult: any;
-            arsaM2: number;
-            emsal: number;
-            katKarsiligiOrani: number;
-            toplamDaire: number;
-            muteahhitDaire: number;
-            arsaSahibiDaire: number;
-            netKar: string;
-            roi: string;
-            durum: string;
-            insaatMaliyeti: number;
-            satisFiyati: number;
-        };
+        parcel: Parcel;
+        userPrecedents: UserPrecedent[];
+        feasibility: FeasibilityCalculation | null;
     };
 }
 
@@ -28,7 +17,8 @@ export default function FeasibilityPage({ data }: FeasibilityPageProps) {
         return null;
     }
 
-    const result = feasibility.fullResult || {};
+    // Cast explicitly for legacy fields dynamically accessed
+    const result = (feasibility.fullResult as any) || {};
 
     // 1. Senaryo: Kat Karşılığı (Mevcut Veriler)
     // Müteahhit sadece inşaat maliyetini öder, dairelerin bir kısmını alır.

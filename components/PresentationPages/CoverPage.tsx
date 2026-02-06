@@ -1,11 +1,10 @@
+import type { Parcel, ParcelImage, PresentationUserSettings } from "@/types";
+
 interface CoverPageProps {
     data: {
-        parcel: any;
-        images: any[];
-        userSettings: {
-            companyName: string;
-            logoUrl: string | null;
-        };
+        parcel: Parcel;
+        images: ParcelImage[];
+        userSettings: PresentationUserSettings;
         generatedAt: string;
     };
 }

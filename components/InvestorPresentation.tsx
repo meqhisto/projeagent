@@ -3,6 +3,16 @@
 import { useState, useEffect } from "react";
 import { Download, Share2, Eye, Loader2, Copy, Check, Link2, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import type {
+    Parcel,
+    ParcelImage,
+    ZoningInfo,
+    Note,
+    FeasibilityCalculation,
+    RegionalData,
+    UserPrecedent,
+    PresentationUserSettings
+} from "@/types";
 
 // Sunum sayfaları
 import CoverPage from "./PresentationPages/CoverPage";
@@ -13,22 +23,15 @@ import FeasibilityPage from "./PresentationPages/FeasibilityPage";
 // ProposalPage kaldırıldı
 import ContactPage from "./PresentationPages/ContactPage";
 
-interface PresentationData {
-    parcel: any;
-    images: any[];
-    zoning: any;
-    notes: any[];
-    feasibility: any;
-    regionalData: any[];
-    userPrecedents: any[];
-    userSettings: {
-        companyName: string;
-        email: string;
-        phone: string | null;
-        logoUrl: string | null;
-        address: string | null;
-        website: string | null;
-    };
+export interface PresentationData {
+    parcel: Parcel;
+    images: ParcelImage[];
+    zoning: ZoningInfo | null;
+    notes: Note[];
+    feasibility: FeasibilityCalculation | null;
+    regionalData: RegionalData[];
+    userPrecedents: UserPrecedent[];
+    userSettings: PresentationUserSettings;
     generatedAt: string;
 }
 

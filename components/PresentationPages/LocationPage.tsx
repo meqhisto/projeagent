@@ -1,9 +1,10 @@
 import { MapPin, Building, Ruler, Layers } from "lucide-react";
+import type { Parcel, ZoningInfo } from "@/types";
 
 interface LocationPageProps {
     data: {
-        parcel: any;
-        zoning: any;
+        parcel: Parcel;
+        zoning: ZoningInfo | null;
     };
 }
 

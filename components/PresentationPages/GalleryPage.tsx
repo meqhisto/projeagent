@@ -1,8 +1,9 @@
 import { Image as ImageIcon } from "lucide-react";
+import type { ParcelImage } from "@/types";
 
 interface GalleryPageProps {
     data: {
-        images: any[];
+        images: ParcelImage[];
     };
 }
 
@@ -34,16 +35,16 @@ export default function GalleryPage({ data }: GalleryPageProps) {
 
             {/* Gallery Grid */}
             <div className={`grid gap-4 ${displayImages.length === 1 ? 'grid-cols-1' :
-                    displayImages.length === 2 ? 'grid-cols-2' :
-                        displayImages.length <= 4 ? 'grid-cols-2' :
-                            'grid-cols-3'
+                displayImages.length === 2 ? 'grid-cols-2' :
+                    displayImages.length <= 4 ? 'grid-cols-2' :
+                        'grid-cols-3'
                 }`}>
                 {displayImages.map((image, index) => (
                     <div
                         key={image.id}
                         className={`relative rounded-xl overflow-hidden border border-gray-200 ${displayImages.length === 1 ? 'h-[500px]' :
-                                displayImages.length === 2 ? 'h-[350px]' :
-                                    'h-[200px]'
+                            displayImages.length === 2 ? 'h-[350px]' :
+                                'h-[200px]'
                             }`}
                     >
                         <img
