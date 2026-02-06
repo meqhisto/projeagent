@@ -1,16 +1,18 @@
 import * as XLSX from 'xlsx';
+import type { Parcel } from "@/types";
 
-export function exportToExcel(parcels: any[], filename: string = 'parseller.xlsx') {
+export function exportToExcel(parcels: Partial<Parcel>[], filename: string = 'parseller.xlsx') {
     const data = parcels.map(p => ({
         'Şehir': p.city,
         'İlçe': p.district,
         'Mahalle': p.neighborhood,
         'Ada': p.island,
-        'Parsel': p.parcel,
+        'Parsel': p.parsel,
+        // Optional properties might be undefined
         'Alan (m²)': p.area || '',
         'CRM Aşaması': p.crmStage || 'NEW_LEAD',
         'Durum': p.status || 'PENDING',
-        'Eklenme Tarihi': new Date(p.createdAt).toLocaleDateString('tr-TR'),
+        'Eklenme Tarihi': p.createdAt ? new Date(p.createdAt).toLocaleDateString('tr-TR') : '',
         'İmar Durumu': p.zoning ? 'Var' : 'Yok',
         'Enlem': p.latitude || '',
         'Boylam': p.longitude || '',
@@ -34,17 +36,17 @@ export function exportToExcel(parcels: any[], filename: string = 'parseller.xlsx
     XLSX.writeFile(wb, filename);
 }
 
-export function exportToCSV(parcels: any[], filename: string = 'parseller.csv') {
+export function exportToCSV(parcels: Partial<Parcel>[], filename: string = 'parseller.csv') {
     const data = parcels.map(p => ({
         'Şehir': p.city,
         'İlçe': p.district,
         'Mahalle': p.neighborhood,
         'Ada': p.island,
-        'Parsel': p.parcel,
+        'Parsel': p.parsel,
         'Alan (m²)': p.area || '',
         'CRM Aşaması': p.crmStage || 'NEW_LEAD',
         'Durum': p.status || 'PENDING',
-        'Eklenme Tarihi': new Date(p.createdAt).toLocaleDateString('tr-TR'),
+        'Eklenme Tarihi': p.createdAt ? new Date(p.createdAt).toLocaleDateString('tr-TR') : '',
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);

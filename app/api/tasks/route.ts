@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
 // GET - List tasks with filters
@@ -16,7 +17,7 @@ export async function GET(req: Request) {
         const dueToday = searchParams.get("dueToday");
         const dueThisWeek = searchParams.get("dueThisWeek");
 
-        const where: any = {
+        const where: Prisma.InteractionWhereInput = {
             type: "TASK"
         };
 

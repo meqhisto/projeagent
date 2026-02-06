@@ -25,7 +25,7 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
         );
     }
 
-    if (!session || (session.user as any).role !== "ADMIN") {
+    if (!session || session.user?.role !== "ADMIN") {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">

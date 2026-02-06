@@ -41,7 +41,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
 
     const navigation = allNavigation.filter(item =>
-        item.roles.includes((session?.user as any)?.role || "USER")
+        item.roles.includes(session?.user?.role || "USER")
     );
 
     const handleSignOut = () => {

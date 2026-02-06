@@ -102,8 +102,9 @@ export interface Customer {
 export interface Interaction {
     id: number;
     type: string;
-    notes: string | null;
-    customerId: number;
+    content: string;
+    date: string | Date;
+    customerId: number | null;
     parcelId: number | null;
     createdAt: string | Date;
 }
@@ -129,7 +130,7 @@ export interface FeasibilityCalculation {
     roi: string;
     durum: string;
 
-    fullResult: FeasibilityResult; // This might be parsed JSON or string depending on where it's used, but in frontend it's usually parsed
+    fullResult: FeasibilityResult | string; // Can be JSON string (DB) or parsed object (Presentation)
     createdAt: string | Date;
 }
 
@@ -143,13 +144,31 @@ export interface PresentationUserSettings {
 }
 
 export interface FeasibilityResult {
-    totalCost: number;
-    totalRevenue: number;
-    netProfit: number;
-    profitMargin: number;
-    roi: number;
-    breakdownCosts?: Record<string, number>;
-    breakdownRevenue?: Record<string, number>;
+    karar_destek: {
+        durum: string;
+        yorum: string;
+        oneri: string;
+    };
+    fiziksel_ozet: {
+        muteahhit_daireleri: number;
+        arsa_sahibi_daireleri: number;
+        toplam_daire_sayisi: number;
+        toplam_insaat_alani: string;
+    };
+    finansal_tablo: {
+        beklenen_ciro: string;
+        toplam_insaat_maliyeti: string;
+        net_kar: string;
+        yatirim_donus_orani_roi: string;
+    };
+    serefiye_analizi?: {
+        optimize_edilmis_ciro: string;
+    };
+    finansal_simulasyon?: {
+        maksimum_nakit_ihtiyaci: string;
+        uyari: string;
+    };
+    teklif_ozeti?: string;
     [key: string]: unknown;
 }
 

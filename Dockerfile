@@ -1,39 +1,54 @@
-# Frontend Dockerfile
-FROM node:20-slim
+# Multi-stage Dockerfile for Next.js
 
+# 1. Install dependencies only when needed
+FROM node:20-alpine AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install OpenSSL for Prisma and Chromium dependencies for Puppeteer
-RUN apt-get update -y && apt-get install -y \
-    openssl \
-    chromium \
-    fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
-    libx11-xcb1 libxcb-dri3-0 libxcomposite1 libxdamage1 \
-    libxfixes3 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json* ./
+RUN npm ci
 
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Use system Chromium instead of bundled (saves ~280MB)
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-# Install dependencies
-RUN npm install
-
-# Copy source code
+# 2. Rebuild the source code only when needed
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build the application
+# Build Next.js
+ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
-# Expose port
+# 3. Production image, copy all the files and run next
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV PORT 3000
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Set up Prisma for production
+COPY --from=builder /app/prisma ./prisma
+
+# Copy public assets
+COPY --from=builder /app/public ./public
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nextjs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nextjs /app/.next/static ./.next/static
+
+USER nextjs
+
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD ["node", "server.js"]

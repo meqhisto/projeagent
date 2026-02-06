@@ -32,13 +32,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="tr" suppressHydrationWarning={true}>
       <body className={`${plusJakarta.variable} ${dmSans.variable} font-body antialiased`}>
-        <ClientLayout>{children}</ClientLayout>
+        <ClientLayout>
+          {children}
+          {modal}
+        </ClientLayout>
       </body>
     </html>
   );

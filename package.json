@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "reset-password": "tsx prisma/reset-password.ts",
     "seed": "tsx prisma/seed.ts",
     "backup": "bash backup-database.sh"
@@ -33,11 +34,13 @@
     "react-dom": "19.2.1",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.6.0",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
     "xlsx": "^0.18.5",
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",

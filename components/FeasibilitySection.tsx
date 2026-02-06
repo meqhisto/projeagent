@@ -2,33 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Calculator, TrendingUp, AlertTriangle, CheckCircle, History, Trash2, Eye, ChevronDown, ChevronUp, Save } from "lucide-react";
-
-interface FeasibilityCalculation {
-    id: number;
-    arsaM2: number;
-    emsal: number;
-    katKarsiligiOrani: number;
-    ortalamaDaireBrutu: number;
-    insaatMaliyeti: number;
-    satisFiyati: number;
-    bonusFactor: number | null;
-    katAdedi: number | null;
-    toplamDaire: number;
-    muteahhitDaire: number;
-    arsaSahibiDaire: number;
-    netKar: string;
-    roi: string;
-    durum: string;
-    fullResult: string;
-    createdAt: string;
-}
+import type { FeasibilityCalculation, FeasibilityResult } from "@/types";
 
 interface FeasibilitySectionProps {
     parcelId: number;
     parcelArea: number;
     initialKs?: number;
     initialTaks?: number;
-    onCalculateSuccess?: (result: any) => void;
+    onCalculateSuccess?: (result: FeasibilityResult) => void;
 }
 
 export default function FeasibilitySection({
@@ -40,7 +21,7 @@ export default function FeasibilitySection({
 }: FeasibilitySectionProps) {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<FeasibilityResult | null>(null);
     const [savedCalculations, setSavedCalculations] = useState<FeasibilityCalculation[]>([]);
     const [showHistory, setShowHistory] = useState(false);
     const [selectedHistoryItem, setSelectedHistoryItem] = useState<FeasibilityCalculation | null>(null);
@@ -87,7 +68,7 @@ export default function FeasibilitySection({
     };
 
     // Hesaplamayı veritabanına kaydet
-    const saveCalculation = async (calculationResult: any) => {
+    const saveCalculation = async (calculationResult: FeasibilityResult) => {
         if (!parcelId) return;
 
         setSaving(true);
@@ -181,7 +162,9 @@ export default function FeasibilitySection({
     // Geçmiş hesaplamayı görüntüle
     const viewHistoryItem = (item: FeasibilityCalculation) => {
         try {
-            const fullResult = JSON.parse(item.fullResult);
+            const fullResult = typeof item.fullResult === "string"
+                ? JSON.parse(item.fullResult)
+                : item.fullResult;
             setResult(fullResult);
             setSelectedHistoryItem(item);
         } catch (error) {
@@ -211,8 +194,9 @@ export default function FeasibilitySection({
     };
 
     // Tarih formatlama
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString("tr-TR", {
+    const formatDate = (dateInput: string | Date) => {
+        const date = new Date(dateInput);
+        return date.toLocaleString("tr-TR", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -383,10 +367,10 @@ export default function FeasibilitySection({
                                             </div>
                                             <div className="flex justify-between text-xs text-amber-900">
                                                 <span>Maksimum Nakit İhtiyacı:</span>
-                                                <span className="font-bold">{result.finansal_simulasyon.maksimum_nakit_ihtiyaci}</span>
+                                                <span className="font-bold">{result.finansal_simulasyon?.maksimum_nakit_ihtiyaci}</span>
                                             </div>
                                             <div className="text-[10px] bg-white/50 p-2 rounded text-amber-800 italic border border-amber-100">
-                                                {result.finansal_simulasyon.uyari}
+                                                {result.finansal_simulasyon?.uyari}
                                             </div>
                                         </div>
                                     )}
@@ -481,10 +465,10 @@ export default function FeasibilitySection({
                                                 </td>
                                                 <td className="p-3 text-center">
                                                     <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${calc.durum === "FIRSAT"
-                                                            ? "bg-emerald-100 text-[#0077ed]"
-                                                            : calc.durum === "RİSKLİ"
-                                                                ? "bg-red-100 text-red-700"
-                                                                : "bg-blue-100 text-blue-700"
+                                                        ? "bg-emerald-100 text-[#0077ed]"
+                                                        : calc.durum === "RİSKLİ"
+                                                            ? "bg-red-100 text-red-700"
+                                                            : "bg-blue-100 text-blue-700"
                                                         }`}>
                                                         {calc.durum}
                                                     </span>

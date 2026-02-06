@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X, MapPin, Building2, Calendar, ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { Parcel, Interaction, Customer } from "@/types";
 
 interface ParcelDetailModalProps {
     isOpen: boolean;
@@ -12,7 +13,7 @@ interface ParcelDetailModalProps {
 }
 
 export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelDetailModalProps) {
-    const [parcel, setParcel] = useState<any>(null);
+    const [parcel, setParcel] = useState<Parcel | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -101,7 +102,7 @@ export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelD
                             <div className="mb-8">
                                 <h4 className="text-sm font-bold text-gray-900 mb-3 border-b border-gray-100 pb-2">Son Etkileşimler</h4>
                                 <div className="space-y-3">
-                                    {parcel.interactions.slice(0, 3).map((interaction: any) => (
+                                    {parcel.interactions?.slice(0, 3).map((interaction: Interaction) => (
                                         <div key={interaction.id} className="flex gap-3 text-sm p-3 rounded-lg bg-gray-50 border border-gray-100">
                                             <div className="font-bold text-gray-700 w-24 shrink-0">{interaction.type}</div>
                                             <div className="text-gray-600 line-clamp-1">{interaction.content}</div>
@@ -119,7 +120,7 @@ export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelD
                             <div>
                                 <h4 className="text-sm font-bold text-gray-900 mb-3 border-b border-gray-100 pb-2">İlgili Kişiler</h4>
                                 <div className="flex flex-wrap gap-2">
-                                    {parcel.stakeholders.map((s: any) => (
+                                    {parcel.stakeholders?.map((s: Customer) => (
                                         <span key={s.id} className="text-xs font-medium px-2 py-1 bg-purple-50 text-purple-700 rounded-md border border-purple-100">
                                             {s.name} ({s.role})
                                         </span>

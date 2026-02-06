@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 import { ParcelCreateSchema, validateSchema } from "@/lib/validations";
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
         const category = searchParams.get("category");
 
         // Build query based on role
-        const where: any = isAdmin((user as any).role as string)
+        const where: Prisma.ParcelWhereInput = isAdmin(user.role as string)
             ? {} // Admin sees all
             : {
                 OR: [
