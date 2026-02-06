@@ -276,7 +276,7 @@ projeagent/
 - [x] Header arama fonksiyonu - SearchModal çalışıyor ✅
 - [ ] Excel/CSV export desteği yok
 - [ ] Email bildirim sistemi yok
-- [ ] Sunum PDF export'u bazen timeout alıyor
+- [x] Sunum PDF export'u timeout sorunu - Chromium + networkidle2 ile çözüldü ✅
 
 ### Teknik Borç:
 - [ ] Bazı componetlerde hala inline stiller var
