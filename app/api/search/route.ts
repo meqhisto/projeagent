@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
     try {
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
                     { name: { contains: query, mode: "insensitive" } },
                     { email: { contains: query, mode: "insensitive" } },
                     { phone: { contains: query, mode: "insensitive" } },
-                    { company: { contains: query, mode: "insensitive" } },
+                    { role: { contains: query, mode: "insensitive" } },
                 ],
             },
             select: {
@@ -51,8 +51,7 @@ export async function GET(req: Request) {
                 name: true,
                 email: true,
                 phone: true,
-                company: true,
-                type: true,
+                role: true,
             },
             take: 5,
             orderBy: { createdAt: "desc" },

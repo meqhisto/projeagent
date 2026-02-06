@@ -21,8 +21,7 @@ interface SearchResult {
         name: string;
         email: string | null;
         phone: string | null;
-        company: string | null;
-        type: string;
+        role: string;
     }[];
 }
 
@@ -259,7 +258,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                                 "text-xs truncate",
                                                 selectedIndex === resultIdx ? "text-white/70" : "text-[#6e6e73]"
                                             )}>
-                                                {customer.company || customer.email || customer.phone || "-"}
+                                                {customer.role || customer.email || customer.phone || "-"}
                                             </p>
                                         </div>
                                     </button>
