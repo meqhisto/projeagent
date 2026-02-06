@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Menu, Search, Bell, ChevronDown } from "lucide-react";
+import { Menu, Search, ChevronDown } from "lucide-react";
 import SearchModal from "./SearchModal";
+import NotificationBell from "./NotificationBell";
 
 interface HeaderProps {
     onMenuClick?: () => void;
@@ -56,10 +57,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2">
                         {/* Notifications */}
-                        <button className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors">
-                            <Bell className="h-5 w-5" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#ff3b30] rounded-full" />
-                        </button>
+                        <NotificationBell />
 
                         {/* User Menu */}
                         <button className="flex items-center gap-2 px-2 py-1.5 hover:bg-black/[0.04] rounded-lg transition-colors">

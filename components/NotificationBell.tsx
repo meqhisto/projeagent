@@ -94,11 +94,11 @@ export default function NotificationBell() {
             {/* Bell Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
             >
-                <Bell className="h-5 w-5 text-gray-600" />
+                <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    <span className="absolute top-1 right-1 bg-[#ff3b30] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                         {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                 )}
@@ -106,15 +106,15 @@ export default function NotificationBell() {
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                <div className="absolute right-0 mt-2 w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-black/[0.06] z-50 overflow-hidden">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                        <h3 className="font-bold text-gray-900">Bildirimler</h3>
+                    <div className="flex items-center justify-between p-4 border-b border-black/[0.06]">
+                        <h3 className="font-semibold text-[#1d1d1f]">Bildirimler</h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
                                 disabled={loading}
-                                className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                                className="text-xs text-[#0071e3] hover:text-[#0077ed] font-medium flex items-center gap-1"
                             >
                                 <CheckCheck className="h-3 w-3" />
                                 Tümünü Okundu İşaretle

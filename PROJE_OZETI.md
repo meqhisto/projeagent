@@ -272,8 +272,8 @@ projeagent/
 - [ ] Dark mode desteği (opsiyonel - sonra)
 
 ### Fonksiyonel Eksikler:
-- [ ] Bildirim sistemi (notifications) henüz çalışmıyor
-- [ ] Header arama fonksiyonu aktif değil
+- [x] Bildirim sistemi (notifications) - NotificationBell bağlandı ✅
+- [x] Header arama fonksiyonu - SearchModal çalışıyor ✅
 - [ ] Excel/CSV export desteği yok
 - [ ] Email bildirim sistemi yok
 - [ ] Sunum PDF export'u bazen timeout alıyor
