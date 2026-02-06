@@ -100,10 +100,10 @@ export async function GET(
 
             console.log("[PDF Export] Navigating to:", internalUrl);
 
-            // Sayfaya git
+            // Sayfaya git - networkidle2 daha hızlı (2 or fewer connections for 500ms)
             const response = await page.goto(internalUrl, {
-                waitUntil: "networkidle0",
-                timeout: 30000
+                waitUntil: "networkidle2",
+                timeout: 60000 // Increased from 30s to 60s
             });
 
             console.log("[PDF Export] Navigation complete, status:", response?.status());
@@ -112,8 +112,9 @@ export async function GET(
             const pageTitle = await page.title();
             console.log("[PDF Export] Page title:", pageTitle);
 
-            // Ekstra bekleme
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Sayfanın tam render olması için bekleme
+            await page.waitForSelector('body', { timeout: 10000 });
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced from 2s
 
             console.log("[PDF Export] Creating PDF...");
 
