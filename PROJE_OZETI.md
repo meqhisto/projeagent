@@ -237,7 +237,71 @@ projeagent/
 
 ---
 
+## 🔧 Sorun Giderme (Troubleshooting)
+
+### Prisma OpenSSL Uyumsuzluk Hatası
+
+**Hata Mesajı:**
+```
+Error loading shared library libssl.so.1.1: No such file or directory
+(needed by /app/node_modules/.prisma/client/libquery_engine-linux-musl.so.node)
+```
+
+**Sebep:** Alpine Linux (musl) ile OpenSSL versiyon uyumsuzluğu.
+
+**Çözüm (7 Şubat 2026'da uygulandı):**
+1. Dockerfile `node:20-alpine` → `node:20-slim` (Debian) olarak değiştirildi
+2. Schema.prisma: `binaryTargets = ["native", "debian-openssl-3.0.x"]`
+
+**Eğer sorun tekrar ederse:**
+```bash
+cd ~/projeagent
+git pull
+
+# Volume'u sil (KRİTİK - eski Prisma binary'lerini temizler)
+docker compose down
+docker volume rm projeagent_node_modules
+
+# Cache temizle ve rebuild
+docker system prune -af
+docker compose up -d --build
+```
+
+**Not:** `.env` dosyasında URL'lerde tırnak kullanılmamalı:
+```env
+# YANLIŞ:
+NEXTAUTH_URL="https://ekip.invecoproje.com"
+
+# DOĞRU:
+NEXTAUTH_URL=https://ekip.invecoproje.com
+```
+
+---
+
 ## 💬 Konuşma Özeti
+
+**Tarih:** 7 Şubat 2026  
+**Konu:** Prisma Docker Uyumluluk Hatası Çözümü
+
+### Yapılan İşler:
+1. **Prisma OpenSSL Hatası Çözüldü:**
+   - Hata: `libssl.so.1.1: No such file or directory`
+   - Alpine Linux + OpenSSL 3.x uyumsuzluğu tespit edildi
+   - `Dockerfile` tamamen yeniden yazıldı: `node:20-alpine` → `node:20-slim` (Debian)
+   - `schema.prisma`: `binaryTargets = ["native", "debian-openssl-3.0.x"]`
+
+2. **Ek Sorunlar:**
+   - `.env` dosyasında URL'lerin tırnak içinde olması `Invalid URL` hatasına neden oluyordu
+   - `docker-compose.yml`'daki `node_modules` volume eski binary'leri cache'liyordu
+
+3. **Çözüm Adımları:**
+   - Volume silme: `docker volume rm projeagent_node_modules`
+   - Cache temizleme: `docker system prune -af`
+   - Yeniden build: `docker compose up -d --build`
+
+**Commit:** `fix: switch to Debian-slim Docker image for Prisma OpenSSL compatibility`
+
+---
 
 **Tarih:** 6 Şubat 2026  
 **Konu:** Apple Liquid Design UI Yenileme
