@@ -4,6 +4,8 @@ import { Prisma } from "@prisma/client";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 import { ParcelCreateSchema, validateSchema } from "@/lib/validations";
+import { logger } from "@/lib/logger";
+import { PARCEL_STATUS } from "@/lib/constants";
 
 export async function GET(request: Request) {
     try {
@@ -72,18 +74,18 @@ export async function POST(request: Request) {
     }
 
     try {
-        console.log("POST /api/parcels - Starting");
+        logger.debug("POST /api/parcels - Starting");
         const userId = await getUserId();
-        console.log("POST /api/parcels - User ID:", userId);
+        logger.debug("POST /api/parcels - User ID:", userId);
 
         const body = await request.json();
-        console.log("POST /api/parcels - Body received", { city: body.city, parsel: body.parsel });
+        logger.debug("POST /api/parcels - Body received", { city: body.city, parsel: body.parsel });
 
         // Zod validation
         const validation = validateSchema(ParcelCreateSchema, body);
 
         if (!validation.success) {
-            console.log("POST /api/parcels - Validation errors:", validation.errors);
+            logger.debug("POST /api/parcels - Validation errors:", validation.errors);
             return NextResponse.json(
                 { error: "Geçersiz veri", details: validation.errors },
                 { status: 400 }
@@ -102,13 +104,13 @@ export async function POST(request: Request) {
                 area: area,
                 latitude: latitude,
                 longitude: longitude,
-                status: "RESEARCHING",
+                status: PARCEL_STATUS.RESEARCHING,
                 category: category || "UNCATEGORIZED",
                 tags: tags || null,
                 ownerId: userId, // Automatically set owner
             },
         });
-        console.log("POST /api/parcels - Created:", newParcel.id);
+        logger.debug("POST /api/parcels - Created:", newParcel.id);
 
         // Trigger background research job
         // We don't await this to keep the API fast
@@ -124,7 +126,7 @@ export async function POST(request: Request) {
                 { status: 409 }
             );
         }
-        console.error("POST Error:", error);
+        logger.error("POST /api/parcels Error:", error);
         return NextResponse.json(
             { error: "Failed to create parcel", details: error instanceof Error ? error.message : String(error) },
             { status: 500 }

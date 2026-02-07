@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth/roleCheck";
+import { logger } from "@/lib/logger";
+import { INTERACTION_TYPE, ROLES, PRIORITY, NOTIFICATION_TYPE } from "@/lib/constants";
 
 // GET - List tasks with filters
 export async function GET(req: Request) {
@@ -18,12 +20,12 @@ export async function GET(req: Request) {
         const dueThisWeek = searchParams.get("dueThisWeek");
 
         const where: Prisma.InteractionWhereInput = {
-            type: "TASK"
+            type: INTERACTION_TYPE.TASK
         };
 
         // User based filtering (Secure default)
         // If not admin, user can only see tasks assigned to them OR created by them
-        if (user.role !== "ADMIN") {
+        if (user.role !== ROLES.ADMIN) {
             where.OR = [
                 { assignedTo: parseInt(user.id || "0") },
                 { createdBy: parseInt(user.id || "0") }
@@ -125,7 +127,7 @@ export async function GET(req: Request) {
         return NextResponse.json(tasks);
 
     } catch (error: any) {
-        console.error("Get tasks error:", error);
+        logger.error("Get tasks error:", error);
 
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -149,7 +151,7 @@ export async function POST(req: Request) {
             customerId,
             content,
             dueDate,
-            priority = "MEDIUM",
+            priority = PRIORITY.MEDIUM,
             assignedTo,
             tags
         } = body;
@@ -166,7 +168,7 @@ export async function POST(req: Request) {
             data: {
                 parcelId: parseInt(parcelId),
                 customerId: customerId ? parseInt(customerId) : null,
-                type: "TASK",
+                type: INTERACTION_TYPE.TASK,
                 content,
                 dueDate: dueDate ? new Date(dueDate) : null,
                 priority,
@@ -187,11 +189,11 @@ export async function POST(req: Request) {
         if (assignedTo && assignedTo !== user.id) {
             await prisma.notification.create({
                 data: {
-                    type: "TASK_ASSIGNED",
+                    type: NOTIFICATION_TYPE.TASK_ASSIGNED,
                     title: "Yeni Görev Atandı",
                     message: `${user.name} size "${content}" görevini atadı`,
                     relatedId: task.id,
-                    relatedType: "TASK"
+                    relatedType: INTERACTION_TYPE.TASK
                 }
             });
         }
@@ -199,7 +201,7 @@ export async function POST(req: Request) {
         return NextResponse.json(task);
 
     } catch (error: any) {
-        console.error("Create task error:", error);
+        logger.error("Create task error:", error);
 
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
