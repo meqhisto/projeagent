@@ -190,6 +190,21 @@ projeagent/
 - [ ] Email notifications
 - [ ] Export to Excel/CSV
 
+### 🔐 Güvenlik İyileştirmeleri (Kısmi Tamamlandı - 08/02/2026)
+
+**✅ Tamamlanan:**
+- [x] AES-256-GCM veri şifreleme (`lib/encryption.ts`)
+- [x] IP bazlı rate limiting ve engelleme (`lib/rateLimit.ts`)
+- [x] Audit logging sistemi (`lib/auditLog.ts`, `/api/admin/audit-logs`)
+- [x] Security headers (HSTS, X-Frame-Options, X-XSS-Protection)
+- [x] Prisma versiyon sabitleme (5.22.0)
+
+**⏳ Eksik Kalan:**
+- [ ] CSP (Content-Security-Policy) header eklenmeli
+- [ ] 2FA (Two-Factor Authentication) - Admin kullanıcılar için
+- [ ] PostgreSQL SSL bağlantısı
+- [ ] npm audit vulnerabilities düzeltilmeli
+
 ### Gelecek:
 - [ ] Multi-language support (EN, TR)
 - [ ] Mobile app (React Native)
