@@ -36,11 +36,15 @@ FROM node:20-slim AS runner
 WORKDIR /app
 
 # Install runtime dependencies for Prisma and Puppeteer/Chromium
+# Added: dumb-init, procps, and additional chromium dependencies
 RUN apt-get update && apt-get install -y \
     openssl \
     chromium \
+    dumb-init \
+    procps \
     fonts-liberation \
-    libappindicator3-1 \
+    fonts-noto-color-emoji \
+    fonts-freefont-ttf \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
@@ -54,20 +58,31 @@ RUN apt-get update && apt-get install -y \
     libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
+    libxfixes3 \
     libxrandr2 \
+    libxshmfence1 \
     xdg-utils \
     ca-certificates \
     --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /tmp/.chromium-crash-reports \
+    && chmod 777 /tmp/.chromium-crash-reports
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# Chromium path in Debian
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# Disable Chromium crash reporter to avoid crashpad errors
+ENV CHROME_CRASHPAD_DATABASE_URL=""
 
 RUN groupadd --system --gid 1001 nodejs
 RUN useradd --system --uid 1001 nextjs
+
+# Create writable directories for chromium
+RUN mkdir -p /home/nextjs/.cache \
+    && chown -R nextjs:nodejs /home/nextjs
 
 # Copy Prisma schema and generated client
 COPY --from=builder /app/prisma ./prisma
@@ -85,4 +100,6 @@ USER nextjs
 
 EXPOSE 3000
 
+# Use dumb-init as PID 1 to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]
