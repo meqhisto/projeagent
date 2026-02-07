@@ -56,7 +56,7 @@ export default function KPICard({ title, value, icon: Icon, trend, color }: KPIC
     const isNeutral = trendValue === 0;
 
     return (
-        <div className="group relative bg-white/60 backdrop-blur-md rounded-[20px] p-5 border border-white/40 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+        <div className="group relative bg-white/60 backdrop-blur-md rounded-[20px] p-5 border border-white/40 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300" tabIndex={0}>
             <div className="flex flex-col h-full justify-between gap-4">
                 <div className="flex items-start justify-between">
                     <div className={clsx("p-2.5 rounded-xl transition-colors", config.bg)}>
