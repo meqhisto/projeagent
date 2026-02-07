@@ -1,7 +1,16 @@
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAuth, getUserId, isAdmin } from '@/lib/auth/roleCheck';
+import { requireAuth, isAdmin } from '@/lib/auth/roleCheck';
+import { encryptField, decryptField } from '@/lib/encryption';
+
+// Helper to decrypt customer fields
+function decryptCustomer<T extends { phone?: string | null; email?: string | null }>(customer: T): T {
+    return {
+        ...customer,
+        phone: customer.phone ? decryptField(customer.phone) : customer.phone,
+        email: customer.email ? decryptField(customer.email) : customer.email,
+    };
+}
 
 export async function GET(
     request: Request,
@@ -47,7 +56,8 @@ export async function GET(
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
-        return NextResponse.json(customer);
+        // Decrypt sensitive fields before returning
+        return NextResponse.json(decryptCustomer(customer));
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch customer" }, { status: 500 });
     }
@@ -84,8 +94,9 @@ export async function PATCH(
         const data: any = {};
         if (name) data.name = name;
         if (role) data.role = role;
-        if (phone) data.phone = phone;
-        if (email) data.email = email;
+        // Encrypt sensitive fields before storing
+        if (phone) data.phone = encryptField(phone);
+        if (email) data.email = encryptField(email);
         if (notes) data.notes = notes;
 
         // Handle Parcel Connections
@@ -107,7 +118,8 @@ export async function PATCH(
             include: { parcels: true }
         });
 
-        return NextResponse.json(updatedCustomer);
+        // Decrypt before returning
+        return NextResponse.json(decryptCustomer(updatedCustomer));
 
     } catch (error) {
         console.error("PATCH Customer Error:", error);

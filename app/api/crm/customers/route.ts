@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, getUserId, isAdmin } from '@/lib/auth/roleCheck';
+import { encryptField, decryptField } from '@/lib/encryption';
+
+// Helper to decrypt customer fields
+function decryptCustomer<T extends { phone?: string | null; email?: string | null }>(customer: T): T {
+    return {
+        ...customer,
+        phone: customer.phone ? decryptField(customer.phone) : customer.phone,
+        email: customer.email ? decryptField(customer.email) : customer.email,
+    };
+}
 
 export async function GET(request: Request) {
     try {
@@ -17,13 +27,9 @@ export async function GET(request: Request) {
             ? {} // Admin sees all customers
             : { ownerId: userId }; // Users see only their own customers
 
-        if (search) {
-            baseWhere['OR'] = [
-                { name: { contains: search, mode: 'insensitive' } },
-                { phone: { contains: search, mode: 'insensitive' } },
-                { email: { contains: search, mode: 'insensitive' } },
-            ];
-        }
+        // Note: Search on encrypted fields won't work with LIKE queries
+        // For now, we filter after fetching (inefficient for large datasets)
+        // TODO: Implement searchable encryption or hash-based search
 
         if (parcelId) {
             const customers = await prisma.customer.findMany({
@@ -37,10 +43,25 @@ export async function GET(request: Request) {
                 },
                 orderBy: { createdAt: 'desc' },
                 include: {
-                    parcels: true // Optional: if we want to see other parcels they own
+                    parcels: true
                 }
             });
-            return NextResponse.json(customers);
+
+            // Decrypt sensitive fields before returning
+            const decryptedCustomers = customers.map(c => decryptCustomer(c));
+
+            // If search provided, filter decrypted results
+            if (search) {
+                const searchLower = search.toLowerCase();
+                const filtered = decryptedCustomers.filter(c =>
+                    c.name?.toLowerCase().includes(searchLower) ||
+                    c.phone?.toLowerCase().includes(searchLower) ||
+                    c.email?.toLowerCase().includes(searchLower)
+                );
+                return NextResponse.json(filtered);
+            }
+
+            return NextResponse.json(decryptedCustomers);
         }
 
         // Return all customers based on role
@@ -63,7 +84,22 @@ export async function GET(request: Request) {
                 }
             }
         });
-        return NextResponse.json(customers);
+
+        // Decrypt sensitive fields before returning
+        const decryptedCustomers = customers.map(c => decryptCustomer(c));
+
+        // If search provided, filter decrypted results
+        if (search) {
+            const searchLower = search.toLowerCase();
+            const filtered = decryptedCustomers.filter(c =>
+                c.name?.toLowerCase().includes(searchLower) ||
+                c.phone?.toLowerCase().includes(searchLower) ||
+                c.email?.toLowerCase().includes(searchLower)
+            );
+            return NextResponse.json(filtered);
+        }
+
+        return NextResponse.json(decryptedCustomers);
     } catch (error) {
         console.error('GET /api/crm/customers error:', error);
         return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
@@ -78,16 +114,17 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { name, role, phone, email, notes, parcelId } = body;
 
-        // Note: Logic could be "Find or Create" based on phone/email to avoid duplicates
-        // But for now, simple create.
+        // Encrypt sensitive fields before storing
+        const encryptedPhone = phone ? encryptField(phone) : null;
+        const encryptedEmail = email ? encryptField(email) : null;
 
         const data: any = {
             name,
             role,
-            phone,
-            email,
+            phone: encryptedPhone,
+            email: encryptedEmail,
             notes,
-            ownerId: userId // Set owner to current user
+            ownerId: userId
         };
 
         if (parcelId) {
@@ -100,7 +137,8 @@ export async function POST(request: Request) {
             data
         });
 
-        return NextResponse.json(customer);
+        // Return decrypted version for immediate use
+        return NextResponse.json(decryptCustomer(customer));
     } catch (error) {
         console.error('POST /api/crm/customers error:', error);
         return NextResponse.json({ error: 'Failed to create customer' }, { status: 500 });
