@@ -36,12 +36,13 @@ FROM node:20-slim AS runner
 WORKDIR /app
 
 # Install runtime dependencies for Prisma and Puppeteer/Chromium
-# Added: dumb-init, procps, and additional chromium dependencies
+# Added: dumb-init, procps, curl, and additional chromium dependencies
 RUN apt-get update && apt-get install -y \
     openssl \
     chromium \
     dumb-init \
     procps \
+    curl \
     fonts-liberation \
     fonts-noto-color-emoji \
     fonts-freefont-ttf \
