@@ -71,6 +71,8 @@ RUN apt-get update && apt-get install -y \
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# Make Next.js listen on all interfaces (required for Puppeteer to connect)
+ENV HOSTNAME=0.0.0.0
 # Chromium path in Debian
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

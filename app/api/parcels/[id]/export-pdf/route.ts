@@ -53,8 +53,8 @@ export async function GET(
 
         console.log("[PDF Export] Share link created with ID:", shareLinkId);
 
-        // Puppeteer için INTERNAL URL kullan
-        const internalUrl = `http://localhost:3000/p/${token}`;
+        // Puppeteer için INTERNAL URL kullan (127.0.0.1 to avoid IPv6 issues)
+        const internalUrl = `http://127.0.0.1:3000/p/${token}`;
 
         // Debug log
         const host = request.headers.get("host") || "localhost:3000";
