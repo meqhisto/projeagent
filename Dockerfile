@@ -1,66 +1,88 @@
-# Multi-stage Dockerfile for Next.js
+# Multi-stage Dockerfile for Next.js with Prisma + Debian Slim
+# Using Debian instead of Alpine for better Prisma/OpenSSL compatibility
 
-# 1. Install dependencies only when needed
-FROM node:20-alpine AS deps
-# libc6-compat needed for some native modules
-RUN apk add --no-cache libc6-compat
+# 1. Install dependencies
+FROM node:20-slim AS deps
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-# Install dependencies
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
+
+# Skip browser downloads to save space/time
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN npm ci
 
-# 2. Rebuild the source code only when needed
-FROM node:20-alpine AS builder
+# Generate Prisma Client in deps stage with correct binaries
+RUN npx prisma generate
+
+# 2. Build the application
+FROM node:20-slim AS builder
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client
+# Prisma client already generated in deps, but regenerate to be safe
 RUN npx prisma generate
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# 3. Production image, copy all the files and run next
-FROM node:20-alpine AS runner
+# 3. Production runner
+FROM node:20-slim AS runner
 WORKDIR /app
+
+# Install runtime dependencies for Prisma and Puppeteer/Chromium
+RUN apt-get update && apt-get install -y \
+    openssl \
+    chromium \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    ca-certificates \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-
-# Install Chromium for Puppeteer PDF export
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont
-
-# Tell Puppeteer to use installed Chromium
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs
+RUN useradd --system --uid 1001 nextjs
 
-# Set up Prisma for production
+# Copy Prisma schema and generated client
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Copy public assets
 COPY --from=builder /app/public ./public
 
-# Automatically leverage output traces to reduce image size
-COPY --from=builder --chown=nextjs:nextjs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nextjs /app/.next/static ./.next/static
+# Copy standalone build
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 3000
 
-# server.js is created by next build from the standalone output
 CMD ["node", "server.js"]
