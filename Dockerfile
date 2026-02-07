@@ -86,10 +86,12 @@ RUN useradd --system --uid 1001 nextjs
 RUN mkdir -p /home/nextjs/.cache \
     && chown -R nextjs:nodejs /home/nextjs
 
-# Copy Prisma schema and generated client
+# Copy Prisma schema and generated client + CLI for migrations
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
 # Copy public assets
 COPY --from=builder /app/public ./public
