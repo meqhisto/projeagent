@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
+import { logLogin } from "@/lib/auditLog";
 
 const prisma = new PrismaClient();
 
@@ -10,6 +11,9 @@ export async function POST(request: Request) {
     const rateLimitResult = rateLimit(request, "/api/auth/verify");
 
     if (!rateLimitResult.success) {
+        // Log rate limit event
+        await logLogin(request, null, false);
+
         return NextResponse.json(
             { error: "Too many login attempts. Please try again later." },
             {
@@ -27,6 +31,9 @@ export async function POST(request: Request) {
         });
 
         if (!user) {
+            // Log failed login attempt
+            await logLogin(request, null, false, email);
+
             return NextResponse.json(
                 { error: "Invalid credentials" },
                 {
@@ -39,6 +46,9 @@ export async function POST(request: Request) {
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
+            // Log failed login attempt  
+            await logLogin(request, user.id, false, email);
+
             return NextResponse.json(
                 { error: "Invalid credentials" },
                 {
@@ -47,6 +57,9 @@ export async function POST(request: Request) {
                 }
             );
         }
+
+        // Log successful login
+        await logLogin(request, user.id, true, email);
 
         return NextResponse.json({
             id: user.id.toString(),
@@ -61,4 +74,3 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Authentication failed" }, { status: 500 });
     }
 }
-
