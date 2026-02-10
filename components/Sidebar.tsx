@@ -41,7 +41,8 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
 
     const navigation = allNavigation.filter(item =>
-        item.roles.includes(session?.user?.role || "USER")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (item.roles as any[]).includes(session?.user?.role || "USER")
     );
 
     const handleSignOut = () => {
@@ -61,19 +62,19 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             {/* Sidebar */}
             <aside
                 className={clsx(
-                    "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-black/[0.06] transform transition-transform duration-300 ease-out",
+                    "fixed inset-y-0 left-0 z-50 w-64 bg-white/80 backdrop-blur-xl border-r border-black/[0.06] transform transition-transform duration-300 ease-out",
                     "lg:translate-x-0",
                     isOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
                 <div className="h-full flex flex-col">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 h-16 border-b border-black/[0.06]">
-                        <Link href="/" className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-[#0071e3] flex items-center justify-center">
+                    <div className="flex items-center justify-between px-6 h-16 border-b border-black/[0.04]">
+                        <Link href="/" className="flex items-center gap-2.5 group">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0071e3] to-[#0077ed] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
                                 <span className="text-white font-bold text-sm">PM</span>
                             </div>
-                            <span className="font-display text-[17px] font-semibold text-[#1d1d1f]">
+                            <span className="font-display text-[17px] font-semibold text-[#1d1d1f] tracking-tight">
                                 ParselMonitor
                             </span>
                         </Link>
@@ -87,8 +88,8 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 px-3 py-4 overflow-y-auto">
-                        <ul className="space-y-0.5">
+                    <nav className="flex-1 px-3 py-6 overflow-y-auto no-scrollbar">
+                        <ul className="space-y-1">
                             {navigation.map((item) => {
                                 const isActive = pathname === item.href;
                                 const Icon = item.icon;
@@ -98,15 +99,15 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                                         <Link
                                             href={item.href}
                                             className={clsx(
-                                                "flex items-center gap-3 px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150",
+                                                "flex items-center gap-3 px-3 py-2 rounded-xl text-[14px] font-medium transition-all duration-200",
                                                 isActive
-                                                    ? "bg-[#0071e3] text-white"
+                                                    ? "bg-[#0071e3]/10 text-[#0071e3]"
                                                     : "text-[#1d1d1f] hover:bg-black/[0.04]"
                                             )}
                                         >
                                             <Icon className={clsx(
                                                 "h-[18px] w-[18px]",
-                                                isActive ? "text-white" : "text-[#6e6e73]"
+                                                isActive ? "text-[#0071e3]" : "text-[#86868b]"
                                             )} />
                                             <span>{item.name}</span>
                                         </Link>
@@ -117,22 +118,22 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     </nav>
 
                     {/* User Section */}
-                    <div className="p-3 border-t border-black/[0.06]">
-                        <div className="flex items-center gap-3 px-3 py-2">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0071e3] to-[#5856d6] flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="p-4 border-t border-black/[0.04] bg-gradient-to-t from-white/50 to-transparent">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/[0.02] transition-colors">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0071e3] to-[#5856d6] flex items-center justify-center text-white font-semibold text-sm shadow-sm ring-2 ring-white">
                                 {session?.user?.name?.[0]?.toUpperCase() || "U"}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="text-[14px] font-medium text-[#1d1d1f] truncate">
                                     {session?.user?.name || "Kullanıcı"}
                                 </div>
-                                <div className="text-[12px] text-[#6e6e73] truncate">
-                                    {(session?.user as any)?.role === "ADMIN" ? "Yönetici" : "Kullanıcı"}
+                                <div className="text-[11px] text-[#86868b] truncate">
+                                    {session?.user?.role === "ADMIN" ? "Yönetici" : "Kullanıcı"}
                                 </div>
                             </div>
                             <button
                                 onClick={handleSignOut}
-                                className="p-2 text-[#6e6e73] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10 rounded-lg transition-colors"
+                                className="p-2 text-[#86868b] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10 rounded-lg transition-all"
                                 title="Çıkış Yap"
                             >
                                 <LogOut className="h-4 w-4" />

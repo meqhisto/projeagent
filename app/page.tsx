@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Loader2, TrendingUp, Users, Target, DollarSign, Building2, CheckCircle } from "lucide-react";
+import { Plus, Loader2, TrendingUp, Users, Target, DollarSign, Building2, CheckCircle, ArrowRight } from "lucide-react";
 import AddParcelDrawer from "@/components/AddParcelDrawer";
 import KPICard from "@/components/KPICard";
 import PipelineChart from "@/components/PipelineChart";
@@ -11,14 +11,32 @@ import ParcelCard from "@/components/ParcelCard";
 import AdvancedFilterPanel from "@/components/AdvancedFilterPanel";
 import ExportButton from "@/components/ExportButton";
 import TaskWidget from "@/components/TaskWidget";
+import Link from "next/link";
+import { Parcel } from "@/types";
+
+interface KpiData {
+  totalParcels: number;
+  activeParcels: number;
+  conversionRate: number;
+  avgROI: number;
+  thisMonthAdded: number;
+  totalValue: number;
+  trends: {
+    parcels: number;
+    roi: number;
+  };
+}
 
 export default function Home() {
-  const [parcels, setParcels] = useState<any[]>([]);
-  const [kpis, setKpis] = useState<any>(null);
+  const [parcels, setParcels] = useState<Parcel[]>([]);
+  const [kpis, setKpis] = useState<KpiData | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [pipelineData, setPipelineData] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [filters, setFilters] = useState<any>({});
 
   const fetchParcels = async () => {
@@ -77,31 +95,34 @@ export default function Home() {
     return Array.from(new Set(parcels.map(p => p.city))).sort();
   }, [parcels]);
 
-  const hotLeads = filteredParcels
-    .filter(p => p.area && p.area > 1000)
-    .slice(0, 5)
-    .map(p => ({
-      ...p,
-      roi: Math.floor(Math.random() * 20) + 20 // Placeholder ROI
-    }));
+  const hotLeads = useMemo(() => {
+    return filteredParcels
+      .filter(p => p.area && p.area > 1000)
+      .slice(0, 5)
+      .map(p => ({
+        ...p,
+        area: p.area ?? undefined,
+        roi: (p.id * 7) % 20 + 20 // Deterministic placeholder ROI instead of random
+      }));
+  }, [filteredParcels]);
 
   const recentParcels = filteredParcels.slice(0, 8);
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-        <Loader2 className="h-12 w-12 animate-spin text-[#0071e3]" />
+      <div className="flex h-screen w-full items-center justify-center bg-[#f5f5f7]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#0071e3]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8 animate-fade-in">
+    <div className="space-y-8 lg:space-y-10 animate-fade-in pb-10">
       {/* Header */}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">Parsel yönetimi ve analiz merkezi</p>
+          <h1 className="text-3xl lg:text-4xl font-bold text-[#1d1d1f] tracking-tight font-display">Dashboard</h1>
+          <p className="text-[15px] text-[#6e6e73] mt-2 font-medium">Parsel yönetimi ve analiz merkezi</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <AdvancedFilterPanel
@@ -111,7 +132,7 @@ export default function Home() {
           <ExportButton parcels={filteredParcels} />
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="flex items-center justify-center rounded-xl bg-[#0071e3] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0077ed] shadow-lg shadow-[#0071e3]/20 transition-all hover:-translate-y-0.5"
+            className="flex items-center justify-center rounded-xl bg-[#0071e3] px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-[#0077ed] shadow-lg shadow-[#0071e3]/20 transition-all hover:-translate-y-0.5 active:scale-95"
           >
             <Plus className="h-4 w-4 lg:mr-2" />
             <span className="hidden lg:inline">Yeni Parsel Ekle</span>
@@ -126,7 +147,7 @@ export default function Home() {
             title="Toplam Parsel"
             value={kpis.totalParcels}
             icon={Building2}
-            trend={kpis.trends.parcels}
+            trend={`%${kpis.trends.parcels}`}
             color="blue"
           />
           <KPICard
@@ -139,7 +160,7 @@ export default function Home() {
             title="Dönüşüm Oranı"
             value={`%${kpis.conversionRate}`}
             icon={CheckCircle}
-            trend={kpis.trends.roi}
+            trend={`%${kpis.trends.roi}`}
             color="green"
           />
           <KPICard
@@ -172,27 +193,34 @@ export default function Home() {
 
       {/* Hot Leads */}
       {hotLeads.length > 0 && (
-        <HotLeadsList parcels={hotLeads} />
+        <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+                <h3 className="text-lg font-semibold text-[#1d1d1f] tracking-tight">Önemli Fırsatlar</h3>
+            </div>
+            <HotLeadsList parcels={hotLeads} />
+        </div>
       )}
 
       {/* Recent Parcels */}
       {recentParcels.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
+            <h3 className="text-xl font-semibold text-[#1d1d1f] tracking-tight font-display">
               {Object.keys(filters).some(k => filters[k] && (Array.isArray(filters[k]) ? filters[k].length > 0 : true))
                 ? 'Filtrelenmiş Parseller'
                 : 'Son Eklenen Parseller'}
             </h3>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500 font-medium">
+              <span className="text-[13px] text-[#6e6e73] font-medium bg-white px-3 py-1 rounded-full border border-black/[0.04] shadow-sm">
                 {filteredParcels.length} sonuç
               </span>
-              <a href="/parcels" className="text-sm font-semibold text-[#0071e3] hover:text-[#0077ed] hover:underline">
-                Tümünü Gör →
-              </a>
+              <Link href="/parcels" className="text-[13px] font-semibold text-[#0071e3] hover:text-[#0077ed] flex items-center gap-1 group">
+                Tümünü Gör
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
             </div>
           </div>
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {recentParcels.map((parcel) => (
               <ParcelCard
@@ -205,6 +233,8 @@ export default function Home() {
                 status={parcel.status}
                 imageUrl={parcel.images && parcel.images.length > 0 ? parcel.images[0].url : undefined}
                 zoning={parcel.zoning}
+                category={parcel.category}
+                tags={parcel.tags}
               />
             ))}
           </div>
@@ -212,9 +242,18 @@ export default function Home() {
       )}
 
       {!loading && parcels.length === 0 && (
-        <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-          <h3 className="text-lg font-bold text-slate-900">Henüz takip edilen parsel yok</h3>
-          <p className="mt-2 text-sm text-slate-500 max-w-sm mx-auto">Yeni bir parsel ekleyerek portföyünüzü oluşturmaya ve analiz etmeye başlayın.</p>
+        <div className="flex flex-col items-center justify-center py-24 bg-white/60 backdrop-blur-md rounded-[32px] border border-dashed border-black/[0.06] text-center">
+            <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
+                <Plus className="h-8 w-8 text-slate-300" />
+            </div>
+          <h3 className="text-lg font-semibold text-[#1d1d1f]">Henüz takip edilen parsel yok</h3>
+          <p className="mt-2 text-[14px] text-[#6e6e73] max-w-sm mx-auto leading-relaxed">Yeni bir parsel ekleyerek portföyünüzü oluşturmaya ve analiz etmeye başlayın.</p>
+          <button
+            onClick={() => setIsDrawerOpen(true)}
+            className="mt-6 text-[14px] font-semibold text-[#0071e3] hover:text-[#0077ed]"
+          >
+            Hemen Ekle →
+          </button>
         </div>
       )}
 
