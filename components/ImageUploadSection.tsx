@@ -155,7 +155,9 @@ export default function ImageUploadSection({ parcelId, images, onUploadSuccess }
                             )}
                             <button
                                 onClick={() => handleDelete(image.id)}
-                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
+                                aria-label="Sil"
+                                title="Sil"
                             >
                                 <X className="h-3 w-3" />
                             </button>

@@ -172,13 +172,17 @@ export default function DocumentUploadSection({ parcelId, documents, onUploadSuc
                                 <a
                                     href={doc.filePath}
                                     download
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-600"
+                                    aria-label="İndir"
+                                    title="İndir"
                                 >
                                     <Download className="h-4 w-4" />
                                 </a>
                                 <button
                                     onClick={() => handleDelete(doc.id)}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:ring-2 focus-visible:ring-red-600"
+                                    aria-label="Sil"
+                                    title="Sil"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
