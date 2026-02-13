@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Check, Loader2, Tag, Save } from "lucide-react";
+import { X, Loader2, Tag, Save } from "lucide-react";
 import { PARCEL_CATEGORIES } from "@/lib/validations";
 import clsx from "clsx";
 
@@ -45,6 +45,30 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
 
     // Animation control
     useEffect(() => {
+        const fetchParcelData = async () => {
+            setFetching(true);
+            setError(null);
+            try {
+                const res = await fetch(`/api/parcels/${parcelId}`);
+                if (!res.ok) throw new Error("Parsel bulunamadı");
+                const data = await res.json();
+                setFormData({
+                    category: data.category || "UNCATEGORIZED",
+                    tags: data.tags || "",
+                });
+                setParcelInfo({
+                    city: data.city,
+                    district: data.district,
+                    island: data.island,
+                    parsel: data.parsel,
+                });
+            } catch (err) {
+                setError(err instanceof Error ? err.message : String(err));
+            } finally {
+                setFetching(false);
+            }
+        };
+
         if (isOpen) {
             setIsVisible(true);
             fetchParcelData();
@@ -52,31 +76,7 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
             const timer = setTimeout(() => setIsVisible(false), 300);
             return () => clearTimeout(timer);
         }
-    }, [isOpen]);
-
-    const fetchParcelData = async () => {
-        setFetching(true);
-        setError(null);
-        try {
-            const res = await fetch(`/api/parcels/${parcelId}`);
-            if (!res.ok) throw new Error("Parsel bulunamadı");
-            const data = await res.json();
-            setFormData({
-                category: data.category || "UNCATEGORIZED",
-                tags: data.tags || "",
-            });
-            setParcelInfo({
-                city: data.city,
-                district: data.district,
-                island: data.island,
-                parsel: data.parsel,
-            });
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setFetching(false);
-        }
-    };
+    }, [isOpen, parcelId]);
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -99,8 +99,8 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
 
             onSuccess();
             onClose();
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }

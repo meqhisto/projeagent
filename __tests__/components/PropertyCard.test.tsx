@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 // Mock Link
 vi.mock('next/link', () => ({
   __esModule: true,
-  default: ({ children, href, className, ...props }: { children: ReactNode; href: string; className?: string; [key: string]: any }) => (
+  default: ({ children, href, className, ...props }: { children: ReactNode; href: string; className?: string; [key: string]: unknown }) => (
     <a href={href} className={className} {...props}>{children}</a>
   ),
 }));

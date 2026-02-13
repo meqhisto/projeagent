@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, MapPin, Building2, Calendar, ArrowRight, ExternalLink } from "lucide-react";
+import { X, MapPin, Building2, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { Parcel, Interaction, Customer } from "@/types";
 
 interface ParcelDetailModalProps {
@@ -15,28 +14,28 @@ interface ParcelDetailModalProps {
 export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelDetailModalProps) {
     const [parcel, setParcel] = useState<Parcel | null>(null);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
 
     useEffect(() => {
+        const fetchParcelDetails = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/parcels/${parcelId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setParcel(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch parcel", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (isOpen && parcelId) {
             fetchParcelDetails();
         }
     }, [isOpen, parcelId]);
 
-    const fetchParcelDetails = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/parcels/${parcelId}`);
-            if (res.ok) {
-                const data = await res.json();
-                setParcel(data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch parcel", error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (!isOpen) return null;
 

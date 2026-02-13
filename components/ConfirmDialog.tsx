@@ -29,13 +29,16 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
     const [isVisible, setIsVisible] = useState(false);
 
+    if (isOpen && !isVisible) {
+        setIsVisible(true);
+    }
+
     useEffect(() => {
-        if (isOpen) {
-            setIsVisible(true);
-        } else {
-            const timer = setTimeout(() => setIsVisible(false), 200);
-            return () => clearTimeout(timer);
+        let timer: NodeJS.Timeout;
+        if (!isOpen) {
+            timer = setTimeout(() => setIsVisible(false), 200);
         }
+        return () => clearTimeout(timer);
     }, [isOpen]);
 
     if (!isVisible && !isOpen) return null;
