@@ -133,7 +133,7 @@ export default function EditParcelDrawer({ isOpen, onClose, onSuccess, parcelId 
                             </p>
                         )}
                     </div>
-                    <button onClick={onClose} className="rounded-full p-2 hover:bg-slate-200 transition-colors">
+                    <button onClick={onClose} className="rounded-full p-2 hover:bg-slate-200 transition-colors" aria-label="Kapat">
                         <X className="h-5 w-5 text-slate-500" />
                     </button>
                 </div>
