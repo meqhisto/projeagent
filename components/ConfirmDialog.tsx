@@ -31,10 +31,9 @@ export default function ConfirmDialog({
 
     useEffect(() => {
         if (isOpen) {
-            // Use requestAnimationFrame to avoid synchronous state update in effect
-            // which can cause cascading renders warning
-            const frame = requestAnimationFrame(() => setIsVisible(true));
-            return () => cancelAnimationFrame(frame);
+            // Small delay to ensure browser paints the "scale-95" state before transitioning to "scale-100"
+            const timer = setTimeout(() => setIsVisible(true), 10);
+            return () => clearTimeout(timer);
         } else {
             const timer = setTimeout(() => setIsVisible(false), 200);
             return () => clearTimeout(timer);
@@ -103,7 +102,6 @@ export default function ConfirmDialog({
                         onClick={onClose}
                         disabled={isLoading}
                         className="p-1.5 text-[#86868b] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors disabled:opacity-50"
-                        aria-label="Kapat"
                     >
                         <X className="h-5 w-5" />
                     </button>

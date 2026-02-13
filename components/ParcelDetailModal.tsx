@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, MapPin, Building2, ArrowRight } from "lucide-react";
+import { X, MapPin, Building2, Calendar, ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Parcel, Interaction, Customer } from "@/types";
 
 interface ParcelDetailModalProps {
@@ -14,28 +15,28 @@ interface ParcelDetailModalProps {
 export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelDetailModalProps) {
     const [parcel, setParcel] = useState<Parcel | null>(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
-        const fetchParcelDetails = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(`/api/parcels/${parcelId}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setParcel(data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch parcel", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (isOpen && parcelId) {
             fetchParcelDetails();
         }
     }, [isOpen, parcelId]);
 
+    const fetchParcelDetails = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/parcels/${parcelId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setParcel(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch parcel", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -46,7 +47,7 @@ export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelD
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50">
                     <h3 className="text-lg font-bold text-gray-900">Parsel Hızlı Bakış</h3>
-                    <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500" aria-label="Kapat">
+                    <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
