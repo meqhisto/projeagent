@@ -47,7 +47,7 @@ export default function ParcelDetailModal({ isOpen, onClose, parcelId }: ParcelD
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50">
                     <h3 className="text-lg font-bold text-gray-900">Parsel Hızlı Bakış</h3>
-                    <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+                    <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500" aria-label="Kapat">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
