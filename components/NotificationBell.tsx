@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, Check, CheckCheck, Loader2 } from "lucide-react";
 
 const NOTIFICATION_ICONS: Record<string, string> = {
     PARCEL_ADDED: "🆕",
@@ -26,6 +26,7 @@ export default function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -59,6 +60,8 @@ export default function NotificationBell() {
             }
         } catch (error) {
             console.error("Fetch notifications error:", error);
+        } finally {
+            setInitialLoading(false);
         }
     };
 
@@ -95,6 +98,10 @@ export default function NotificationBell() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
+                aria-label={unreadCount > 0 ? `Bildirimler, ${unreadCount} okunmamış` : "Bildirimler"}
+                title="Bildirimler"
+                aria-expanded={isOpen}
+                aria-haspopup="true"
             >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
@@ -124,37 +131,44 @@ export default function NotificationBell() {
 
                     {/* Notification List */}
                     <div className="max-h-96 overflow-y-auto">
-                        {notifications.length > 0 ? (
-                            notifications.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${!notification.isRead ? "bg-blue-50" : ""
-                                        }`}
-                                    onClick={() => !notification.isRead && markAsRead(notification.id)}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-2xl flex-shrink-0">
-                                            {NOTIFICATION_ICONS[notification.type] || "📢"}
-                                        </span>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-medium text-gray-900 text-sm">
-                                                {notification.title}
-                                            </h4>
-                                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                {notification.message}
-                                            </p>
-                                            <p className="text-xs text-gray-400 mt-2">
-                                                {timeAgo(notification.createdAt)}
-                                            </p>
-                                        </div>
-                                        {!notification.isRead && (
-                                            <div className="flex-shrink-0">
-                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        {initialLoading ? (
+                            <div className="flex items-center justify-center p-8 text-gray-400">
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                            </div>
+                        ) : notifications.length > 0 ? (
+                            <ul role="menu" className="m-0 p-0 list-none">
+                                {notifications.map((notification) => (
+                                    <li key={notification.id} role="none">
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start gap-3 ${!notification.isRead ? "bg-blue-50" : ""
+                                                }`}
+                                            onClick={() => !notification.isRead && markAsRead(notification.id)}
+                                        >
+                                            <span className="text-2xl flex-shrink-0" aria-hidden="true">
+                                                {NOTIFICATION_ICONS[notification.type] || "📢"}
+                                            </span>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium text-gray-900 text-sm">
+                                                    {notification.title}
+                                                </h4>
+                                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                                    {notification.message}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    {timeAgo(notification.createdAt)}
+                                                </p>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))
+                                            {!notification.isRead && (
+                                                <div className="flex-shrink-0" aria-label="Okunmadı">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                </div>
+                                            )}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
                         ) : (
                             <div className="p-8 text-center text-gray-400 text-sm">
                                 <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
