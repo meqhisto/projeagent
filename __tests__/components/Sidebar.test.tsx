@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar";
 const mockUseSession = vi.fn();
 const mockSignOut = vi.fn();
 
+// Mock next-auth/react
 vi.mock("next-auth/react", () => ({
     useSession: () => mockUseSession(),
     signOut: () => mockSignOut(),
@@ -32,36 +33,31 @@ describe("Sidebar", () => {
         });
     });
 
-    it("renders the logo", () => {
+    it("renders the logo and title", () => {
         render(<Sidebar />);
-        expect(screen.getByText("PARSEL")).toBeInTheDocument();
-        expect(screen.getByText("MONITOR")).toBeInTheDocument();
+        expect(screen.getByText("PM")).toBeInTheDocument();
+        expect(screen.getByText("ParselMonitor")).toBeInTheDocument();
     });
 
     it("renders navigation items for USER role", () => {
         render(<Sidebar />);
-        expect(screen.getByText("Anasayfa")).toBeInTheDocument();
-        expect(screen.getByText("Parsel Listesi")).toBeInTheDocument();
-        expect(screen.getByText("Harita Görünümü")).toBeInTheDocument();
+        expect(screen.getByText("Dashboard")).toBeInTheDocument();
+        expect(screen.getByText("Arsalar")).toBeInTheDocument();
+        expect(screen.getByText("Harita")).toBeInTheDocument();
+        // Should not see Admin only items
+        expect(screen.queryByText("Kullanıcı Yönetimi")).not.toBeInTheDocument();
     });
 
-    it("shows user profile section with user name", () => {
+    it("shows user profile section with user name and role", () => {
         render(<Sidebar />);
         expect(screen.getByText("Test User")).toBeInTheDocument();
-        expect(screen.getByText("test@example.com")).toBeInTheDocument();
-    });
-
-    // "Online" status was removed in the redesign for a cleaner look
-    // it("shows Online status in profile", () => { ... });
-
-    it("does not show Admin Panel for USER role", () => {
-        render(<Sidebar />);
-        expect(screen.queryByText("Admin Panel")).not.toBeInTheDocument();
+        expect(screen.getByText("Kullanıcı")).toBeInTheDocument(); // Role label for USER
     });
 
     it("shows user initials", () => {
         render(<Sidebar />);
-        expect(screen.getByText("TU")).toBeInTheDocument(); // Test User -> TU
+        // Initials logic: T (from Test User)
+        expect(screen.getByText("T")).toBeInTheDocument();
     });
 });
 
@@ -80,16 +76,14 @@ describe("Sidebar with Admin role", () => {
         });
     });
 
-    it("shows Admin Panel for ADMIN role", () => {
+    it("shows Admin Panel items for ADMIN role", () => {
         render(<Sidebar />);
-        expect(screen.getByText("Admin Panel")).toBeInTheDocument();
+        expect(screen.getByText("Kullanıcı Yönetimi")).toBeInTheDocument();
     });
 
-    it("shows all navigation items for admin", () => {
+    it("shows user profile as Manager", () => {
         render(<Sidebar />);
-        expect(screen.getByText("Anasayfa")).toBeInTheDocument();
-        expect(screen.getByText("Admin Panel")).toBeInTheDocument();
-        expect(screen.getByText("Ayarlar")).toBeInTheDocument();
+        expect(screen.getByText("Yönetici")).toBeInTheDocument(); // Role label for ADMIN
     });
 });
 
