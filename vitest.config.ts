@@ -10,11 +10,11 @@ export default defineConfig({
         globals: true,
         setupFiles: ["./vitest.setup.ts"],
         include: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
-        exclude: ["node_modules", ".next", "backend", "tests/e2e"],
+        exclude: ["node_modules", ".next", "backend"],
         coverage: {
             provider: "v8",
             reporter: ["text", "json", "html"],
-            exclude: ["node_modules", ".next", "backend", "**/*.d.ts", "tests/e2e"],
+            exclude: ["node_modules", ".next", "backend", "**/*.d.ts"],
         },
     },
     resolve: {
