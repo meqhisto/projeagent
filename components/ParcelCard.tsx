@@ -97,22 +97,31 @@ export default function ParcelCard({
                     </div>
 
                     {/* Actions */}
-                    <div className="absolute top-3 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute top-3 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
                         <button
+                            type="button"
+                            title="Hızlı Önizleme"
+                            aria-label="Hızlı Önizleme"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsQuickViewOpen(true); }}
-                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors focus-visible:opacity-100"
                         >
                             <Eye className="h-4 w-4" />
                         </button>
                         <button
+                            type="button"
+                            title="Düzenle"
+                            aria-label="Düzenle"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditOpen(true); }}
-                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors focus-visible:opacity-100"
                         >
                             <Edit2 className="h-4 w-4" />
                         </button>
                         <button
+                            type="button"
+                            title="Sil"
+                            aria-label="Sil"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsDeleteOpen(true); }}
-                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#ff3b30] shadow-sm transition-colors"
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#ff3b30] shadow-sm transition-colors focus-visible:opacity-100"
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>
