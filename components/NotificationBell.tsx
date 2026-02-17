@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
+
+interface Notification {
+    id: number;
+    type: string;
+    title: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+}
 
 const NOTIFICATION_ICONS: Record<string, string> = {
     PARCEL_ADDED: "🆕",
@@ -22,7 +31,7 @@ function timeAgo(date: string) {
 }
 
 export default function NotificationBell() {
-    const [notifications, setNotifications] = useState<any[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -94,7 +103,8 @@ export default function NotificationBell() {
             {/* Bell Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
+                aria-label="Bildirimler"
+                className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
             >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
