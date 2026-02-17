@@ -33,7 +33,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 className={clsx(
                     "inline-flex items-center justify-center gap-2 rounded-xl font-medium",
                     "transition-all duration-200",
-                    "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
                     variantClasses[variant],
                     sizeClasses[size],

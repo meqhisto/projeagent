@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -13,7 +13,19 @@
     "test:e2e": "playwright test",
     "reset-password": "tsx prisma/reset-password.ts",
     "seed": "tsx prisma/seed.ts",
-    "backup": "bash backup-database.sh"
+    "backup": "bash backup-database.sh",
+    "postinstall": "prisma generate"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "core-js",
+      "esbuild",
+      "prisma",
+      "puppeteer",
+      "sharp"
+    ]
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

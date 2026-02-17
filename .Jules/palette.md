@@ -1,3 +1,0 @@
-## 2026-02-08 - Icon-Only Button Accessibility Pattern
-**Learning:** The application frequently uses raw `<button>` elements for icon-only actions (like "Notification Bell", "Menu", "Task Toggle") instead of the shared `Button` component. These raw buttons consistently lack `aria-label` and `focus-visible` styles, making them inaccessible to screen readers and keyboard users.
-**Action:** When adding new icon-only buttons, ensure `aria-label` is provided. Consider refactoring these to use the shared `Button` component if possible, or at least ensure the shared `Button` component has robust default accessibility styles (like `focus-visible`) so future usages are safe.
