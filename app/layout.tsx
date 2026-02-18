@@ -4,8 +4,6 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import ClientLayout from "./ClientLayout";
 
-export const runtime = 'nodejs';
-
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
