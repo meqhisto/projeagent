@@ -34,7 +34,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={onMenuClick}
-                            className="lg:hidden p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
+                            aria-label="Ana menüyü aç"
+                            className="lg:hidden p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
                         >
                             <Menu className="h-5 w-5" />
                         </button>
@@ -42,7 +43,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         {/* Search Trigger */}
                         <button
                             onClick={() => setSearchOpen(true)}
-                            className="flex items-center gap-3 px-3 py-2 bg-[#f5f5f7] hover:bg-[#e8e8ed] rounded-lg transition-colors group"
+                            className="flex items-center gap-3 px-3 py-2 bg-[#f5f5f7] hover:bg-[#e8e8ed] rounded-lg transition-colors group focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
                         >
                             <Search className="h-4 w-4 text-[#86868b] group-hover:text-[#6e6e73]" />
                             <span className="hidden sm:block text-sm text-[#86868b] group-hover:text-[#6e6e73]">
@@ -60,7 +61,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         <NotificationBell />
 
                         {/* User Menu */}
-                        <button className="flex items-center gap-2 px-2 py-1.5 hover:bg-black/[0.04] rounded-lg transition-colors">
+                        <button
+                            aria-label="Kullanıcı menüsü"
+                            className="flex items-center gap-2 px-2 py-1.5 hover:bg-black/[0.04] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
+                        >
                             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0071e3] to-[#5856d6] flex items-center justify-center text-white font-medium text-xs">
                                 {session?.user?.name?.[0]?.toUpperCase() || "U"}
                             </div>
