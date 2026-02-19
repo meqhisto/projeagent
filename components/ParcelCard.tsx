@@ -97,28 +97,38 @@ export default function ParcelCard({
                     </div>
 
                     {/* Actions */}
-                    <div className="absolute top-3 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute top-3 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsQuickViewOpen(true); }}
                             className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
+                            aria-label="Parsel detaylarını görüntüle"
+                            title="Detaylar"
                         >
                             <Eye className="h-4 w-4" />
                         </button>
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditOpen(true); }}
                             className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
+                            aria-label="Parseli düzenle"
+                            title="Düzenle"
                         >
                             <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsDeleteOpen(true); }}
                             className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#ff3b30] shadow-sm transition-colors"
+                            aria-label="Parseli sil"
+                            title="Sil"
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>
                     </div>
 
-                    <Link href={`/parcels/${id || '#'}`} className="block h-full w-full">
+                    <Link
+                        href={`/parcels/${id || '#'}`}
+                        className="block h-full w-full"
+                        aria-label={`${city}, ${district} - Ada ${island} / Parsel ${parcel} detaylarına git`}
+                    >
                         {imageUrl ? (
                             <div
                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
