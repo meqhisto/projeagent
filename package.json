@@ -2,11 +2,13 @@
   "name": "projeagent",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma --version && prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -27,7 +29,6 @@
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "next-auth": "^5.0.0-beta.30",
-    "prisma": "5.22.0",
     "puppeteer": "^24.33.0",
     "qrcode.react": "^4.2.0",
     "react": "19.2.1",
@@ -53,6 +54,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
     "jsdom": "^27.3.0",
+    "prisma": "5.22.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
@@ -60,5 +62,16 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcryptjs",
+      "esbuild",
+      "prisma",
+      "puppeteer",
+      "sharp"
+    ]
   }
 }
