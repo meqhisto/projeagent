@@ -70,21 +70,17 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                 </div>
 
                 {/* Quick Actions */}
-                <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Link
                         href={`/properties/${property.id}`}
-                        className="p-2 bg-white/90 rounded-lg hover:bg-[#0071e3] hover:text-white text-gray-600 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
-                        aria-label="Detaylar"
-                        title="Detaylar"
+                        className="p-2 bg-white/90 rounded-lg hover:bg-[#0071e3] hover:text-white text-gray-600 transition-colors shadow-sm"
                     >
                         <Eye className="w-4 h-4" />
                     </Link>
                     {onEdit && (
                         <button
                             onClick={() => onEdit(property)}
-                            className="p-2 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white text-gray-600 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30"
-                            aria-label="Düzenle"
-                            title="Düzenle"
+                            className="p-2 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white text-gray-600 transition-colors shadow-sm"
                         >
                             <Edit className="w-4 h-4" />
                         </button>
@@ -92,9 +88,7 @@ export default function PropertyCard({ property, onEdit, onDelete }: PropertyCar
                     {onDelete && (
                         <button
                             onClick={() => onDelete(property)}
-                            className="p-2 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white text-gray-600 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-500/30"
-                            aria-label="Sil"
-                            title="Sil"
+                            className="p-2 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white text-gray-600 transition-colors shadow-sm"
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>

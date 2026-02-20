@@ -6,12 +6,15 @@ FROM node:20-slim AS deps
 RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+# Install pnpm
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
 # Skip browser downloads to save space/time
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 # Generate Prisma Client in deps stage with correct binaries
 RUN npx prisma generate
@@ -21,6 +24,9 @@ FROM node:20-slim AS builder
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
+# Install pnpm
+RUN npm install -g pnpm
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -29,7 +35,7 @@ RUN npx prisma generate
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN pnpm run build
 
 # 3. Production runner
 FROM node:20-slim AS runner
@@ -92,7 +98,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+# COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
 # Copy public assets
 COPY --from=builder /app/public ./public
