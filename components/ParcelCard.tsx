@@ -97,28 +97,22 @@ export default function ParcelCard({
                     </div>
 
                     {/* Actions */}
-                    <div className="absolute top-3 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
+                    <div className="absolute top-3 right-3 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsQuickViewOpen(true); }}
-                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
-                            aria-label="Hızlı Görünüm"
-                            title="Hızlı Görünüm"
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
                         >
                             <Eye className="h-4 w-4" />
                         </button>
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditOpen(true); }}
-                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
-                            aria-label="Düzenle"
-                            title="Düzenle"
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
                         >
                             <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsDeleteOpen(true); }}
-                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#ff3b30] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ff3b30]/30"
-                            aria-label="Sil"
-                            title="Sil"
+                            className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#ff3b30] shadow-sm transition-colors"
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>
