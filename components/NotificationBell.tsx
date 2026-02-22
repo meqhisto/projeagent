@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
+
+interface Notification {
+    id: number;
+    title: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+    type: string;
+}
 
 const NOTIFICATION_ICONS: Record<string, string> = {
     PARCEL_ADDED: "🆕",
@@ -22,7 +31,7 @@ function timeAgo(date: string) {
 }
 
 export default function NotificationBell() {
-    const [notifications, setNotifications] = useState<any[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -94,7 +103,10 @@ export default function NotificationBell() {
             {/* Bell Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
+                aria-label={unreadCount > 0 ? `Bildirimler, ${unreadCount} okunmamış` : "Bildirimler"}
+                aria-expanded={isOpen}
+                aria-haspopup="true"
+                className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0071e3]/30"
             >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
@@ -114,7 +126,7 @@ export default function NotificationBell() {
                             <button
                                 onClick={markAllAsRead}
                                 disabled={loading}
-                                className="text-xs text-[#0071e3] hover:text-[#0077ed] font-medium flex items-center gap-1"
+                                className="text-xs text-[#0071e3] hover:text-[#0077ed] font-medium flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/30 rounded"
                             >
                                 <CheckCheck className="h-3 w-3" />
                                 Tümünü Okundu İşaretle
@@ -123,45 +135,46 @@ export default function NotificationBell() {
                     </div>
 
                     {/* Notification List */}
-                    <div className="max-h-96 overflow-y-auto">
+                    <ul className="max-h-96 overflow-y-auto">
                         {notifications.length > 0 ? (
                             notifications.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${!notification.isRead ? "bg-blue-50" : ""
-                                        }`}
-                                    onClick={() => !notification.isRead && markAsRead(notification.id)}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-2xl flex-shrink-0">
-                                            {NOTIFICATION_ICONS[notification.type] || "📢"}
-                                        </span>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-medium text-gray-900 text-sm">
-                                                {notification.title}
-                                            </h4>
-                                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                {notification.message}
-                                            </p>
-                                            <p className="text-xs text-gray-400 mt-2">
-                                                {timeAgo(notification.createdAt)}
-                                            </p>
-                                        </div>
-                                        {!notification.isRead && (
-                                            <div className="flex-shrink-0">
-                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <li key={notification.id}>
+                                    <button
+                                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/30 focus-visible:z-10 relative ${!notification.isRead ? "bg-blue-50" : ""
+                                            }`}
+                                        onClick={() => !notification.isRead && markAsRead(notification.id)}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-2xl flex-shrink-0" aria-hidden="true">
+                                                {NOTIFICATION_ICONS[notification.type] || "📢"}
+                                            </span>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium text-gray-900 text-sm">
+                                                    {notification.title}
+                                                </h4>
+                                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                                    {notification.message}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    {timeAgo(notification.createdAt)}
+                                                </p>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
+                                            {!notification.isRead && (
+                                                <div className="flex-shrink-0">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full" aria-label="Okunmamış"></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </button>
+                                </li>
                             ))
                         ) : (
-                            <div className="p-8 text-center text-gray-400 text-sm">
-                                <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                            <li className="p-8 text-center text-gray-400 text-sm">
+                                <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" aria-hidden="true" />
                                 <p>Henüz bildirim yok</p>
-                            </div>
+                            </li>
                         )}
-                    </div>
+                    </ul>
                 </div>
             )}
         </div>
