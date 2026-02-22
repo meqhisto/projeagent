@@ -13,8 +13,10 @@
     "test:e2e": "playwright test",
     "reset-password": "tsx prisma/reset-password.ts",
     "seed": "tsx prisma/seed.ts",
-    "backup": "bash backup-database.sh"
+    "backup": "bash backup-database.sh",
+    "postinstall": "prisma generate"
   },
+  "packageManager": "pnpm@9.15.4",
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "@prisma/client": "5.22.0",
