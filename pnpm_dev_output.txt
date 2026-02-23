@@ -25,3 +25,29 @@ https://nextjs.org/telemetry
     at Auth (/app/.next/dev/server/chunks/691c0_@auth_core_843d8dff._.js:5330:264)
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
     at async AppRouteRouteModule.do (/app/node_modules/.pnpm/next@16.0.10_@babel+core@7.29.0_@playwright+test@1.58.2_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+ ✓ Compiled in 494ms
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:5331:270)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:5331:270)
+ ○ Compiling /_not-found/page ...
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:5331:270)
+ GET /app/node_modules/.pnpm/playwright@1.58.2/node_modules/playwright/lib/index.js 404 in 9.2s (compile: 8.6s, proxy.ts: 126ms, render: 463ms)
+ GET /app/node_modules/.pnpm/playwright@1.58.2/node_modules/playwright/lib/index.js 404 in 3.5s (compile: 2.2s, proxy.ts: 17ms, render: 1236ms)
+ GET /app/node_modules/.pnpm/playwright@1.58.2/node_modules/playwright/lib/index.js 404 in 9.6s (compile: 8.9s, proxy.ts: 319ms, render: 322ms)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:5331:270)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:5331:270)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:5331:270)
+ GET /app/tests/e2e/presentation.spec.ts 404 in 642ms (compile: 281ms, proxy.ts: 22ms, render: 339ms)
+ GET /app/tests/e2e/auth.spec.ts 404 in 700ms (compile: 374ms, proxy.ts: 50ms, render: 275ms)
+ GET /app/tests/e2e/parcels.spec.ts 404 in 522ms (compile: 341ms, proxy.ts: 23ms, render: 158ms)
