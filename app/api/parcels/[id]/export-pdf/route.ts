@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
-import puppeteer from "puppeteer";
 import crypto from "crypto";
 
 export async function GET(
@@ -70,6 +69,8 @@ export async function GET(
 
         try {
             console.log("[PDF Export] Launching Puppeteer...");
+
+            const puppeteer = (await import("puppeteer")).default;
 
             browser = await puppeteer.launch({
                 headless: true,
