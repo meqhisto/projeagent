@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "postinstall": "prisma generate",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -61,17 +60,5 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@prisma/client",
-      "@prisma/engines",
-      "core-js",
-      "esbuild",
-      "prisma",
-      "puppeteer",
-      "sharp",
-      "unrs-resolver"
-    ]
   }
 }
