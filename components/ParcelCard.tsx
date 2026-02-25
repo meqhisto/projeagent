@@ -101,24 +101,18 @@ export default function ParcelCard({
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsQuickViewOpen(true); }}
                             className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
-                            aria-label="Parsel detaylarını görüntüle"
-                            title="Hızlı Bakış"
                         >
                             <Eye className="h-4 w-4" />
                         </button>
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditOpen(true); }}
                             className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#0071e3] shadow-sm transition-colors"
-                            aria-label="Parseli düzenle"
-                            title="Düzenle"
                         >
                             <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsDeleteOpen(true); }}
                             className="p-2 rounded-lg bg-white/90 text-[#6e6e73] hover:text-[#ff3b30] shadow-sm transition-colors"
-                            aria-label="Parseli sil"
-                            title="Sil"
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>

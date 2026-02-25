@@ -116,3 +116,5 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
         return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
     }
 }
+
+export const runtime = 'nodejs';

@@ -161,3 +161,5 @@ export async function DELETE(
         return NextResponse.json({ error: "Failed to delete customer" }, { status: 500 });
     }
 }
+
+export const runtime = 'nodejs';

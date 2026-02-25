@@ -22,3 +22,5 @@ export async function GET() {
         }, { status: 503 });
     }
 }
+
+export const runtime = 'nodejs';
