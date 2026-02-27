@@ -43,8 +43,14 @@ export async function GET(request: Request) {
             where,
             orderBy: { createdAt: "desc" },
             include: {
-                images: true,
-                zoning: true,
+                images: {
+                    take: 1,
+                    orderBy: { isDefault: 'desc' },
+                    select: { url: true }
+                },
+                zoning: {
+                    select: { ks: true, taks: true, maxHeight: true }
+                },
             },
         });
         return NextResponse.json(parcels);
