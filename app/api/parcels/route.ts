@@ -43,14 +43,14 @@ export async function GET(request: Request) {
             where,
             orderBy: { createdAt: "desc" },
             include: {
+                // ⚡ Bolt: Performance Optimization
+                // We only need the default/first image to display the thumbnail on the ParcelCard component.
+                // Limiting to take: 1 prevents fetching a massive array of images for every parcel in the list.
                 images: {
                     take: 1,
                     orderBy: { isDefault: 'desc' },
-                    select: { url: true }
                 },
-                zoning: {
-                    select: { ks: true, taks: true, maxHeight: true }
-                },
+                zoning: true,
             },
         });
         return NextResponse.json(parcels);
