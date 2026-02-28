@@ -43,7 +43,11 @@ export async function GET(request: Request) {
             where,
             orderBy: { createdAt: "desc" },
             include: {
-                images: true,
+                images: {
+                    select: { id: true, url: true, isDefault: true },
+                    orderBy: { isDefault: 'desc' },
+                    take: 1
+                },
                 zoning: true,
             },
         });
