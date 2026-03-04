@@ -43,7 +43,15 @@ export async function GET(request: Request) {
             where,
             orderBy: { createdAt: "desc" },
             include: {
-                images: true,
+                images: {
+                    // ⚡ Bolt: Only fetch the first/default image to reduce payload size
+                    // Since the list views only display a single thumbnail, we don't need all images
+                    take: 1,
+                    orderBy: {
+                        isDefault: 'desc'
+                    },
+                    select: { url: true, id: true }
+                },
                 zoning: true,
             },
         });
