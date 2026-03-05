@@ -1,0 +1,3 @@
+## 2024-05-24 - Prisma FindMany select Optimization
+**Learning:** Found a specific over-fetching vulnerability where an entire relational tree or all columns on a model was being loaded, even though only a small fraction of data (e.g. status flags, created dates) were needed for summary analytics logic. This causes a major payload bloat and memory bloat on large datasets like `parcels`.
+**Action:** When working on summary or KPI metrics in Prisma routes, ALWAYS utilize `select` logic to scope down the required columns. Do not use generic `include` definitions without verifying if that included table is actually utilized.

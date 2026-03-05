@@ -20,10 +20,17 @@ export async function GET() {
                 ]
             };
 
+        // ⚡ Bolt: Optimize KPI query to only fetch required fields
+        // 💡 What: Replaced `include: { zoning: true }` with `select` for specific fields.
+        // 🎯 Why: Prevents overfetching all parcel columns and the unused zoning relation.
+        // 📊 Impact: Significantly reduces DB payload and memory usage for large datasets.
         const parcels = await prisma.parcel.findMany({
             where,
-            include: {
-                zoning: true
+            select: {
+                id: true,
+                crmStage: true,
+                createdAt: true,
+                area: true
             }
         });
 
