@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 export async function GET() {
     try {
         const user = await requireAuth();
