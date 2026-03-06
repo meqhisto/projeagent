@@ -58,16 +58,19 @@ export async function GET(request: Request) {
                 longitude: true,
                 status: true,
                 createdAt: true,
+                updatedAt: true,
                 crmStage: true,
                 category: true,
                 tags: true,
+                ownerId: true,
+                assignedTo: true,
                 images: {
                     take: 1, // Only need the first image for list thumbnail
-                    select: { url: true },
+                    select: { id: true, url: true, type: true, isDefault: true, parcelId: true, createdAt: true },
                     orderBy: { isDefault: 'desc' }
                 },
                 zoning: {
-                    select: { ks: true, taks: true, maxHeight: true }
+                    select: { id: true, parcelId: true, ks: true, taks: true, maxHeight: true, zoningType: true, notes: true, sourceUrl: true, retrievedAt: true }
                 }
             },
         });
