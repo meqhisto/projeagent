@@ -1,0 +1,3 @@
+## 2024-05-19 - Prisma Selects Optimization
+**Learning:** Found that many Prisma `findMany` queries in API endpoints are fetching all fields and nested relations (`include: { images: true, zoning: true }`), which leads to massive over-fetching of data, significantly increasing DB response time, JSON serialization time, and network payload sizes, especially for lists like `GET /api/parcels` and `GET /api/properties`.
+**Action:** When implementing a fix, only fetch the fields required by the frontend using `select`, and consider capping the number of returned relational records (e.g. `images: { take: 1 }`).

@@ -39,12 +39,36 @@ export async function GET(request: Request) {
             where.category = category as any; // Cast to any to bypass strict enum check for now, or import ParcelCategory
         }
 
+        // ⚡ Bolt Optimization: Replace `include: true` with targeted `select`
+        // By fetching only the scalar fields and relational sub-fields needed by `ParcelCard.tsx`
+        // and map views, we drastically reduce over-fetching. We also limit `images` to just 1
+        // to avoid transferring large arrays of images that won't be displayed in list views.
         const parcels = await prisma.parcel.findMany({
             where,
             orderBy: { createdAt: "desc" },
-            include: {
-                images: true,
-                zoning: true,
+            select: {
+                id: true,
+                city: true,
+                district: true,
+                neighborhood: true,
+                island: true,
+                parsel: true,
+                area: true,
+                latitude: true,
+                longitude: true,
+                status: true,
+                createdAt: true,
+                crmStage: true,
+                category: true,
+                tags: true,
+                images: {
+                    take: 1, // Only need the first image for list thumbnail
+                    select: { url: true },
+                    orderBy: { isDefault: 'desc' }
+                },
+                zoning: {
+                    select: { ks: true, taks: true, maxHeight: true }
+                }
             },
         });
         return NextResponse.json(parcels);
