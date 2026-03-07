@@ -40,4 +40,3 @@ export async function POST(request: Request, props: { params: Promise<{ path: st
         );
     }
 }
-export const runtime = 'nodejs';

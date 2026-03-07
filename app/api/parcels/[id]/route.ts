@@ -184,4 +184,3 @@ export async function DELETE(
         );
     }
 }
-export const runtime = 'nodejs';

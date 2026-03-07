@@ -77,4 +77,3 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error.message }, { status: error.message === "Unauthorized" || error.message === "Admin access required" ? 403 : 500 });
     }
 }
-export const runtime = 'nodejs';
