@@ -64,3 +64,4 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+export const runtime = 'nodejs';

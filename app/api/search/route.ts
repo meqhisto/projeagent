@@ -63,3 +63,4 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: "Arama yapılırken hata oluştu" }, { status: 500 });
     }
 }
+export const runtime = 'nodejs';
