@@ -1,0 +1,3 @@
+## 2025-03-08 - [Optimize pipeline calculation]
+**Learning:** Found an anti-pattern in `app/api/analytics/pipeline/route.ts` where all parcel models were being loaded into memory via `.findMany()` just to count their `.crmStage` values. This would cause memory exhaustion when processing hundreds or thousands of records. Prisma `.groupBy()` with `_count` completely pushes this grouping to the database level, allowing for scalable aggregation.
+**Action:** Before bringing rows into memory just to run array calculations (like `.filter(x => ...).length`), check if Prisma's grouping or counting can be used instead to save network transfer time and Node.js process memory.
