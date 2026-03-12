@@ -20,14 +20,27 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ Bolt: Push aggregation to DB to avoid loading all parcels into Node.js memory
+        // Expected impact: Significant reduction in memory usage and network transfer for large datasets
+        const stageGroups = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            _count: { _all: true },
+            where
+        });
 
         // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
-        const data = stages.map(stage => ({
-            stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
-        }));
+        const data = stages.map(stage => {
+            // Map null/empty crmStage to NEW_LEAD
+            const count = stageGroups
+                .filter(g => (g.crmStage || "NEW_LEAD") === stage)
+                .reduce((sum, g) => sum + g._count._all, 0);
+
+            return {
+                stage,
+                count
+            };
+        });
 
         return NextResponse.json(data);
     } catch (error: any) {

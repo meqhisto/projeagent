@@ -1,0 +1,3 @@
+## 2024-05-18 - Database Aggregation Pattern
+**Learning:** The codebase has a recurring anti-pattern of using Prisma's `findMany` to load entire tables (like `parcel` or `property`) into Node.js memory simply to calculate counts, sums, or group by certain fields (like `crmStage` or `status`). This causes significant memory bloat and network overhead for large datasets.
+**Action:** Always prefer pushing aggregations to the database layer using Prisma's `groupBy()`, `count()`, and `aggregate()` methods instead of filtering/reducing in JavaScript. When grouping, handle null/undefined fields explicitly if the original JavaScript code had fallback values (e.g., `(p.crmStage || "NEW_LEAD")`).
