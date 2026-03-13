@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
-export const runtime = 'nodejs';
-
 const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
@@ -22,29 +20,13 @@ export async function GET() {
                 ]
             };
 
-        // ⚡ Bolt: Fetch counts grouped by stage directly from DB to avoid loading all parcels into Node.js memory
-        // This dramatically reduces payload from DB and Memory Usage for O(n) filtering.
-        const stageCounts = await prisma.parcel.groupBy({
-            by: ['crmStage'],
-            where,
-            _count: {
-                _all: true
-            }
-        });
+        const parcels = await prisma.parcel.findMany({ where });
 
-        // Initialize counts map for quick O(1) lookups
-        const stageCountMap: Record<string, number> = {};
-        for (const item of stageCounts) {
-            // If crmStage is null/undefined in some old records, we treat it as NEW_LEAD
-            const stage = item.crmStage || "NEW_LEAD";
-            stageCountMap[stage] = (stageCountMap[stage] || 0) + item._count._all;
-        }
-
-        // Output all expected stages (with zero counts for missing ones)
+        // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
         const data = stages.map(stage => ({
             stage,
-            count: stageCountMap[stage] || 0
+            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
         }));
 
         return NextResponse.json(data);
