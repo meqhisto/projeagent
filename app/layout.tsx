@@ -18,6 +18,8 @@ const dmSans = DM_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
+export const runtime = "nodejs";
+
 export const metadata: Metadata = {
   title: "ParselMonitor - İnşaat Arsa Yönetim Sistemi",
   description: "Modern, güvenli ve kullanıcı dostu arsa takip ve analiz platformu. Gayrimenkul profesyonelleri için tasarlanmış, tam özellikli CRM ve fizibilite analiz sistemi.",

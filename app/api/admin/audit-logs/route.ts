@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 import { getRecentAuditLogs, getSecurityLogs } from "@/lib/auditLog";
