@@ -7,6 +7,8 @@ import { ParcelCreateSchema, validateSchema } from "@/lib/validations";
 import { logger } from "@/lib/logger";
 import { PARCEL_STATUS } from "@/lib/constants";
 
+export const runtime = 'nodejs';
+
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();

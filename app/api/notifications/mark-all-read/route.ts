@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // PATCH - Mark all notifications as read
+export const runtime = 'nodejs';
+
 export async function PATCH() {
     try {
         await prisma.notification.updateMany({
