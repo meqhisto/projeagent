@@ -1,0 +1,3 @@
+## 2024-05-14 - Prisma findMany Over-fetching Anti-pattern
+**Learning:** A critical anti-pattern was found where `findMany()` is used without `select` to fetch all rows and all columns from the database, purely to calculate counts or metrics in Node.js memory (e.g., in `app/api/analytics/pipeline/route.ts`). This forces the database to serialize large amounts of data, clogs the network, and increases Node.js memory pressure significantly when dealing with thousands of rows.
+**Action:** Always prefer pushing aggregations and counting down to the database layer by using Prisma's `.groupBy()`, `.count()`, or `.aggregate()` with `_count: { _all: true }`. Avoid using `findMany()` when the final result is just an aggregate metric.
