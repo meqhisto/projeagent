@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -20,13 +17,35 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // Optimization: Use database aggregation instead of fetching all rows into memory
+        // and iterating over them in Node.js. Also maps fallback stage (null/undefined) to "NEW_LEAD".
+        const groupedParcels = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            _count: { _all: true },
+            where
+        });
 
-        // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
+
+        // Initialize counts to 0
+        const countsByStage: Record<string, number> = {};
+        stages.forEach(stage => countsByStage[stage] = 0);
+
+        // Accumulate counts, handling null/empty strings by defaulting to "NEW_LEAD"
+        groupedParcels.forEach(group => {
+            const stage = group.crmStage || "NEW_LEAD";
+            if (stages.includes(stage)) {
+                countsByStage[stage] = (countsByStage[stage] || 0) + group._count._all;
+            } else {
+                // If it's an unrecognized stage, we can optionally group it into NEW_LEAD or ignore it.
+                // Replicating original logic which just checked if it matched a known stage.
+                // `(p.crmStage || "NEW_LEAD") === stage` implies recognized stages only.
+            }
+        });
+
         const data = stages.map(stage => ({
             stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
+            count: countsByStage[stage]
         }));
 
         return NextResponse.json(data);
