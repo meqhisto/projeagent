@@ -1,0 +1,4 @@
+
+## 2024-03-18 - Avoid findMany for simple counting and don't instantiate new PrismaClient in serverless routes
+**Learning:** Instantiating `new PrismaClient()` in every API route breaks Edge deployments and can easily cause connection pool exhaustion in serverless environments. Additionally, reading entire datasets into Node.js using `findMany` just to perform counting or group aggregates creates significant memory and CPU bottlenecks on large datasets.
+**Action:** Use the shared singleton `import { prisma } from "@/lib/prisma"` in API routes. Offload dataset aggregations to the database layer directly using Prisma's `.groupBy()` or `.count()` with `_count: { _all: true }`. When mapping `groupBy` results for fallback/default values (e.g. `item.crmStage || "NEW_LEAD"`), ensure you accumulate (add) the values instead of overwriting keys.

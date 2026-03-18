@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -20,13 +18,27 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // BOLT OPTIMIZATION: Push processing to database layer and replace new PrismaClient instantiation
+        // Previously: used findMany() to fetch all records into Node.js memory just to count them
+        // Now: Uses Prisma's groupBy & _count directly on the database + singleton PrismaClient to avoid connection exhaustion
+        const groupedParcels = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            where,
+            _count: { _all: true }
+        });
 
-        // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
+
+        // Ensure accurate counting by properly accumulating counts of nullish keys into NEW_LEAD
+        const countsByStage = groupedParcels.reduce((acc, curr) => {
+            const stage = curr.crmStage || "NEW_LEAD";
+            acc[stage] = (acc[stage] || 0) + curr._count._all;
+            return acc;
+        }, {} as Record<string, number>);
+
         const data = stages.map(stage => ({
             stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
+            count: countsByStage[stage] || 0
         }));
 
         return NextResponse.json(data);
