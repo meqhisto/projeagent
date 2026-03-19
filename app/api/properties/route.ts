@@ -4,8 +4,6 @@ import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 
 // GET /api/properties - Tüm gayrimenkulleri listele
-export const runtime = 'nodejs';
-
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();

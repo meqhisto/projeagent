@@ -4,8 +4,6 @@ import bcrypt from "bcryptjs";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 import { logLogin } from "@/lib/auditLog";
 
-export const runtime = 'nodejs';
-
 export async function POST(request: Request) {
     // Rate limiting check
     const rateLimitResult = rateLimit(request, "/api/auth/verify");

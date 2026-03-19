@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, isAdmin } from '@/lib/auth/roleCheck';
 
-export const runtime = 'nodejs';
-
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();

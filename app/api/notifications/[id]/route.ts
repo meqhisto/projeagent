@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 // PATCH - Mark single notification as read
-export const runtime = 'nodejs';
-
 export async function PATCH(
     request: Request,
     props: { params: Promise<{ id: string }> }

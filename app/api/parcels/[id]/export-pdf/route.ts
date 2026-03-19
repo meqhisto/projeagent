@@ -4,8 +4,6 @@ import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 import puppeteer from "puppeteer";
 import crypto from "crypto";
 
-export const runtime = 'nodejs';
-
 export async function GET(
     request: NextRequest,
     props: { params: Promise<{ id: string }> }

@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
 // GET - Kullanıcının sunum ayarlarını getir
-export const runtime = 'nodejs';
-
 export async function GET() {
     try {
         const user = await requireAuth();

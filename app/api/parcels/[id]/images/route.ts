@@ -4,8 +4,6 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 // GET - List all images for a parcel
-export const runtime = 'nodejs';
-
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     try {

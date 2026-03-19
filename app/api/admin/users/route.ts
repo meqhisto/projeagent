@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { requireAdmin } from "@/lib/auth/roleCheck";
 
-export const runtime = 'nodejs';
-
 export async function GET() {
     try {
         await requireAdmin();

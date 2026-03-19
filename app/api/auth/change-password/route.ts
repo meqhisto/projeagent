@@ -4,8 +4,6 @@ import bcrypt from "bcryptjs";
 import { requireAuth } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 
-export const runtime = 'nodejs';
-
 export async function POST(req: Request) {
     // Rate limiting check
     const rateLimitResult = rateLimit(req, "/api/auth/change-password");

@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 // POST - Yeni paylaşım linki oluştur
-export const runtime = 'nodejs';
-
 export async function POST(
     request: NextRequest,
     props: { params: Promise<{ id: string }> }
