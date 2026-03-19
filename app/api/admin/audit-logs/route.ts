@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 import { getRecentAuditLogs, getSecurityLogs } from "@/lib/auditLog";
 
+export const runtime = 'nodejs';
+
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();
