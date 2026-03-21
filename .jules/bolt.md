@@ -1,3 +1,7 @@
 ## 2024-05-24 - Accumulating GroupBy counts for nullable properties
 **Learning:** When using Prisma `.groupBy()` on a field that can be nullish, mapping the results back in Node.js with fallback keys (like `item.crmStage || "NEW_LEAD"`) means multiple rows from the `groupBy` result could map to the *same* fallback key. If you just overwrite values (e.g. `countMap[key] = count`), you will lose data.
 **Action:** When mapping `groupBy` results with fallback keys, always accumulate values using `+=` instead of overwriting to correctly compute the aggregate sum involving default values.
+
+## 2024-05-24 - PrismaClient Instantiation in Next.js Serverless/Edge Environments
+**Learning:** In Next.js App Router applications deploying to serverless/edge environments (like Cloudflare Workers), creating `new PrismaClient()` directly inside individual API routes (`app/api/.../route.ts`) causes severe issues: 1) It exhausts database connections because a new client is instantiated per request or module load, and 2) It triggers build failures in edge runtimes.
+**Action:** Never instantiate `new PrismaClient()` inside an API route. Always import the shared singleton instance (`import { prisma } from "@/lib/prisma"`) to reuse connections and ensure compatibility with the build system.

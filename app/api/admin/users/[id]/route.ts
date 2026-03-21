@@ -1,10 +1,9 @@
 export const runtime = 'nodejs';
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { requireAdmin } from "@/lib/auth/roleCheck";
 
-const prisma = new PrismaClient();
 
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     try {

@@ -1,8 +1,7 @@
 export const runtime = 'nodejs';
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 
 // PATCH - Mark single notification as read
 export async function PATCH(
