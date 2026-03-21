@@ -1,0 +1,3 @@
+## 2024-05-24 - Accumulating GroupBy counts for nullable properties
+**Learning:** When using Prisma `.groupBy()` on a field that can be nullish, mapping the results back in Node.js with fallback keys (like `item.crmStage || "NEW_LEAD"`) means multiple rows from the `groupBy` result could map to the *same* fallback key. If you just overwrite values (e.g. `countMap[key] = count`), you will lose data.
+**Action:** When mapping `groupBy` results with fallback keys, always accumulate values using `+=` instead of overwriting to correctly compute the aggregate sum involving default values.
