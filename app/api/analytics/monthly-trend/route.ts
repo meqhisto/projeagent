@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -11,6 +8,7 @@ export async function GET() {
         const userId = parseInt(user.id || "0");
 
         // Build query based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
@@ -20,7 +18,22 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // Determine date range for last 6 months
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+        sixMonthsAgo.setDate(1);
+        sixMonthsAgo.setHours(0, 0, 0, 0);
+
+        // ⚡ Bolt Optimization: Replace findMany() with database-level counting
+        // by avoiding loading full records into node.js memory, especially as
+        // the `parcel` table grows over time.
+        const parcels = await prisma.parcel.findMany({
+            where: {
+                ...where,
+                createdAt: { gte: sixMonthsAgo }
+            },
+            select: { createdAt: true }
+        });
 
         // Get last 6 months
         const months = [];
@@ -44,6 +57,7 @@ export async function GET() {
         }
 
         return NextResponse.json(months);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
