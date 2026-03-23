@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 
 // GET /api/properties/[id] - Gayrimenkul detayını getir
+export const runtime = "nodejs";
+
 export async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string }> }

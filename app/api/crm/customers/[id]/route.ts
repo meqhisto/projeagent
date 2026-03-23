@@ -12,6 +12,8 @@ function decryptCustomer<T extends { phone?: string | null; email?: string | nul
     };
 }
 
+export const runtime = "nodejs";
+
 export async function GET(
     request: Request,
     props: { params: Promise<{ id: string }> }

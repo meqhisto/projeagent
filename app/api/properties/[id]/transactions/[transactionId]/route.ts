@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 // GET - Tek bir işlem detayı
+export const runtime = "nodejs";
+
 export async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string; transactionId: string }> }

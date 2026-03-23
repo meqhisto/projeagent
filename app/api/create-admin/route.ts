@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+export const runtime = "nodejs";
+
 export async function POST() {
     try {
         // Check if admin already exists

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 // GET - Parsel için sunum verilerini getir
+export const runtime = "nodejs";
+
 export async function GET(
     request: NextRequest,
     props: { params: Promise<{ id: string }> }

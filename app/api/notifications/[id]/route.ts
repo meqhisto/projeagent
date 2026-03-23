@@ -4,6 +4,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // PATCH - Mark single notification as read
+export const runtime = "nodejs";
+
 export async function PATCH(
     request: Request,
     props: { params: Promise<{ id: string }> }

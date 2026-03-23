@@ -5,6 +5,8 @@ import { requireAdmin } from "@/lib/auth/roleCheck";
 
 const prisma = new PrismaClient();
 
+export const runtime = "nodejs";
+
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
         const params = await props.params;

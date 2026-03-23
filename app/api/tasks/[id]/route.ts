@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
 // GET - Get single task
+export const runtime = "nodejs";
+
 export async function GET(
     req: Request,
     props: { params: Promise<{ id: string }> }

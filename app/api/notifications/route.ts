@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
 // GET - List notifications for current user
+export const runtime = "nodejs";
+
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();

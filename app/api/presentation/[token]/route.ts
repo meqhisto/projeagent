@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET - Token ile public sunum verilerini getir (AUTH GEREKTİRMEZ)
+export const runtime = "nodejs";
+
 export async function GET(
     request: NextRequest,
     props: { params: Promise<{ token: string }> }
