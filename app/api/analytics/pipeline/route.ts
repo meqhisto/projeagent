@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -11,6 +8,7 @@ export async function GET() {
         const userId = parseInt(user.id || "0");
 
         // Build query based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
@@ -20,16 +18,45 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ Bolt: Replaced findMany + in-memory mapping with database-level .groupBy()
+        // Why: Avoids fetching entire Parcel table into Node.js memory just to count rows by stage.
+        // Impact: Reduces DB memory footprint and payload size, lowering latency from O(N) objects to O(1) query result.
+        const groupByResult = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            where,
+            _count: {
+                _all: true,
+            },
+        });
 
-        // Count parcels by stage
+        // Map and accumulate counts ensuring that any null/missing stages fall back to NEW_LEAD
+        const stageCounts: Record<string, number> = {
+            "NEW_LEAD": 0,
+            "CONTACTED": 0,
+            "ANALYSIS": 0,
+            "OFFER_SENT": 0,
+            "CONTRACT": 0,
+            "LOST": 0
+        };
+
+        for (const group of groupByResult) {
+            const stage = group.crmStage || "NEW_LEAD";
+            if (stageCounts[stage] !== undefined) {
+                stageCounts[stage] += group._count._all;
+            } else {
+                // If there's an unexpected stage, add it or fall back
+                stageCounts[stage] = group._count._all;
+            }
+        }
+
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
         const data = stages.map(stage => ({
             stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
+            count: stageCounts[stage] || 0
         }));
 
         return NextResponse.json(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
