@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
 // GET - Firma eşleştirmelerini getir
-export const runtime = "nodejs";
-
 export async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string }> }

@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 
 // GET - Tüm firmaları listele
-export const runtime = "nodejs";
-
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();

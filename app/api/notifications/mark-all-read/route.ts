@@ -4,8 +4,6 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // PATCH - Mark all notifications as read
-export const runtime = "nodejs";
-
 export async function PATCH() {
     try {
         await prisma.notification.updateMany({

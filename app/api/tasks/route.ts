@@ -6,8 +6,6 @@ import { logger } from "@/lib/logger";
 import { INTERACTION_TYPE, ROLES, PRIORITY, NOTIFICATION_TYPE } from "@/lib/constants";
 
 // GET - List tasks with filters
-export const runtime = "nodejs";
-
 export async function GET(req: Request) {
     try {
         const user = await requireAuth();
