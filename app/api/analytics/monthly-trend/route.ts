@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -9,6 +11,7 @@ export async function GET() {
         const userId = parseInt(user.id || "0");
 
         // Build query based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
@@ -18,45 +21,31 @@ export async function GET() {
                 ]
             };
 
+        const parcels = await prisma.parcel.findMany({ where });
+
         // Get last 6 months
-        const monthsData = [];
+        const months = [];
         const monthNames = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
 
-        // Prepare month ranges for queries
         for (let i = 5; i >= 0; i--) {
             const date = new Date();
             date.setMonth(date.getMonth() - i);
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-            monthsData.push({
+            const count = parcels.filter(p => {
+                const createdAt = new Date(p.createdAt);
+                return createdAt >= monthStart && createdAt <= monthEnd;
+            }).length;
+
+            months.push({
                 month: monthNames[date.getMonth()],
-                start: monthStart,
-                end: monthEnd
+                count
             });
         }
 
-        // ⚡ Bolt Optimization: Replace O(n) findMany + array processing with concurrent DB queries
-        const counts = await Promise.all(
-            monthsData.map(data =>
-                prisma.parcel.count({
-                    where: {
-                        ...where,
-                        createdAt: {
-                            gte: data.start,
-                            lte: data.end
-                        }
-                    }
-                })
-            )
-        );
-
-        const months = monthsData.map((data, index) => ({
-            month: data.month,
-            count: counts[index]
-        }));
-
         return NextResponse.json(months);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

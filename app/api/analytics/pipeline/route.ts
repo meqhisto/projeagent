@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -9,6 +11,7 @@ export async function GET() {
         const userId = parseInt(user.id || "0");
 
         // Build query based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
@@ -18,34 +21,17 @@ export async function GET() {
                 ]
             };
 
-        // ⚡ Bolt Optimization: Replace O(n) findMany + array filter with O(1) DB groupBy
-        const groupedParcels = await prisma.parcel.groupBy({
-            by: ["crmStage"],
-            where,
-            _count: { _all: true }
-        });
+        const parcels = await prisma.parcel.findMany({ where });
 
-        // Initialize stage counts to 0
+        // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
-        const stageMap: Record<string, number> = {};
-        stages.forEach(stage => { stageMap[stage] = 0; });
-
-        // Populate counts from DB aggregation results
-        groupedParcels.forEach(group => {
-            const stage = group.crmStage || "NEW_LEAD";
-            if (stageMap[stage] !== undefined) {
-                stageMap[stage] += group._count._all; // Accumulate counts per memory guidelines
-            } else {
-                stageMap[stage] = group._count._all;
-            }
-        });
-
         const data = stages.map(stage => ({
             stage,
-            count: stageMap[stage] || 0
+            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
         }));
 
         return NextResponse.json(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
