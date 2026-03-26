@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -20,13 +18,31 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ Bolt Optimization: Replace O(n) findMany + array filter with O(1) DB groupBy
+        const groupedParcels = await prisma.parcel.groupBy({
+            by: ["crmStage"],
+            where,
+            _count: { _all: true }
+        });
 
-        // Count parcels by stage
+        // Initialize stage counts to 0
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
+        const stageMap: Record<string, number> = {};
+        stages.forEach(stage => { stageMap[stage] = 0; });
+
+        // Populate counts from DB aggregation results
+        groupedParcels.forEach(group => {
+            const stage = group.crmStage || "NEW_LEAD";
+            if (stageMap[stage] !== undefined) {
+                stageMap[stage] += group._count._all; // Accumulate counts per memory guidelines
+            } else {
+                stageMap[stage] = group._count._all;
+            }
+        });
+
         const data = stages.map(stage => ({
             stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
+            count: stageMap[stage] || 0
         }));
 
         return NextResponse.json(data);
