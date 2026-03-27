@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -20,10 +17,11 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
-
-        // Get last 6 months
-        const months = [];
+        // ⚡ Bolt Optimization:
+        // Use concurrent `prisma.parcel.count()` queries for each month
+        // to prevent transferring the entire DB table into Node.js for memory-based filtering.
+        // Get last 6 months date ranges
+        const monthRanges = [];
         const monthNames = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
 
         for (let i = 5; i >= 0; i--) {
@@ -32,16 +30,32 @@ export async function GET() {
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
             const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-            const count = parcels.filter(p => {
-                const createdAt = new Date(p.createdAt);
-                return createdAt >= monthStart && createdAt <= monthEnd;
-            }).length;
-
-            months.push({
-                month: monthNames[date.getMonth()],
-                count
+            monthRanges.push({
+                name: monthNames[date.getMonth()],
+                start: monthStart,
+                end: monthEnd
             });
         }
+
+        // Execute queries concurrently
+        const counts = await Promise.all(
+            monthRanges.map(range =>
+                prisma.parcel.count({
+                    where: {
+                        ...where,
+                        createdAt: {
+                            gte: range.start,
+                            lte: range.end
+                        }
+                    }
+                })
+            )
+        );
+
+        const months = monthRanges.map((range, index) => ({
+            month: range.name,
+            count: counts[index]
+        }));
 
         return NextResponse.json(months);
     } catch (error: any) {
