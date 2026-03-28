@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -11,7 +8,7 @@ export async function GET() {
         const userId = parseInt(user.id || "0");
 
         // Build query based on role
-        const where = isAdmin((user as any).role as string)
+        const where: any = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
                 OR: [
@@ -20,7 +17,25 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // Get last 6 months start date
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 5);
+        startDate.setDate(1);
+        startDate.setHours(0, 0, 0, 0);
+
+        where.createdAt = { gte: startDate };
+
+        // ⚡ Bolt: Fetch only createdAt instead of fetching full parcel objects
+        // and reuse the shared Prisma singleton to prevent connection leaks.
+        // Grouping by date in SQLite/Postgres across multiple dialects can be
+        // complex via Prisma groupBy, so selecting only createdAt and grouping in Node
+        // is very efficient since payload size is minimal.
+        const parcels = await prisma.parcel.findMany({
+            where,
+            select: {
+                createdAt: true
+            }
+        });
 
         // Get last 6 months
         const months = [];

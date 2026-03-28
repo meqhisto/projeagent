@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -20,55 +17,89 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({
-            where,
-            include: {
-                zoning: true
-            }
-        });
+        // ⚡ Bolt: Use Promise.all and database-level aggregations instead of fetching
+        // all properties to memory and grouping in Node.js.
+        // Also removed new PrismaClient() usage in favor of shared singleton.
 
-        // Calculate KPIs
-        const totalParcels = parcels.length;
-
-        const activeParcels = parcels.filter(p =>
-            ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT"].includes(p.crmStage)
-        ).length;
-
-        const contractParcels = parcels.filter(p => p.crmStage === "CONTRACT").length;
-        const conversionRate = totalParcels > 0 ? (contractParcels / totalParcels) * 100 : 0;
-
-        // This month (last 30 days)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const thisMonthAdded = parcels.filter(p =>
-            new Date(p.createdAt) >= thirtyDaysAgo
-        ).length;
 
-        // Previous month for trend
         const sixtyDaysAgo = new Date();
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-        const previousMonthAdded = parcels.filter(p => {
-            const date = new Date(p.createdAt);
-            return date >= sixtyDaysAgo && date < thirtyDaysAgo;
-        }).length;
 
-        const parcelTrend = previousMonthAdded > 0
-            ? ((thisMonthAdded - previousMonthAdded) / previousMonthAdded) * 100
-            : thisMonthAdded > 0 ? 100 : 0;
+        const [
+            totalParcelsCount,
+            activeParcelsCount,
+            contractParcelsCount,
+            thisMonthAddedCount,
+            previousMonthAddedCount,
+            areaAggregation
+        ] = await Promise.all([
+            // Total parcels
+            prisma.parcel.count({ where }),
+
+            // Active parcels
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    crmStage: { in: ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT"] }
+                }
+            }),
+
+            // Contract parcels
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    crmStage: "CONTRACT"
+                }
+            }),
+
+            // Added this month
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    createdAt: { gte: thirtyDaysAgo }
+                }
+            }),
+
+            // Added previous month
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo }
+                }
+            }),
+
+            // Total area sum (for total value)
+            prisma.parcel.aggregate({
+                where,
+                _sum: {
+                    area: true
+                }
+            })
+        ]);
+
+        const conversionRate = totalParcelsCount > 0
+            ? (contractParcelsCount / totalParcelsCount) * 100
+            : 0;
+
+        const parcelTrend = previousMonthAddedCount > 0
+            ? ((thisMonthAddedCount - previousMonthAddedCount) / previousMonthAddedCount) * 100
+            : thisMonthAddedCount > 0 ? 100 : 0;
 
         // Estimated total value (area * average m² price)
         const avgPricePerM2 = 50000; // TL - could be made dynamic
-        const totalValue = parcels.reduce((sum, p) => sum + (p.area || 0) * avgPricePerM2, 0);
+        const totalValue = (areaAggregation._sum.area || 0) * avgPricePerM2;
 
         // Average ROI (simplified - would need actual feasibility data)
         const avgROI = 28.5; // Placeholder
 
         return NextResponse.json({
-            totalParcels,
-            activeParcels,
+            totalParcels: totalParcelsCount,
+            activeParcels: activeParcelsCount,
             conversionRate: parseFloat(conversionRate.toFixed(1)),
             avgROI,
-            thisMonthAdded,
+            thisMonthAdded: thisMonthAddedCount,
             totalValue,
             trends: {
                 parcels: parcelTrend >= 0 ? `+${parcelTrend.toFixed(0)}%` : `${parcelTrend.toFixed(0)}%`,

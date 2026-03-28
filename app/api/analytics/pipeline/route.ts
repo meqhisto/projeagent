@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -20,14 +17,34 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ Bolt: Push grouping and counting to the DB layer to avoid transferring
+        // all parcel records into Node.js memory. Also reuse the shared Prisma
+        // singleton instead of creating a new PrismaClient to avoid connection issues.
+        const grouped = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            where,
+            _count: {
+                _all: true
+            }
+        });
+
+        // The default stage for parcels without crmStage explicitly set in code logic
+        // but default is "NEW_LEAD" in schema.
 
         // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
-        const data = stages.map(stage => ({
-            stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
-        }));
+
+        const data = stages.map(stage => {
+            // Need to correctly accumulate counts if DB returns both nullish and explicit "NEW_LEAD"
+            const count = grouped
+                .filter(g => (g.crmStage || "NEW_LEAD") === stage)
+                .reduce((sum, g) => sum + g._count._all, 0);
+
+            return {
+                stage,
+                count
+            };
+        });
 
         return NextResponse.json(data);
     } catch (error: any) {
