@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -30,24 +29,24 @@ export async function GET() {
         // Calculate KPIs
         const totalParcels = parcels.length;
 
-        const activeParcels = parcels.filter(p =>
+        const activeParcels = parcels.filter((p: any) =>
             ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT"].includes(p.crmStage)
         ).length;
 
-        const contractParcels = parcels.filter(p => p.crmStage === "CONTRACT").length;
+        const contractParcels = parcels.filter((p: any) => p.crmStage === "CONTRACT").length;
         const conversionRate = totalParcels > 0 ? (contractParcels / totalParcels) * 100 : 0;
 
         // This month (last 30 days)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const thisMonthAdded = parcels.filter(p =>
+        const thisMonthAdded = parcels.filter((p: any) =>
             new Date(p.createdAt) >= thirtyDaysAgo
         ).length;
 
         // Previous month for trend
         const sixtyDaysAgo = new Date();
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-        const previousMonthAdded = parcels.filter(p => {
+        const previousMonthAdded = parcels.filter((p: any) => {
             const date = new Date(p.createdAt);
             return date >= sixtyDaysAgo && date < thirtyDaysAgo;
         }).length;
@@ -58,7 +57,7 @@ export async function GET() {
 
         // Estimated total value (area * average m² price)
         const avgPricePerM2 = 50000; // TL - could be made dynamic
-        const totalValue = parcels.reduce((sum, p) => sum + (p.area || 0) * avgPricePerM2, 0);
+        const totalValue = parcels.reduce((sum: number, p: any) => sum + (p.area || 0) * avgPricePerM2, 0);
 
         // Average ROI (simplified - would need actual feasibility data)
         const avgROI = 28.5; // Placeholder

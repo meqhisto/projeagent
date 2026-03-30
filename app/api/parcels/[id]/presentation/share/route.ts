@@ -104,7 +104,7 @@ export async function GET(
 
         // Public URL'leri ekle
         const baseUrl = process.env.NEXTAUTH_URL || 'https://ekip.invecoproje.com';
-        const sharesWithUrls = shares.map(share => ({
+        const sharesWithUrls = shares.map((share: any) => ({
             ...share,
             shareUrl: `${baseUrl}/p/${share.token}`
         }));

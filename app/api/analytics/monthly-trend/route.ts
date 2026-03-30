@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -32,7 +31,7 @@ export async function GET() {
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
             const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-            const count = parcels.filter(p => {
+            const count = parcels.filter((p: any) => {
                 const createdAt = new Date(p.createdAt);
                 return createdAt >= monthStart && createdAt <= monthEnd;
             }).length;

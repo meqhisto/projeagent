@@ -35,7 +35,7 @@ export async function GET(
 
         // Ortalama puan hesapla
         const avgScore = contractor.ratings.length > 0
-            ? contractor.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / contractor.ratings.length
+            ? contractor.ratings.reduce((sum: number, r: any) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / contractor.ratings.length
             : null;
 
         return NextResponse.json({ ...contractor, averageScore: avgScore });

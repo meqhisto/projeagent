@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -26,7 +25,7 @@ export async function GET() {
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
         const data = stages.map(stage => ({
             stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
+            count: parcels.filter((p: any) => (p.crmStage || "NEW_LEAD") === stage).length
         }));
 
         return NextResponse.json(data);

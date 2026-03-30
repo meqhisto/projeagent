@@ -48,12 +48,12 @@ export async function GET(request: Request) {
             });
 
             // Decrypt sensitive fields before returning
-            const decryptedCustomers = customers.map(c => decryptCustomer(c));
+            const decryptedCustomers = customers.map((c: any) => decryptCustomer(c));
 
             // If search provided, filter decrypted results
             if (search) {
                 const searchLower = search.toLowerCase();
-                const filtered = decryptedCustomers.filter(c =>
+                const filtered = decryptedCustomers.filter((c: any) =>
                     c.name?.toLowerCase().includes(searchLower) ||
                     c.phone?.toLowerCase().includes(searchLower) ||
                     c.email?.toLowerCase().includes(searchLower)
@@ -86,12 +86,12 @@ export async function GET(request: Request) {
         });
 
         // Decrypt sensitive fields before returning
-        const decryptedCustomers = customers.map(c => decryptCustomer(c));
+        const decryptedCustomers = customers.map((c: any) => decryptCustomer(c));
 
         // If search provided, filter decrypted results
         if (search) {
             const searchLower = search.toLowerCase();
-            const filtered = decryptedCustomers.filter(c =>
+            const filtered = decryptedCustomers.filter((c: any) =>
                 c.name?.toLowerCase().includes(searchLower) ||
                 c.phone?.toLowerCase().includes(searchLower) ||
                 c.email?.toLowerCase().includes(searchLower)
