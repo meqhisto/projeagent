@@ -30,14 +30,23 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ BOLT OPTIMIZATION: Prevent N+1 and overfetching by only requesting required rating values for the average calculation,
+        // and using _count for relations instead of full objects.
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                ratings: {
+                    select: {
+                        reliability: true,
+                        quality: true,
+                        communication: true,
+                        pricing: true
+                    }
+                },
+                _count: {
+                    select: {
+                        matches: true,
+                        ratings: true
                     }
                 }
             },
@@ -49,7 +58,10 @@ export async function GET(request: Request) {
             const avgScore = c.ratings.length > 0
                 ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
                 : null;
-            return { ...c, averageScore: avgScore };
+
+            // Remove the ratings array to save payload size, we only need the count on the frontend
+            const { ratings, ...rest } = c;
+            return { ...rest, averageScore: avgScore };
         });
 
         return NextResponse.json(contractorsWithAvg);
