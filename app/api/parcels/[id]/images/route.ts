@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
-const prisma = new PrismaClient();
 
 // GET - List all images for a parcel
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
