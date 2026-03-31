@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+// ⚡ Bolt: Use shared Prisma client to prevent connection exhaustion
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -38,3 +39,5 @@ export async function POST() {
         );
     }
 }
+
+export const runtime = 'nodejs';

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+// ⚡ Bolt: Use shared Prisma client to prevent connection exhaustion
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { requireAdmin } from "@/lib/auth/roleCheck";
@@ -76,3 +77,5 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error.message }, { status: error.message === "Unauthorized" || error.message === "Admin access required" ? 403 : 500 });
     }
 }
+
+export const runtime = 'nodejs';
