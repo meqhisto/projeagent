@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-// ⚡ Bolt: Use shared Prisma client to prevent connection exhaustion
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { requireAuth } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
     // Rate limiting check
@@ -94,5 +94,3 @@ export async function POST(req: Request) {
         );
     }
 }
-
-export const runtime = 'nodejs';

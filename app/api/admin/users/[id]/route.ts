@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-// ⚡ Bolt: Use shared Prisma client to prevent connection exhaustion
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { requireAdmin } from "@/lib/auth/roleCheck";
 
+const prisma = new PrismaClient();
 
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
@@ -64,5 +64,3 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
-
-export const runtime = 'nodejs';

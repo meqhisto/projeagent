@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-// ⚡ Bolt: Use shared Prisma client to prevent connection exhaustion
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
+const prisma = new PrismaClient();
 
 // GET - List all documents for a parcel
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
@@ -116,5 +116,3 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
         return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
     }
 }
-
-export const runtime = 'nodejs';

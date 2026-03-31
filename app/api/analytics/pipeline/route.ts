@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-// ⚡ Bolt: Use shared Prisma client to prevent connection exhaustion
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -38,5 +38,3 @@ export async function GET() {
         return NextResponse.json({ error: "Failed to fetch pipeline data" }, { status: 500 });
     }
 }
-
-export const runtime = 'nodejs';

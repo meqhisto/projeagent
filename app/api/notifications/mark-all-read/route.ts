@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-// ⚡ Bolt: Use shared Prisma client to prevent connection exhaustion
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 
 // PATCH - Mark all notifications as read
 export async function PATCH() {
@@ -20,5 +20,3 @@ export async function PATCH() {
         );
     }
 }
-
-export const runtime = 'nodejs';
