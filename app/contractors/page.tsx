@@ -15,10 +15,8 @@ interface Contractor {
     specialties?: string;
     notes?: string;
     averageScore?: number;
-    _count: {
-        matches: number;
-        ratings: number;
-    };
+    ratings: any[];
+    matches: any[];
 }
 
 export default function ContractorsPage() {
@@ -151,7 +149,7 @@ export default function ContractorsPage() {
                             </div>
                             <div className="flex flex-col items-end gap-1">
                                 {renderStars(contractor.averageScore)}
-                                <span className="text-xs text-gray-400">{contractor._count.ratings} değerlendirme</span>
+                                <span className="text-xs text-gray-400">{contractor.ratings.length} değerlendirme</span>
                             </div>
                         </div>
 
@@ -203,9 +201,9 @@ export default function ContractorsPage() {
                         )}
 
                         {/* Matches count */}
-                        {contractor._count.matches > 0 && (
+                        {contractor.matches.length > 0 && (
                             <div className="text-xs text-purple-600 font-medium mb-3">
-                                {contractor._count.matches} arsa eşleşmesi
+                                {contractor.matches.length} arsa eşleşmesi
                             </div>
                         )}
 

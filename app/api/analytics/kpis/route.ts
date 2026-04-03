@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -20,37 +17,58 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({
-            where,
-            include: {
-                zoning: true
-            }
-        });
-
-        // Calculate KPIs
-        const totalParcels = parcels.length;
-
-        const activeParcels = parcels.filter(p =>
-            ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT"].includes(p.crmStage)
-        ).length;
-
-        const contractParcels = parcels.filter(p => p.crmStage === "CONTRACT").length;
-        const conversionRate = totalParcels > 0 ? (contractParcels / totalParcels) * 100 : 0;
-
         // This month (last 30 days)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const thisMonthAdded = parcels.filter(p =>
-            new Date(p.createdAt) >= thirtyDaysAgo
-        ).length;
 
         // Previous month for trend
         const sixtyDaysAgo = new Date();
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-        const previousMonthAdded = parcels.filter(p => {
-            const date = new Date(p.createdAt);
-            return date >= sixtyDaysAgo && date < thirtyDaysAgo;
-        }).length;
+
+        // Calculate KPIs via database aggregations to avoid processing large arrays in Node.js memory
+        // and resolve N+1 style full table data loading.
+        const [
+            totalParcels,
+            activeParcels,
+            contractParcels,
+            thisMonthAdded,
+            previousMonthAdded,
+            totalAreaAgg
+        ] = await Promise.all([
+            prisma.parcel.count({ where }),
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    crmStage: { in: ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT"] }
+                }
+            }),
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    crmStage: "CONTRACT"
+                }
+            }),
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    createdAt: { gte: thirtyDaysAgo }
+                }
+            }),
+            prisma.parcel.count({
+                where: {
+                    ...where,
+                    createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo }
+                }
+            }),
+            prisma.parcel.aggregate({
+                where,
+                _sum: {
+                    area: true
+                }
+            })
+        ]);
+
+        const conversionRate = totalParcels > 0 ? (contractParcels / totalParcels) * 100 : 0;
 
         const parcelTrend = previousMonthAdded > 0
             ? ((thisMonthAdded - previousMonthAdded) / previousMonthAdded) * 100
@@ -58,7 +76,7 @@ export async function GET() {
 
         // Estimated total value (area * average m² price)
         const avgPricePerM2 = 50000; // TL - could be made dynamic
-        const totalValue = parcels.reduce((sum, p) => sum + (p.area || 0) * avgPricePerM2, 0);
+        const totalValue = (totalAreaAgg._sum.area || 0) * avgPricePerM2;
 
         // Average ROI (simplified - would need actual feasibility data)
         const avgROI = 28.5; // Placeholder
