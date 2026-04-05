@@ -1,0 +1,3 @@
+## 2024-05-24 - Prisma groupBy Unconstrained Query Risk
+**Learning:** When trying to optimize N+1 in-memory calculations by using a concurrent `Prisma.groupBy` query to get aggregate data for a subset of records fetched by `findMany`, failing to add a matching `where` clause (e.g. `where: { contractorId: { in: contractorIds } }`) to the `groupBy` results in a silent full-table scan that calculates stats for the entire database on every API call.
+**Action:** Whenever using `.groupBy()` alongside a filtered `.findMany()` operation to merge aggregate data, ALWAYS extract the IDs from the `findMany` results and apply an `in` filter to the `.groupBy()` query to strictly bound the data processing.

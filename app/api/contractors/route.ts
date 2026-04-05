@@ -30,25 +30,51 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ Bolt Optimization:
+        // 💡 What: Replaced fetching full 'ratings' and 'matches' relations with Prisma's '_count' aggregate, and pushed average rating calculations to the database using 'groupBy'.
+        // 🎯 Why: Previously, fetching full relations caused large network payloads and memory usage, essentially acting like an N+1 when calculating averages in Node.js memory.
+        // 📊 Impact: Significantly reduces database data transfer size and Node.js memory overhead. List operations scale optimally as matches/ratings grow to thousands.
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
+        const contractorIds = contractors.map(c => c.id);
+
+        const ratingStats = await prisma.contractorRating.groupBy({
+            by: ['contractorId'],
+            where: {
+                contractorId: {
+                    in: contractorIds
+                }
+            },
+            _avg: {
+                reliability: true,
+                quality: true,
+                communication: true,
+                pricing: true,
+            }
+        });
+
+        const ratingStatsMap = new Map(
+            ratingStats.map(stat => [stat.contractorId, stat])
+        );
+
         // Her firma için ortalama puan hesapla
         const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
+            const stat = ratingStatsMap.get(c.id);
+            let avgScore = null;
+            if (stat && stat._avg.reliability !== null && stat._avg.quality !== null && stat._avg.communication !== null && stat._avg.pricing !== null) {
+                avgScore = (stat._avg.reliability + stat._avg.quality + stat._avg.communication + stat._avg.pricing) / 4;
+            }
             return { ...c, averageScore: avgScore };
         });
 
