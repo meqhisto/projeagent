@@ -151,7 +151,7 @@ export default function ContractorsPage() {
                             </div>
                             <div className="flex flex-col items-end gap-1">
                                 {renderStars(contractor.averageScore)}
-                                <span className="text-xs text-gray-400">{contractor._count.ratings} değerlendirme</span>
+                                <span className="text-xs text-gray-400">{contractor._count?.ratings || 0} değerlendirme</span>
                             </div>
                         </div>
 
@@ -203,7 +203,7 @@ export default function ContractorsPage() {
                         )}
 
                         {/* Matches count */}
-                        {contractor._count.matches > 0 && (
+                        {contractor._count?.matches > 0 && (
                             <div className="text-xs text-purple-600 font-medium mb-3">
                                 {contractor._count.matches} arsa eşleşmesi
                             </div>

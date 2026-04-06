@@ -33,18 +33,11 @@ export async function GET(request: Request) {
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: {
-                    select: {
-                        reliability: true,
-                        quality: true,
-                        communication: true,
-                        pricing: true,
-                    }
-                },
-                _count: {
-                    select: {
-                        matches: true,
-                        ratings: true,
+                ratings: true,
+                matches: {
+                    include: {
+                        parcel: true,
+                        customer: true,
                     }
                 }
             },
@@ -56,10 +49,7 @@ export async function GET(request: Request) {
             const avgScore = c.ratings.length > 0
                 ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
                 : null;
-
-            // Omit the ratings array to reduce JSON payload size over the network
-            const { ratings, ...rest } = c;
-            return { ...rest, averageScore: avgScore };
+            return { ...c, averageScore: avgScore };
         });
 
         return NextResponse.json(contractorsWithAvg);
