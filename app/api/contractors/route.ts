@@ -30,29 +30,34 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // Optimization: Use _count for matches and ratings to avoid fetching large arrays
+        // We still fetch raw ratings to compute the average score in-memory, but we'll strip them before sending response
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
                 ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        matches: true,
+                        ratings: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
-        const contractorsWithAvg = contractors.map(c => {
+        // Her firma için ortalama puan hesapla ve sadece gerekli verileri dön
+        const optimizedContractors = contractors.map(c => {
             const avgScore = c.ratings.length > 0
                 ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
                 : null;
-            return { ...c, averageScore: avgScore };
+
+            // Explicitly exclude large nested arrays to save bandwidth
+            const { ratings, ...rest } = c;
+            return { ...rest, averageScore: avgScore };
         });
 
-        return NextResponse.json(contractorsWithAvg);
+        return NextResponse.json(optimizedContractors);
     } catch (error) {
         console.error("Error fetching contractors:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
