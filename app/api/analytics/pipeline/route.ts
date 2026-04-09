@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma"; // ⚡ Bolt: Used shared singleton instead of instantiating new PrismaClient to avoid connection exhaustion
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -20,13 +18,34 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ Bolt: Replaced findMany() with groupBy() to push aggregation to the database,
+        // reducing memory usage and Node.js processing time, especially for large datasets.
+        const groupedStages = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            where,
+            _count: {
+                _all: true
+            }
+        });
 
-        // Count parcels by stage
+        // Initialize counts for all stages
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
+        const stageCounts: Record<string, number> = {};
+        stages.forEach(stage => stageCounts[stage] = 0);
+
+        // Accumulate the counts. Nullish or empty crmStages are treated as NEW_LEAD
+        groupedStages.forEach(item => {
+            const stage = item.crmStage || "NEW_LEAD";
+            if (stageCounts[stage] !== undefined) {
+                stageCounts[stage] += item._count._all; // Accumulate counts safely
+            } else {
+                 stageCounts[stage] = item._count._all;
+            }
+        });
+
         const data = stages.map(stage => ({
             stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
+            count: stageCounts[stage] || 0
         }));
 
         return NextResponse.json(data);

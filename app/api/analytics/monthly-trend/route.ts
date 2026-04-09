@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma"; // ⚡ Bolt: Used shared singleton instead of instantiating new PrismaClient
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -11,7 +9,7 @@ export async function GET() {
         const userId = parseInt(user.id || "0");
 
         // Build query based on role
-        const where = isAdmin((user as any).role as string)
+        const baseWhere = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
                 OR: [
@@ -20,28 +18,41 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
 
-        // Get last 6 months
-        const months = [];
         const monthNames = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+        const monthQueries = [];
+        const monthLabels = [];
 
+        // Pre-calculate month ranges
         for (let i = 5; i >= 0; i--) {
             const date = new Date();
             date.setMonth(date.getMonth() - i);
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
             const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-            const count = parcels.filter(p => {
-                const createdAt = new Date(p.createdAt);
-                return createdAt >= monthStart && createdAt <= monthEnd;
-            }).length;
+            monthLabels.push(monthNames[date.getMonth()]);
 
-            months.push({
-                month: monthNames[date.getMonth()],
-                count
-            });
+            // ⚡ Bolt: Pushing calculation to DB using count and concurrent promises
+            monthQueries.push(
+                prisma.parcel.count({
+                    where: {
+                        ...baseWhere,
+                        createdAt: {
+                            gte: monthStart,
+                            lte: monthEnd,
+                        }
+                    }
+                })
+            );
         }
+
+        // Execute all queries concurrently
+        const counts = await Promise.all(monthQueries);
+
+        const months = monthLabels.map((month, index) => ({
+            month,
+            count: counts[index]
+        }));
 
         return NextResponse.json(months);
     } catch (error: any) {

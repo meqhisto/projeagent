@@ -1,0 +1,3 @@
+## 2024-06-25 - DB-Level Aggregation & Concurrency in Prisma
+**Learning:** Instantiating `new PrismaClient()` in API routes causes connection exhaustion. Fetching all records with `.findMany()` to perform counting/filtering in Node.js memory leads to severe O(N) memory and data transfer bottlenecks, especially for analytics endpoints. Using a loop with synchronous queries is also slow.
+**Action:** Always import the shared singleton `import { prisma } from "@/lib/prisma";`. Use Prisma's `.groupBy()` (with `_count`) or `.count()` to push aggregation to the database. For multiple independent aggregations (like monthly trends), construct an array of promises and execute them concurrently using `Promise.all()`.
