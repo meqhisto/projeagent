@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Add specific nodejs runtime directive to fix edge compatibility in Cloudflare build
+export const runtime = 'nodejs';
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
