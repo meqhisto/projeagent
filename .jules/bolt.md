@@ -1,0 +1,4 @@
+
+## 2024-06-25 - Avoid In-Memory Aggregations & Direct PrismaClient Usage
+**Learning:** Instantiating `new PrismaClient()` directly inside API routes causes database connection exhaustion in serverless environments. Furthermore, using `findMany()` to fetch large sets of data just to calculate `length` or `reduce` aggregates is an anti-pattern that drastically increases memory usage, CPU load, and network transfer time. This is especially true when `include` clauses are unnecessarily used, leading to massive over-fetching.
+**Action:** Always import the shared instance `import { prisma } from "@/lib/prisma"`. Replace in-memory array operations with Prisma's aggregation functions (`count`, `aggregate`, `groupBy`). When calculating multiple aggregate metrics, wrap them in `Promise.all` to fetch them concurrently. Use `_count: { _all: true }` in `groupBy` statements to safely count rows with null fields.
