@@ -1,0 +1,3 @@
+## 2024-04-12 - Prevent over-fetching by using Prisma `_count` and selective mappings
+**Learning:** Returning entire nested object collections using `include` from list-view API endpoints causes significant network bandwidth usage and memory exhaustion. The backend loaded full objects for relationships (`matches`, `ratings`), even though the frontend only needed counts and specific properties (for aggregate functions).
+**Action:** Always prefer `_count` aggregation instead of fully loaded arrays inside `include` clauses on list views. Limit relational data fetches via `select` inside `include` blocks, and map out intermediary arrays so they are never returned in the final JSON response.
