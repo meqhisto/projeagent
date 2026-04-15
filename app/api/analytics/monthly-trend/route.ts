@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -20,30 +18,43 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ Bolt Optimization: Use Prisma group by on formatted date (if supported directly, or fetch counts incrementally)
+        // Given SQLite/Postgres differences, doing 6 small targeted counts is faster and uses less memory
+        // than fetching thousands of rows to memory and filtering them.
 
-        // Get last 6 months
         const months = [];
         const monthNames = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+
+        // Create array of promises for concurrent fetching
+        const countPromises = [];
 
         for (let i = 5; i >= 0; i--) {
             const date = new Date();
             date.setMonth(date.getMonth() - i);
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
 
-            const count = parcels.filter(p => {
-                const createdAt = new Date(p.createdAt);
-                return createdAt >= monthStart && createdAt <= monthEnd;
-            }).length;
+            const monthStr = monthNames[date.getMonth()];
 
-            months.push({
-                month: monthNames[date.getMonth()],
-                count
-            });
+            countPromises.push(
+                prisma.parcel.count({
+                    where: {
+                        ...where,
+                        createdAt: {
+                            gte: monthStart,
+                            lte: monthEnd
+                        }
+                    }
+                }).then(count => ({
+                    month: monthStr,
+                    count
+                }))
+            );
         }
 
-        return NextResponse.json(months);
+        const results = await Promise.all(countPromises);
+
+        return NextResponse.json(results);
     } catch (error: any) {
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

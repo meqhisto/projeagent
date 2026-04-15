@@ -1,0 +1,3 @@
+## 2024-05-18 - Replacing findMany in-memory processing with Prisma grouping/aggregates for KPI analytics
+**Learning:** The analytics routes heavily relied on fetching large data collections into Node.js memory via `findMany` to manually count and summarize totals, leading to significant memory consumption and potential OOM errors for large datasets. Using Prisma's concurrent aggregates (`.count`, `.aggregate`, `.groupBy`) offloads calculation to the database, severely improving memory use and response times.
+**Action:** Use Prisma native grouping and aggregate operations and resolve multiple operations concurrently with `Promise.all()` when producing dashboard analytics endpoints.
