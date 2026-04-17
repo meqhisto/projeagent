@@ -30,14 +30,23 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // Optimization: Push matches count to database and select only necessary rating fields to calculate average score,
+        // then strip ratings array to reduce payload size.
+        // Expected impact: Drastically reduces DB transfer size and network payload for the contractors list.
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                ratings: {
+                    select: {
+                        reliability: true,
+                        quality: true,
+                        communication: true,
+                        pricing: true
+                    }
+                },
+                _count: {
+                    select: {
+                        matches: true
                     }
                 }
             },
@@ -49,7 +58,18 @@ export async function GET(request: Request) {
             const avgScore = c.ratings.length > 0
                 ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
                 : null;
-            return { ...c, averageScore: avgScore };
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { ratings, ...rest } = c;
+
+            return {
+                ...rest,
+                averageScore: avgScore,
+                _count: {
+                    matches: c._count.matches,
+                    ratings: c.ratings.length
+                }
+            };
         });
 
         return NextResponse.json(contractorsWithAvg);

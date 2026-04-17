@@ -1,0 +1,3 @@
+## 2024-04-17 - Prevent N+1 Data Transfer in API List Endpoints
+**Learning:** Returning full relational objects (like `matches: { include: { parcel: true, customer: true } }` and `ratings: true`) in list API endpoints just to access their `.length` property causes severe over-fetching. This unnecessarily increases database query payload, memory overhead in the Node process, and final JSON network payload size to the client.
+**Action:** Always use Prisma's `_count` aggregate inside the `include` block or use `select` inside `include` to fetch only the needed fields for calculations. Before sending the response, map out and remove any arrays that were only needed for intermediate calculation (e.g. `averageScore`) so that the client receives the minimum required payload.
