@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -8,7 +11,6 @@ export async function GET() {
         const userId = parseInt(user.id || "0");
 
         // Build query based on role
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where = isAdmin((user as any).role as string)
             ? {} // Admin sees all
             : {
@@ -18,38 +20,16 @@ export async function GET() {
                 ]
             };
 
-        // BOLT OPTIMIZATION: Replaced findMany with groupBy to push aggregations to the DB.
-        // Also removed new PrismaClient() in favor of shared singleton.
-        // Impact: O(1) memory usage instead of O(N), prevents Node.js memory bloat for large datasets.
-        const groupedParcels = await prisma.parcel.groupBy({
-            by: ['crmStage'],
-            _count: { _all: true },
-            where
-        });
+        const parcels = await prisma.parcel.findMany({ where });
 
+        // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
-
-        // Initialize counts
-        const countMap: Record<string, number> = {};
-        stages.forEach(stage => countMap[stage] = 0);
-
-        // Map grouped results and accumulate correctly per memory rules
-        groupedParcels.forEach(group => {
-            const stage = group.crmStage || "NEW_LEAD";
-            if (countMap[stage] !== undefined) {
-                countMap[stage] += group._count._all;
-            } else {
-                countMap[stage] = group._count._all; // Fallback for unknown stages
-            }
-        });
-
         const data = stages.map(stage => ({
             stage,
-            count: countMap[stage]
+            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
         }));
 
         return NextResponse.json(data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
