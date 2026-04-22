@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
-// Cloudflare Workers explicitly requires edge runtime. Do not remove this unless migrating entirely away from Pages.
-export const runtime = 'edge';
-
 export async function GET() {
     try {
         const user = await requireAuth();
