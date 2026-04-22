@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -20,16 +17,36 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ BOLT OPTIMIZATION: Push counting to DB level
+        // Replaced loading all parcels into memory with DB-level grouping
+        const groupedStages = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            where,
+            _count: {
+                _all: true
+            }
+        });
 
         // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
-        const data = stages.map(stage => ({
-            stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
-        }));
 
-        return NextResponse.json(data);
+        // Sum any multiple matches if there were nulls that mapped to NEW_LEAD
+        // To be safe as per memory instructions
+        const finalData = stages.map(stage => {
+            const count = groupedStages.reduce((sum, g) => {
+                if ((g.crmStage || "NEW_LEAD") === stage) {
+                     return sum + g._count._all;
+                }
+                return sum;
+            }, 0);
+            return {
+                stage,
+                count
+            };
+        });
+
+
+        return NextResponse.json(finalData);
     } catch (error: any) {
         if (error.message === "Unauthorized") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

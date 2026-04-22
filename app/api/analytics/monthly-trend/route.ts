@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET() {
@@ -20,28 +17,45 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
-
-        // Get last 6 months
-        const months = [];
+        // ⚡ BOLT OPTIMIZATION: Push data filtering and aggregation to DB
+        // using concurrent counts instead of loading all parcels into memory
         const monthNames = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
 
+        // Prepare date ranges for the last 6 months
+        const dateRanges = [];
         for (let i = 5; i >= 0; i--) {
             const date = new Date();
             date.setMonth(date.getMonth() - i);
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
             const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-            const count = parcels.filter(p => {
-                const createdAt = new Date(p.createdAt);
-                return createdAt >= monthStart && createdAt <= monthEnd;
-            }).length;
-
-            months.push({
-                month: monthNames[date.getMonth()],
-                count
+            dateRanges.push({
+                monthIndex: date.getMonth(),
+                monthStart,
+                monthEnd
             });
         }
+
+        // Execute concurrent queries using Promise.all
+        const counts = await Promise.all(
+            dateRanges.map(range =>
+                prisma.parcel.count({
+                    where: {
+                        ...where,
+                        createdAt: {
+                            gte: range.monthStart,
+                            lte: range.monthEnd
+                        }
+                    }
+                })
+            )
+        );
+
+        // Map results back to expected format
+        const months = dateRanges.map((range, index) => ({
+            month: monthNames[range.monthIndex],
+            count: counts[index]
+        }));
 
         return NextResponse.json(months);
     } catch (error: any) {
