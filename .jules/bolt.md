@@ -1,0 +1,3 @@
+## 2024-04-24 - Prisma relation count fetching
+**Learning:** In API list endpoints (e.g., `app/api/contractors/route.ts`), it's highly inefficient to fetch the full array of related records (like ratings or matches) just to get their count and/or a simple aggregate, which leads to large query payloads and higher memory usage.
+**Action:** Use Prisma's `_count` aggregate inside the `include` block (or better, `select`) to fetch only the counts of relationships. In `app/api/contractors/route.ts`, `include: { ratings: true, matches: { include: { ... } } }` is overfetching if we only need counts or simple aggregations for list view.
