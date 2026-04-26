@@ -6,6 +6,8 @@ import { logLogin } from "@/lib/auditLog";
 
 const prisma = new PrismaClient();
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
     // Rate limiting check
     const rateLimitResult = rateLimit(request, "/api/auth/verify");
