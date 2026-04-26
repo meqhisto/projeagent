@@ -68,3 +68,4 @@ check_db_user.ts
 reset-password-docker.js
 test-backup-remote.sh
 
+dev_server.log
