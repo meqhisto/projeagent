@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -20,13 +18,27 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        // ⚡ Bolt Optimization: Removed findMany() that fetched all records into memory.
+        // Using groupBy pushes the aggregation to the database, drastically reducing memory usage and transfer latency.
+        const groupedStages = await prisma.parcel.groupBy({
+            by: ['crmStage'],
+            where,
+            _count: { _all: true }
+        });
 
-        // Count parcels by stage
         const stages = ["NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"];
+
+        // ⚡ Bolt Optimization: Map the grouped results in Node.js, accumulating counts
+        // for fallback keys correctly using item._count._all.
+        const counts = groupedStages.reduce((acc: Record<string, number>, item) => {
+            const stage = item.crmStage || "NEW_LEAD";
+            acc[stage] = (acc[stage] || 0) + item._count._all;
+            return acc;
+        }, {});
+
         const data = stages.map(stage => ({
             stage,
-            count: parcels.filter(p => (p.crmStage || "NEW_LEAD") === stage).length
+            count: counts[stage] || 0
         }));
 
         return NextResponse.json(data);

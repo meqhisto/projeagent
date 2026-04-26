@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
@@ -20,7 +18,19 @@ export async function GET() {
                 ]
             };
 
-        const parcels = await prisma.parcel.findMany({ where });
+        const sixMonthsAgoDate = new Date();
+        sixMonthsAgoDate.setMonth(sixMonthsAgoDate.getMonth() - 5);
+        const sixMonthsAgoStart = new Date(sixMonthsAgoDate.getFullYear(), sixMonthsAgoDate.getMonth(), 1);
+
+        // ⚡ Bolt Optimization: Removed findMany() that fetched all records and full objects into memory.
+        // Selecting only the `createdAt` field and limiting the query to the last 6 months drastically reduces payload and processing.
+        const parcels = await prisma.parcel.findMany({
+            where: {
+                ...where,
+                createdAt: { gte: sixMonthsAgoStart }
+            },
+            select: { createdAt: true }
+        });
 
         // Get last 6 months
         const months = [];
