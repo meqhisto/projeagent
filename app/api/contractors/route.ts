@@ -30,27 +30,56 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ Bolt Optimization: Replaced overfetching full ratings and matches arrays with _count.
+        // Used groupBy to calculate average scores at the database level instead of in Node.js.
+        // This avoids N+1 memory issues and drastically reduces the payload size.
+        // Fetch the list of contractors first
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
-        const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
-            return { ...c, averageScore: avgScore };
-        });
+        const contractorIds = contractors.map(c => c.id);
+
+        // Calculate averages via DB groupBy, scoped only to the retrieved contractors
+        const ratingsAvg = contractorIds.length > 0
+            ? await prisma.contractorRating.groupBy({
+                by: ['contractorId'],
+                where: { contractorId: { in: contractorIds } },
+                _avg: {
+                    reliability: true,
+                    quality: true,
+                    communication: true,
+                    pricing: true,
+                }
+            })
+            : [];
+
+        const ratingsMap = new Map(
+            ratingsAvg.map(r => {
+                // Calculate average of the 4 score fields
+                const { reliability, quality, communication, pricing } = r._avg;
+                let avg = null;
+                if (reliability !== null && quality !== null && communication !== null && pricing !== null) {
+                    avg = (reliability + quality + communication + pricing) / 4;
+                }
+                return [r.contractorId, avg];
+            })
+        );
+
+        // Her firma için ortalama puan ekle
+        const contractorsWithAvg = contractors.map(c => ({
+            ...c,
+            averageScore: ratingsMap.get(c.id) ?? null
+        }));
 
         return NextResponse.json(contractorsWithAvg);
     } catch (error) {

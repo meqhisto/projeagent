@@ -1,3 +1,6 @@
 ## 2024-04-25 - Analytics Database Query Overfetching Anti-Pattern
 **Learning:** Found an anti-pattern in `app/api/analytics/*` routes where `new PrismaClient()` is improperly instantiated and `findMany()` is used to fetch all records into Node.js memory just for aggregate counts, leading to potential memory bloat, high latency, and DB connection exhaustion.
 **Action:** Always import the shared singleton `import { prisma } from '@/lib/prisma';`. Use database-level aggregations like `prisma.parcel.groupBy()` with `_count: { _all: true }` and accumulate mapped fallback keys in memory to minimize database transfer latency and Node.js memory footprint.
+## 2024-12-15 - Unbounded Aggregate Database Queries Anti-Pattern
+**Learning:** Running an unconstrained `prisma.model.groupBy` concurrently with a paginated/filtered `findMany` request overfetches aggregate statistics for the entire database unnecessarily.
+**Action:** When using Prisma's `.groupBy()` alongside `.findMany()` to push aggregate calculations to the database for a specific subset of records, always include a `where` clause (e.g., `where: { id: { in: recordIds } }`) in the `groupBy` query to avoid expensive full-table scans. Calculate statistics only for the subset of records being loaded.
