@@ -9,6 +9,9 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.env
+.env.example
+backup-database.sh
 
 # testing
 /coverage
@@ -39,3 +42,35 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+# Database backups
+/backups/
+
+# IDE and Editor
+.vscode/
+.cursor/
+.idea/
+
+# Testing artifacts
+playwright-report/
+test-results/
+
+# Local data and memory
+mimar_memory.db
+cursor-memory-bank/
+temp_uploads/
+
+# AI assistant config
+.claude/
+
+# Nested project copies
+/projeagent/
+
+# Local scripts
+check_db.ts
+check_db_user.ts
+reset-password-docker.js
+test-backup-remote.sh
+

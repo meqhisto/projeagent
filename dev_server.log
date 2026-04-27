@@ -1,0 +1,22 @@
+
+> projeagent@0.1.0 dev /app
+> next dev
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.0.2:3000
+
+ ✓ Starting...
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+ ✓ Ready in 1935ms
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:513:16)
+    at Auth (/app/.next/dev/server/edge/chunks/691c0_@auth_core_e17b3cd3._.js:5331:270)
+ ○ Compiling /test-ui ...
+ GET /test-ui 200 in 6.0s (compile: 5.1s, proxy.ts: 154ms, render: 781ms)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/691c0_@auth_core_843d8dff._.js:513:16)
+    at Auth (/app/.next/dev/server/chunks/691c0_@auth_core_843d8dff._.js:5330:264)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async AppRouteRouteModule.do (/app/node_modules/.pnpm/next@16.0.10_@babel+core@7.29.0_@playwright+test@1.58.2_react-dom@19.2.1_react@19.2.1__react@19.2.1/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)

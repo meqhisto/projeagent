@@ -1,0 +1,628 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Parsel Kategori Tipi
+enum ParcelCategory {
+  RESIDENTIAL // Konut Arsası
+  COMMERCIAL // Ticari Arsa
+  INDUSTRIAL // Sanayi Arsası
+  AGRICULTURAL // Tarım Arazisi
+  MIXED_USE // Karma Kullanım
+  TOURISM // Turizm Arsası
+  INVESTMENT // Yatırım Amaçlı
+  DEVELOPMENT // Geliştirme Arazisi
+  UNCATEGORIZED // Kategorisiz
+}
+
+model Parcel {
+  id           Int            @id @default(autoincrement())
+  city         String
+  district     String
+  neighborhood String
+  island       String // Ada
+  parsel       String // Parsel
+  area         Float?
+  askingPrice  Float? // Sahibinin istediği/ilan fiyatı (TL) — değerlemede emsal olarak kullanılır
+  latitude     Float? // Coordinate for map
+  longitude    Float? // Coordinate for map
+  geometry     String? // GeoJSON polygon boundary (from TKGM or manual draw)
+  status       String         @default("PENDING") // PENDING, RESEARCHING, COMPLETED
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  crmStage     String         @default("NEW_LEAD") // "NEW_LEAD", "CONTACTED", "ANALYSIS", "OFFER_SENT", "CONTRACT", "LOST"
+  category     ParcelCategory @default(UNCATEGORIZED) // Arsa kategorisi
+  tags         String? // Opsiyonel etiketler (virgülle ayrılmış)
+
+  ownerId    Int // User who owns this parcel
+  owner      User  @relation("OwnedParcels", fields: [ownerId], references: [id])
+  assignedTo Int? // Optional: assigned to another user
+  assignee   User? @relation("AssignedParcels", fields: [assignedTo], references: [id])
+
+  images             Image[]
+  documents          Document[]
+  zoning             ZoningInfo?
+  notes              Note[]
+  interactions       Interaction[]
+  stakeholders       Customer[]
+  properties         Property[] // Üzerine yapılan gayrimenkuller
+  contractorMatches  ContractorParcelMatch[]
+  calculations       FeasibilityCalculation[] // Fizibilite hesaplamaları
+  presentationShares PresentationShare[] // Sunum paylaşım linkleri
+  precedents         ParcelPrecedent[] // Emsal veriler
+  shares             ParcelShare[] // Danışmanlarla paylaşım
+
+  @@unique([ownerId, city, district, neighborhood, island, parsel])
+  @@index([ownerId])
+  @@index([assignedTo])
+  @@index([city, district, neighborhood])
+  @@index([status])
+  @@index([crmStage])
+}
+
+// ... (Image, ZoningInfo, Note, ZoningPrecedent models remain unchanged)
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  type      String // "MAP", "SATELLITE", "TKGM_PARCEL", "TKGM_NEIGHBORHOOD", "UPLOADED"
+  source    String? // "AUTO" or "USER" - optional for backward compatibility
+  isDefault Boolean  @default(false) // Main image for display
+  parcelId  Int
+  parcel    Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([parcelId])
+}
+
+model ZoningInfo {
+  id          Int      @id @default(autoincrement())
+  parcelId    Int      @unique
+  parcel      Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  ks          Float? // Kaks (Emsal)
+  taks        Float? // Taks
+  maxHeight   Float? // Hmax
+  zoningType  String? // Konut, Ticaret, Sanayi
+  notes       String? // AI/Agent research summary
+  sourceUrl   String?
+  retrievedAt DateTime @default(now())
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  content   String
+  parcelId  Int
+  parcel    Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+}
+
+// Danışman-Parsel paylaşım tablosu (çoka-çok)
+model ParcelShare {
+  id         Int      @id @default(autoincrement())
+  parcelId   Int
+  parcel     Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  userId     Int      // Paylaşılan danışman
+  user       User     @relation("SharedWithUser", fields: [userId], references: [id], onDelete: Cascade)
+  permission String   @default("VIEW") // VIEW | EDIT
+  sharedById Int?     // Admin'in id'si
+  createdAt  DateTime @default(now())
+
+  @@unique([parcelId, userId])
+  @@index([userId])
+  @@index([parcelId])
+}
+
+model ZoningPrecedent {
+  id           Int    @id @default(autoincrement())
+  city         String
+  district     String
+  neighborhood String
+  type         String // "RESIDENTIAL", "COMMERCIAL", "MIXED"
+
+  ks        Float? // Emsal
+  taks      Float? // Taks
+  maxHeight Float? // Hmax
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([city, district, neighborhood, type])
+}
+
+model Customer {
+  id    Int     @id @default(autoincrement())
+  name  String
+  role  String // "Land Owner", "Investor", "Agent", "Other"
+  phone String?
+  email String?
+  notes String?
+
+  ownerId Int // User who owns this customer
+  owner   User @relation("OwnedCustomers", fields: [ownerId], references: [id])
+
+  parcels           Parcel[]
+  interactions      Interaction[]
+  units             Unit[] // Kiracı olduğu daireler
+  contractorMatches ContractorParcelMatch[]
+  createdAt         DateTime                @default(now())
+}
+
+model Interaction {
+  id         Int       @id @default(autoincrement())
+  parcelId   Int
+  parcel     Parcel    @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  customerId Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  type    String // "CALL", "MEETING", "OFFER", "NOTE", "TASK"
+  content String
+  date    DateTime @default(now())
+
+  // Task/Görevlendirme özellikleri
+  dueDate     DateTime?
+  isCompleted Boolean   @default(false)
+  priority    String?   @default("MEDIUM") // "LOW", "MEDIUM", "HIGH", "URGENT"
+  assignedTo  Int? // Atanan kullanıcı
+  assignee    User?     @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  createdBy   Int? // Oluşturan kullanıcı
+  creator     User?     @relation("CreatedTasks", fields: [createdBy], references: [id])
+  tags        String? // Comma-separated tags
+
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id          Int      @id @default(autoincrement())
+  parcelId    Int
+  parcel      Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  name        String // User-provided name
+  fileName    String // Actual filename on server
+  filePath    String // Path to file
+  fileType    String // MIME type
+  fileSize    Int // Size in bytes
+  description String? // Optional description
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  type        String // PARCEL_ADDED, RESEARCH_COMPLETED, STAGE_CHANGED, TASK_ASSIGNED, etc.
+  title       String
+  message     String
+  relatedId   Int? // ParcelId, DocumentId, etc.
+  relatedType String? // "PARCEL", "DOCUMENT", "TASK", etc.
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // User-specific notification
+  userId Int? // If null, notification is global (for backwards compatibility)
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String // Hashed with bcrypt
+  name      String
+  role      String    @default("USER") // USER, ADMIN
+  isActive  Boolean   @default(true)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+
+  parcels         Parcel[]   @relation("OwnedParcels")
+  assignedParcels Parcel[]   @relation("AssignedParcels")
+  customers       Customer[] @relation("OwnedCustomers")
+  parcelShares    ParcelShare[] @relation("SharedWithUser")
+
+  // Task relations
+  assignedTasks Interaction[] @relation("AssignedTasks")
+  createdTasks  Interaction[] @relation("CreatedTasks")
+  notes         Note[]
+
+  // Notifications
+  notifications Notification[]
+
+  // Property Portfolio
+  properties Property[] @relation("OwnedProperties")
+
+  // Contractor relations
+  contractors       Contractor[]       @relation("OwnedContractors")
+  contractorRatings ContractorRating[] @relation("RatedContractors")
+
+  // Presentation settings
+  presentationSettings UserPresentationSettings?
+  presentationShares   PresentationShare[]
+
+  sessions  Session[]
+  auditLogs AuditLog[]
+}
+
+model Session {
+  id        String   @id
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// AUDIT LOGGING - GÜVENLİK KAYITLARI
+// ==========================================
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?     // Null for unauthenticated actions (failed logins)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  action      String   // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, EXPORT, FAILED_LOGIN, etc.
+  resource    String   // parcels, customers, users, etc.
+  resourceId  Int?     // ID of the affected resource
+  
+  details     String?  @db.Text // JSON with additional context
+  
+  ipAddress   String?  // Client IP
+  userAgent   String?  // Browser/client info
+  
+  status      String   @default("SUCCESS") // SUCCESS, FAILURE, BLOCKED
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+}
+
+// ==========================================
+// GAYRIMENKUL PORTFÖY SİSTEMİ
+// ==========================================
+
+// Gayrimenkul Tipi
+enum PropertyType {
+  APARTMENT // Daire
+  VILLA // Villa
+  DETACHED // Müstakil Ev
+  OFFICE // Ofis
+  SHOP // Dükkan
+  COMMERCIAL // Ticari Alan
+  LAND // Arsa
+  BUILDING // Bina
+  WAREHOUSE // Depo
+}
+
+// Gayrimenkul Durumu
+enum PropertyStatus {
+  AVAILABLE // Boş/Satılık
+  RENTED // Kirada
+  SOLD // Satıldı
+  UNDER_CONSTRUCTION // İnşaat Halinde
+  RENOVATION // Tadilatta
+  RESERVED // Rezerve
+}
+
+// Oda Sayısı (Ön Tanımlı)
+enum RoomType {
+  STUDIO // Stüdyo
+  ONE_PLUS_ZERO // 1+0
+  ONE_PLUS_ONE // 1+1
+  TWO_PLUS_ONE // 2+1
+  THREE_PLUS_ONE // 3+1
+  THREE_PLUS_TWO // 3+2
+  FOUR_PLUS_ONE // 4+1
+  FOUR_PLUS_TWO // 4+2
+  FIVE_PLUS_ONE // 5+1
+  FIVE_PLUS_TWO // 5+2
+  SIX_PLUS // 6+ ve üzeri
+  OTHER // Diğer
+}
+
+// Finansal İşlem Tipi
+enum TransactionType {
+  RENT_INCOME // Kira Geliri
+  EXPENSE // Gider
+  PURCHASE // Satın Alma
+  SALE // Satış
+  DEPOSIT // Depozito
+  MAINTENANCE // Bakım/Onarım
+  TAX // Vergi
+  INSURANCE // Sigorta
+}
+
+// Ana Gayrimenkul Modeli
+model Property {
+  id Int @id @default(autoincrement())
+
+  // Temel Bilgiler
+  title  String // "Ataşehir 3+1 Daire"
+  type   PropertyType   @default(APARTMENT)
+  status PropertyStatus @default(AVAILABLE)
+
+  // Konum
+  city         String
+  district     String
+  neighborhood String
+  address      String?
+  latitude     Float?
+  longitude    Float?
+
+  // Fiziksel Özellikler
+  grossArea   Float? // Brüt m²
+  netArea     Float? // Net m²
+  roomType    RoomType? // Oda tipi
+  floorNumber Int? // Bulunduğu kat
+  totalFloors Int? // Bina toplam kat
+  buildYear   Int? // Yapım yılı
+  hasElevator Boolean   @default(false)
+  hasParking  Boolean   @default(false)
+  heatingType String? // Doğalgaz, Merkezi, Klima
+
+  // Finansal Bilgiler
+  purchasePrice Float? // Alış fiyatı
+  purchaseDate  DateTime? // Alış tarihi
+  currentValue  Float? // Mevcut değer
+  monthlyRent   Float? // Aylık kira
+  listingPrice  Float? // İlan fiyatı
+
+  // İlişkiler
+  parcelId Int? // İsteğe bağlı parsel bağlantısı
+  parcel   Parcel? @relation(fields: [parcelId], references: [id])
+
+  ownerId Int
+  owner   User @relation("OwnedProperties", fields: [ownerId], references: [id])
+
+  units        Unit[] // Bina ise daireler
+  transactions Transaction[]
+  valuations   Valuation[]
+  images       PropertyImage[]
+
+  notes String? // Notlar
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([parcelId])
+  @@index([type])
+  @@index([status])
+}
+
+// Gayrimenkul Görselleri
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  type       String   @default("PHOTO") // PHOTO, FLOOR_PLAN, EXTERIOR
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+// Alt Birimler (Daireler/Ofisler)
+model Unit {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  unitNumber String // "A-12", "Daire 5"
+  roomType   RoomType? // 1+1, 2+1, etc.
+  area       Float? // m²
+  status     PropertyStatus @default(AVAILABLE)
+
+  floorNumber  Int? // Kat
+  monthlyRent  Float? // Kira
+  currentValue Float? // Değer
+
+  // Kiracı bilgisi
+  tenantId   Int?
+  tenant     Customer? @relation(fields: [tenantId], references: [id])
+  leaseStart DateTime? // Kira başlangıç
+  leaseEnd   DateTime? // Kira bitiş
+
+  transactions Transaction[]
+  notes        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Finansal İşlemler
+model Transaction {
+  id Int @id @default(autoincrement())
+
+  propertyId Int?
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unitId     Int?
+  unit       Unit?     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  type        TransactionType
+  amount      Float
+  date        DateTime
+  description String?
+  category    String? // Alt kategori
+
+  isPaid  Boolean   @default(true) // Ödendi mi?
+  dueDate DateTime? // Vade tarihi
+
+  createdAt DateTime @default(now())
+}
+
+// Değerleme Geçmişi
+model Valuation {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  value  Float
+  source String? // "Manuel", "AI Tahmini", "Ekspertiz"
+  date   DateTime
+  notes  String?
+
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// İNŞAAT FİRMASI SİSTEMİ
+// ==========================================
+
+// İnşaat Firması
+model Contractor {
+  id               Int     @id @default(autoincrement())
+  name             String // Firma adı
+  authorizedPerson String? // Yetkili kişi
+  phone            String? // Telefon
+  email            String? // E-posta
+  address          String? // Adres
+  website          String? // Web sitesi
+  taxNumber        String? // Vergi numarası
+  specialties      String? // Uzmanlık alanları (comma-separated)
+  notes            String? // Notlar
+
+  ownerId Int
+  owner   User @relation("OwnedContractors", fields: [ownerId], references: [id])
+
+  ratings ContractorRating[]
+  matches ContractorParcelMatch[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// İnşaat Firması Puanlama
+model ContractorRating {
+  id           Int        @id @default(autoincrement())
+  contractorId Int
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  reliability   Int     @default(0) // Güvenilirlik (1-5)
+  quality       Int     @default(0) // Kalite (1-5)
+  communication Int     @default(0) // İletişim (1-5)
+  pricing       Int     @default(0) // Fiyat (1-5)
+  overallScore  Float? // Hesaplanan ortalama
+  comment       String? // Yorum
+
+  ratedBy Int
+  rater   User @relation("RatedContractors", fields: [ratedBy], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// Firma-Parsel Eşleştirmesi (Görüşme/Müzakere)
+model ContractorParcelMatch {
+  id           Int        @id @default(autoincrement())
+  contractorId Int
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  parcelId     Int
+  parcel       Parcel     @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  customerId   Int? // Arsa sahibi (Customer)
+  customer     Customer?  @relation(fields: [customerId], references: [id])
+
+  status      String    @default("PLANNED") // PLANNED, MET, OFFER_RECEIVED, AGREED, REJECTED
+  meetingDate DateTime?
+  offerAmount Float?
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contractorId])
+  @@index([parcelId])
+  @@index([customerId])
+}
+
+// ==========================================
+// FİZİBİLİTE HESAPLAMA GEÇMİŞİ
+// ==========================================
+
+// Müteahhit Hesabı Kayıtları
+model FeasibilityCalculation {
+  id       Int    @id @default(autoincrement())
+  parcelId Int
+  parcel   Parcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  // Input parametreleri
+  arsaM2             Float
+  emsal              Float
+  katKarsiligiOrani  Float
+  ortalamaDaireBrutu Float
+  insaatMaliyeti     Float
+  satisFiyati        Float
+  bonusFactor        Float? @default(1.3)
+  katAdedi           Int?   @default(5)
+
+  // Sonuç özeti (kolay erişim için)
+  toplamDaire     Int
+  muteahhitDaire  Int
+  arsaSahibiDaire Int
+  netKar          String // Formatlanmış TL
+  roi             String // Yüzde olarak
+  durum           String // FIRSAT, RİSKLİ, NORMAL
+
+  // Tam sonuç (JSON)
+  fullResult String @db.Text
+
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// YATIRIMCI SUNUM SİSTEMİ
+// ==========================================
+
+// Kullanıcı Sunum Ayarları
+model UserPresentationSettings {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyName String? // Şirket adı
+  logoUrl     String? // Logo URL'i
+  phone       String? // İletişim telefon
+  email       String? // İletişim e-posta
+  address     String? // Adres
+  website     String? // Web sitesi
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Sunum Paylaşım Linki
+model PresentationShare {
+  id       Int    @id @default(autoincrement())
+  token    String @unique @default(cuid())
+  parcelId Int
+  parcel   Parcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id])
+
+  title     String? // Opsiyonel başlık
+  expiresAt DateTime? // Opsiyonel son kullanma tarihi
+  viewCount Int       @default(0)
+  isActive  Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+}
+
+model ParcelPrecedent {
+  id         Int      @id @default(autoincrement())
+  parcelId   Int
+  parcel     Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  title      String
+  price      Float // TL
+  area       Float? // m²
+  pricePerM2 Float? // Hesaplanmış
+  sourceUrl  String? // Sahibinden vs link
+  source     String? // "sahibinden", "hepsiemlak", "manuel"
+  notes      String?
+  createdAt  DateTime @default(now())
+}
