@@ -32,8 +32,10 @@ model Parcel {
   island       String // Ada
   parsel       String // Parsel
   area         Float?
+  askingPrice  Float? // Sahibinin istediği/ilan fiyatı (TL) — değerlemede emsal olarak kullanılır
   latitude     Float? // Coordinate for map
   longitude    Float? // Coordinate for map
+  geometry     String? // GeoJSON polygon boundary (from TKGM or manual draw)
   status       String         @default("PENDING") // PENDING, RESEARCHING, COMPLETED
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -57,6 +59,7 @@ model Parcel {
   calculations       FeasibilityCalculation[] // Fizibilite hesaplamaları
   presentationShares PresentationShare[] // Sunum paylaşım linkleri
   precedents         ParcelPrecedent[] // Emsal veriler
+  shares             ParcelShare[] // Danışmanlarla paylaşım
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
   @@index([ownerId])
@@ -98,7 +101,25 @@ model Note {
   content   String
   parcelId  Int
   parcel    Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
+}
+
+// Danışman-Parsel paylaşım tablosu (çoka-çok)
+model ParcelShare {
+  id         Int      @id @default(autoincrement())
+  parcelId   Int
+  parcel     Parcel   @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  userId     Int      // Paylaşılan danışman
+  user       User     @relation("SharedWithUser", fields: [userId], references: [id], onDelete: Cascade)
+  permission String   @default("VIEW") // VIEW | EDIT
+  sharedById Int?     // Admin'in id'si
+  createdAt  DateTime @default(now())
+
+  @@unique([parcelId, userId])
+  @@index([userId])
+  @@index([parcelId])
 }
 
 model ZoningPrecedent {
@@ -202,10 +223,12 @@ model User {
   parcels         Parcel[]   @relation("OwnedParcels")
   assignedParcels Parcel[]   @relation("AssignedParcels")
   customers       Customer[] @relation("OwnedCustomers")
+  parcelShares    ParcelShare[] @relation("SharedWithUser")
 
   // Task relations
   assignedTasks Interaction[] @relation("AssignedTasks")
   createdTasks  Interaction[] @relation("CreatedTasks")
+  notes         Note[]
 
   // Notifications
   notifications Notification[]

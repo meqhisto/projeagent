@@ -23,7 +23,8 @@ export async function GET(request: Request) {
             : {
                 OR: [
                     { ownerId: userId },
-                    { assignedTo: userId }
+                    { assignedTo: userId },
+                    { shares: { some: { userId } } }, // Paylaşılan parseller
                 ]
             };
 
@@ -92,9 +93,9 @@ export async function POST(request: Request) {
             );
         }
 
-        const { city, district, neighborhood, island, parsel, area, latitude, longitude, category, tags } = validation.data!;
+        const { city, district, neighborhood, island, parsel, area, latitude, longitude, category, tags, geometry, askingPrice } = validation.data!;
 
-        const newParcel = await prisma.parcel.create({
+        const newParcel = await (prisma.parcel.create as any)({
             data: {
                 city,
                 district,
@@ -102,12 +103,14 @@ export async function POST(request: Request) {
                 island,
                 parsel,
                 area: area,
+                askingPrice: askingPrice ?? null,
                 latitude: latitude,
                 longitude: longitude,
                 status: PARCEL_STATUS.RESEARCHING,
                 category: category || "UNCATEGORIZED",
                 tags: tags || null,
-                ownerId: userId, // Automatically set owner
+                geometry: geometry || null,
+                ownerId: userId,
             },
         });
         logger.debug("POST /api/parcels - Created:", newParcel.id);

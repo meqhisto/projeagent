@@ -62,6 +62,12 @@ mimar_memory.db
 cursor-memory-bank/
 temp_uploads/
 
+# AI assistant config
+.claude/
+
+# Nested project copies
+/projeagent/
+
 # Local scripts
 check_db.ts
 check_db_user.ts

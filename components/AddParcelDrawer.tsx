@@ -22,6 +22,7 @@ interface ManualFormData {
     island: string;
     parsel: string;
     area: string;
+    askingPrice: string;
     latitude: string;
     longitude: string;
     category: string;
@@ -69,6 +70,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
         island: "",
         parsel: "",
         area: "",
+        askingPrice: "",
         latitude: "",
         longitude: "",
         category: "UNCATEGORIZED",
@@ -152,6 +154,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 island: formData.island.trim(),
                 parsel: formData.parsel.trim(),
                 area: formData.area ? parseFloat(formData.area) : null,
+                askingPrice: formData.askingPrice ? parseFloat(formData.askingPrice) : null,
                 latitude: formData.latitude ? parseFloat(formData.latitude) : null,
                 longitude: formData.longitude ? parseFloat(formData.longitude) : null,
                 category: formData.category || "UNCATEGORIZED",
@@ -185,6 +188,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 island: "",
                 parsel: "",
                 area: "",
+                askingPrice: "",
                 latitude: "",
                 longitude: "",
                 category: "UNCATEGORIZED",
@@ -237,16 +241,23 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 itemsToProcess = data.features.map((f: any) => {
                     const p = f.properties || {};
                     let lat = null, lon = null;
+                    let geometry: string | null = null;
+
                     if (f.geometry && f.geometry.coordinates) {
                         if (f.geometry.type === "Point") {
                             lon = f.geometry.coordinates[0];
                             lat = f.geometry.coordinates[1];
                         } else if (f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon") {
+                            // Save the full polygon geometry
+                            geometry = JSON.stringify(f.geometry);
+                            // Derive center point from polygon centroid
                             const coords = f.geometry.type === "Polygon"
-                                ? f.geometry.coordinates[0][0]
-                                : f.geometry.coordinates[0][0][0];
-                            lon = coords[0];
-                            lat = coords[1];
+                                ? f.geometry.coordinates[0]
+                                : f.geometry.coordinates[0][0];
+                            const lats = coords.map((c: number[]) => c[1]);
+                            const lons = coords.map((c: number[]) => c[0]);
+                            lat = (Math.min(...lats) + Math.max(...lats)) / 2;
+                            lon = (Math.min(...lons) + Math.max(...lons)) / 2;
                         }
                     }
 
@@ -259,8 +270,10 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                         island: String(findProp(p, ["Ada", "island", "Block", "ada", "AdaNo"]) || ""),
                         parsel: String(extractedParcel || (Object.keys(p).find(k => k.toLowerCase().includes("parsel")) ? p[Object.keys(p).find(k => k.toLowerCase().includes("parsel"))!] : "") || ""),
                         area: parseNumber(findProp(p, ["Alan", "area", "alan"])),
+                        askingPrice: parseNumber(findProp(p, ["AskingPrice", "Fiyat", "ilanFiyati", "fiyat", "askingPrice"])),
                         latitude: lat,
-                        longitude: lon
+                        longitude: lon,
+                        geometry,
                     };
                 });
             } else {
@@ -272,6 +285,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                     island: String(findProp(item, ["ada", "island", "Ada", "Block", "AdaNo"]) || ""),
                     parsel: String(findProp(item, ["parsel", "parcel", "ParselNo", "Parsel", "ParselNo."]) || ""),
                     area: parseNumber(findProp(item, ["alan", "area", "Alan"])),
+                    askingPrice: parseNumber(findProp(item, ["AskingPrice", "Fiyat", "ilanFiyati", "fiyat", "askingPrice"])),
                     latitude: item.latitude || item.lat || null,
                     longitude: item.longitude || item.lon || item.lng || null
                 }));
@@ -448,6 +462,21 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                         step="0.01"
                                         className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                     />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                                        İlan / Talep Fiyatı (TL) <span className="text-slate-400 font-normal">— Opsiyonel</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={formData.askingPrice}
+                                        onChange={(e) => handleFormChange("askingPrice", e.target.value)}
+                                        placeholder="2500000"
+                                        step="1"
+                                        min="0"
+                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
+                                    />
+                                    <p className="text-xs text-slate-400 mt-1">Sahibinin/danışmanın istediği fiyat. Bölgesel değerlemede emsal olarak kullanılır.</p>
                                 </div>
                             </div>
 

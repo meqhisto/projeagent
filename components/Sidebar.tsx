@@ -15,7 +15,9 @@ import {
     Settings,
     LogOut,
     X,
-    HardHat
+    HardHat,
+    Shield,
+    FolderOpen,
 } from "lucide-react";
 
 const allNavigation = [
@@ -28,7 +30,9 @@ const allNavigation = [
     { name: "Gayrimenkuller", href: "/properties", icon: Building2, roles: ["USER", "ADMIN"] },
     { name: "Müteahhitler", href: "/contractors", icon: HardHat, roles: ["USER", "ADMIN"] },
     { name: "Ayarlar", href: "/settings", icon: Settings, roles: ["USER", "ADMIN"] },
-    { name: "Kullanıcı Yönetimi", href: "/admin/users", icon: Users, roles: ["ADMIN"] },
+    // Admin only
+    { name: "Parsel Yönetimi", href: "/admin/parcels", icon: FolderOpen, roles: ["ADMIN"], adminSection: true },
+    { name: "Kullanıcı Yönetimi", href: "/admin/users", icon: Shield, roles: ["ADMIN"], adminSection: true },
 ];
 
 interface SidebarProps {
@@ -90,10 +94,9 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     {/* Navigation */}
                     <nav className="flex-1 px-3 py-6 overflow-y-auto no-scrollbar">
                         <ul className="space-y-1">
-                            {navigation.map((item) => {
+                            {navigation.filter(i => !(i as any).adminSection).map((item) => {
                                 const isActive = pathname === item.href;
                                 const Icon = item.icon;
-
                                 return (
                                     <li key={item.name}>
                                         <Link
@@ -105,15 +108,41 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                                                     : "text-[#1d1d1f] hover:bg-black/[0.04]"
                                             )}
                                         >
-                                            <Icon className={clsx(
-                                                "h-[18px] w-[18px]",
-                                                isActive ? "text-[#0071e3]" : "text-[#86868b]"
-                                            )} />
+                                            <Icon className={clsx("h-[18px] w-[18px]", isActive ? "text-[#0071e3]" : "text-[#86868b]")} />
                                             <span>{item.name}</span>
                                         </Link>
                                     </li>
                                 );
                             })}
+
+                            {/* Admin bölümü */}
+                            {navigation.some(i => (i as any).adminSection) && (
+                                <>
+                                    <li className="pt-4 pb-1 px-3">
+                                        <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest">Yönetim</span>
+                                    </li>
+                                    {navigation.filter(i => (i as any).adminSection).map((item) => {
+                                        const isActive = pathname === item.href;
+                                        const Icon = item.icon;
+                                        return (
+                                            <li key={item.name}>
+                                                <Link
+                                                    href={item.href}
+                                                    className={clsx(
+                                                        "flex items-center gap-3 px-3 py-2 rounded-xl text-[14px] font-medium transition-all duration-200",
+                                                        isActive
+                                                            ? "bg-purple-50 text-purple-700"
+                                                            : "text-[#1d1d1f] hover:bg-purple-50/60"
+                                                    )}
+                                                >
+                                                    <Icon className={clsx("h-[18px] w-[18px]", isActive ? "text-purple-600" : "text-purple-400")} />
+                                                    <span>{item.name}</span>
+                                                </Link>
+                                            </li>
+                                        );
+                                    })}
+                                </>
+                            )}
                         </ul>
                     </nav>
 

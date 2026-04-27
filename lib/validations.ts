@@ -33,6 +33,12 @@ export const ParcelCreateSchema = z.object({
     ),
     category: z.enum(PARCEL_CATEGORIES).optional().default("UNCATEGORIZED"),
     tags: z.string().max(500, "Etiketler en fazla 500 karakter olabilir").optional().nullable(),
+    geometry: z.string().optional().nullable(),
+    askingPrice: z.union([z.string(), z.number()]).optional().nullable().transform(val => {
+        if (val === null || val === undefined || val === "") return null;
+        const n = parseFloat(String(val));
+        return isNaN(n) ? null : n;
+    }).refine(v => v === null || (v >= 0 && v <= 1e12), { message: "Geçerli bir fiyat girin (0 - 1 trilyon TL)" }),
 });
 
 
@@ -111,6 +117,13 @@ export const ZoningUpdateSchema = z.object({
     zoningType: z.string().max(50).optional().nullable(),
     notes: z.string().max(2000).optional().nullable(),
     sourceUrl: z.string().url().optional().or(z.literal("")),
+});
+
+/**
+ * Valuation Query Schema
+ */
+export const ValuationQuerySchema = z.object({
+    radiusKm: z.coerce.number().min(0.5).max(50).optional().default(5),
 });
 
 /**

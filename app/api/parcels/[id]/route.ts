@@ -86,13 +86,16 @@ export async function PATCH(
         }
 
         const body = await request.json();
-        const { crmStage, ks, taks, maxHeight, zoningType, notes, category, tags } = body;
+        const { crmStage, ks, taks, maxHeight, zoningType, notes, category, tags, askingPrice } = body;
 
-        // 1. Update Parcel Fields (CRM Stage, Category, Tags)
+        // 1. Update Parcel Fields (CRM Stage, Category, Tags, AskingPrice)
         const parcelUpdateData: any = {};
         if (crmStage) parcelUpdateData.crmStage = crmStage;
         if (category) parcelUpdateData.category = category;
         if (tags !== undefined) parcelUpdateData.tags = tags;
+        if (askingPrice !== undefined) {
+            parcelUpdateData.askingPrice = askingPrice === null ? null : parseFloat(String(askingPrice));
+        }
 
         if (Object.keys(parcelUpdateData).length > 0) {
             await prisma.parcel.update({

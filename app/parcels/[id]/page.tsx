@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { MapPin, ArrowLeft, Building, Loader2, FileText, ExternalLink, History, Share2, MoreVertical, ChevronRight, Layers, Maximize2, Info, Download, Calculator, Users, FolderOpen, TrendingUp } from "lucide-react";
+import { MapPin, ArrowLeft, Building, Loader2, FileText, ExternalLink, History, Share2, MoreVertical, ChevronRight, Layers, Maximize2, Info, Download, Calculator, Users, FolderOpen, TrendingUp, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import ZoningEditSection from "@/components/ZoningEditSection";
@@ -15,6 +15,7 @@ import ImageUploadSection from "@/components/ImageUploadSection";
 import DocumentUploadSection from "@/components/DocumentUploadSection";
 import ParcelTaskList from "@/components/ParcelTaskList";
 import PrecedentManager from "@/components/PrecedentManager";
+import ValuationSection from "@/components/ValuationSection";
 
 export default function ParcelDetailPage() {
     const params = useParams();
@@ -26,6 +27,8 @@ export default function ParcelDetailPage() {
     const [feasibilityData, setFeasibilityData] = useState<any>(null);
     const [images, setImages] = useState<any[]>([]);
     const [documents, setDocuments] = useState<any[]>([]);
+    const [noteInput, setNoteInput] = useState("");
+    const [noteLoading, setNoteLoading] = useState(false);
 
     const fetchParcel = useCallback(async () => {
         try {
@@ -87,6 +90,31 @@ export default function ParcelDetailPage() {
         } catch (e) {
             console.error("Failed to update stage", e);
         }
+    };
+
+    const handleAddNote = async () => {
+        if (!noteInput.trim()) return;
+        setNoteLoading(true);
+        try {
+            const res = await fetch(`/api/parcels/${params.id}/notes`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: noteInput }),
+            });
+            if (res.ok) {
+                setNoteInput("");
+                fetchParcel();
+            }
+        } finally {
+            setNoteLoading(false);
+        }
+    };
+
+    const handleDeleteNote = async (noteId: number) => {
+        try {
+            await fetch(`/api/parcels/${params.id}/notes?noteId=${noteId}`, { method: "DELETE" });
+            fetchParcel();
+        } catch {}
     };
 
     const handleDownloadReport = () => {
@@ -303,6 +331,14 @@ export default function ParcelDetailPage() {
                                                 <dt className="text-gray-500">Yüz Ölçümü</dt>
                                                 <dd className="font-medium text-gray-900">{parcel.area ? `${parcel.area} m²` : '-'}</dd>
                                             </div>
+                                            <div className="py-3 flex justify-between">
+                                                <dt className="text-gray-500">İlan Fiyatı</dt>
+                                                <dd className="font-medium text-gray-900">
+                                                    {parcel.askingPrice
+                                                        ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(parcel.askingPrice)
+                                                        : '—'}
+                                                </dd>
+                                            </div>
                                         </dl>
                                     </div>
 
@@ -364,11 +400,41 @@ export default function ParcelDetailPage() {
                                         <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
                                             <FileText className="h-4 w-4 text-gray-400" /> Notlar
                                         </h3>
-                                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+
+                                        {/* Add Note */}
+                                        <div className="flex gap-2 mb-4">
+                                            <input
+                                                type="text"
+                                                value={noteInput}
+                                                onChange={(e) => setNoteInput(e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
+                                                placeholder="Yeni not ekle..."
+                                                className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-gray-50"
+                                            />
+                                            <button
+                                                onClick={handleAddNote}
+                                                disabled={noteLoading || !noteInput.trim()}
+                                                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+                                            >
+                                                {noteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                                             {parcel.notes?.map((note: any) => (
-                                                <div key={note.id} className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-sm text-yellow-900 shadow-sm relative group">
-                                                    <p>{note.content}</p>
-                                                    <span className="text-[10px] text-yellow-600/70 mt-2 block text-right">{new Date(note.createdAt).toLocaleDateString()}</span>
+                                                <div key={note.id} className="group bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-sm text-yellow-900 flex items-start gap-2">
+                                                    <p className="flex-1 leading-relaxed">{note.content}</p>
+                                                    <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                                                        <button
+                                                            onClick={() => handleDeleteNote(note.id)}
+                                                            className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </button>
+                                                        <span className="text-[10px] text-yellow-600/60">
+                                                            {new Date(note.createdAt).toLocaleDateString("tr-TR")}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             ))}
                                             {(!parcel.notes || parcel.notes.length === 0) && (
@@ -421,7 +487,14 @@ export default function ParcelDetailPage() {
 
                         {/* Tab Content: Market Analysis */}
                         <TabsContent value="market">
-                            <PrecedentManager parcelId={parcel.id} />
+                            <div className="space-y-6 max-w-5xl mx-auto">
+                                <ValuationSection
+                                    parcelId={parcel.id}
+                                    parcelArea={parcel.area ?? null}
+                                    askingPrice={parcel.askingPrice ?? null}
+                                />
+                                <PrecedentManager parcelId={parcel.id} />
+                            </div>
                         </TabsContent>
 
                         {/* Tab Content: Documents */}

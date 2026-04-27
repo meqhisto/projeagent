@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Users, Phone, Calendar, Plus, UserPlus, Mail, FileText, User, X } from "lucide-react";
+import { Users, Phone, Calendar, Plus, UserPlus, Mail, FileText, User, X, ClipboardList, CheckSquare } from "lucide-react";
 import AddStakeholderModal from "./AddStakeholderModal";
 
-// ... (interfaces remain same)
+interface SystemUser {
+    id: number;
+    name: string;
+    email: string;
+}
+
 interface Interaction {
     id: number;
     type: string;
@@ -32,14 +37,19 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
     const [isStakeholderModalOpen, setIsStakeholderModalOpen] = useState(false);
+    const [systemUsers, setSystemUsers] = useState<SystemUser[]>([]);
 
     // Form State
     const [interactionType, setInteractionType] = useState("CALL");
     const [content, setContent] = useState("");
     const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
+    const [assignedUserId, setAssignedUserId] = useState<string>("");
+    const [dueDate, setDueDate] = useState<string>("");
+    const [priority, setPriority] = useState<string>("MEDIUM");
 
     useEffect(() => {
         fetchData();
+        fetch("/api/admin/users").then(r => r.ok ? r.json() : []).then(setSystemUsers).catch(() => {});
     }, [parcelId]);
 
     const fetchData = async () => {
@@ -69,15 +79,21 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                     parcelId,
                     type: interactionType,
                     content,
-                    customerId: selectedCustomerId ? parseInt(selectedCustomerId) : null
+                    customerId: selectedCustomerId ? parseInt(selectedCustomerId) : null,
+                    assignedTo: assignedUserId ? parseInt(assignedUserId) : null,
+                    dueDate: dueDate || null,
+                    priority,
                 })
             });
 
             if (res.ok) {
-                fetchData(); // Refresh list
+                fetchData();
                 setShowAddForm(false);
                 setContent("");
                 setInteractionType("CALL");
+                setAssignedUserId("");
+                setDueDate("");
+                setPriority("MEDIUM");
             }
         } catch (e) {
             alert("Etkileşim eklenemedi.");
@@ -164,7 +180,7 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Etkileşim Türü</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {["CALL", "MEETING", "OFFER", "NOTE"].map(type => (
+                                    {["CALL", "MEETING", "OFFER", "NOTE", "TASK"].map(type => (
                                         <button
                                             key={type}
                                             onClick={() => setInteractionType(type)}
@@ -173,7 +189,7 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                                                 : "bg-white border-gray-300 text-gray-600 hover:border-purple-300 hover:text-purple-600"
                                                 }`}
                                         >
-                                            {type === "CALL" ? "Telefon" : type === "MEETING" ? "Toplantı" : type === "OFFER" ? "Teklif" : "Not"}
+                                            {type === "CALL" ? "Telefon" : type === "MEETING" ? "Toplantı" : type === "OFFER" ? "Teklif" : type === "NOTE" ? "Not" : "Görev"}
                                         </button>
                                     ))}
                                 </div>
@@ -194,6 +210,47 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                                 </select>
                             </div>
                         </div>
+
+                        {/* Görev alanları — sadece TASK tipinde */}
+                        {interactionType === "TASK" && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-blue-700 uppercase tracking-wide">Danışmana Ata</label>
+                                    <select
+                                        value={assignedUserId}
+                                        onChange={e => setAssignedUserId(e.target.value)}
+                                        className="w-full text-sm p-2 rounded-lg border border-blue-200 bg-white focus:ring-2 focus:ring-blue-400 outline-none"
+                                    >
+                                        <option value="">Seçiniz...</option>
+                                        {systemUsers.map(u => (
+                                            <option key={u.id} value={u.id}>{u.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-blue-700 uppercase tracking-wide">Bitiş Tarihi</label>
+                                    <input
+                                        type="date"
+                                        value={dueDate}
+                                        onChange={e => setDueDate(e.target.value)}
+                                        className="w-full text-sm p-2 rounded-lg border border-blue-200 bg-white focus:ring-2 focus:ring-blue-400 outline-none"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-blue-700 uppercase tracking-wide">Öncelik</label>
+                                    <select
+                                        value={priority}
+                                        onChange={e => setPriority(e.target.value)}
+                                        className="w-full text-sm p-2 rounded-lg border border-blue-200 bg-white focus:ring-2 focus:ring-blue-400 outline-none"
+                                    >
+                                        <option value="LOW">Düşük</option>
+                                        <option value="MEDIUM">Normal</option>
+                                        <option value="HIGH">Yüksek</option>
+                                        <option value="URGENT">Acil</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="relative">
                             <textarea
@@ -234,12 +291,15 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                             <div className="flex flex-col items-center z-10">
                                 <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-white ${interaction.type === 'OFFER' ? 'bg-amber-100 text-amber-700' :
                                     interaction.type === 'MEETING' ? 'bg-blue-100 text-blue-700' :
-                                        interaction.type === 'CALL' ? 'bg-emerald-100 text-[#0077ed]' :
-                                            'bg-gray-100 text-gray-700'
+                                        interaction.type === 'CALL' ? 'bg-emerald-100 text-emerald-700' :
+                                            interaction.type === 'TASK' ? 'bg-purple-100 text-purple-700' :
+                                                'bg-gray-100 text-gray-700'
                                     }`}>
                                     {interaction.type === 'CALL' ? <Phone className="h-4 w-4" /> :
                                         interaction.type === 'MEETING' ? <Users className="h-4 w-4" /> :
-                                            interaction.type === 'OFFER' ? '₺' : <FileText className="h-4 w-4" />}
+                                            interaction.type === 'OFFER' ? '₺' :
+                                                interaction.type === 'TASK' ? <ClipboardList className="h-4 w-4" /> :
+                                                    <FileText className="h-4 w-4" />}
                                 </div>
                             </div>
                             <div className="flex-1 pb-2">
@@ -248,7 +308,8 @@ export default function CRMSection({ parcelId }: { parcelId: number }) {
                                         <span className="text-sm font-bold text-gray-900">
                                             {interaction.type === 'CALL' ? 'Telefon Görüşmesi' :
                                                 interaction.type === 'MEETING' ? 'Toplantı' :
-                                                    interaction.type === 'OFFER' ? 'Teklif Verildi' : 'Not Alındı'}
+                                                    interaction.type === 'OFFER' ? 'Teklif Verildi' :
+                                                        interaction.type === 'TASK' ? 'Görev' : 'Not Alındı'}
                                         </span>
                                         {interaction.customer && (
                                             <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-medium border border-purple-100 flex items-center gap-1">

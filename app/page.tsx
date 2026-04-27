@@ -11,6 +11,7 @@ import ParcelCard from "@/components/ParcelCard";
 import AdvancedFilterPanel from "@/components/AdvancedFilterPanel";
 import ExportButton from "@/components/ExportButton";
 import TaskWidget from "@/components/TaskWidget";
+import CategoryChart from "@/components/CategoryChart";
 import Link from "next/link";
 import { Parcel } from "@/types";
 
@@ -185,9 +186,10 @@ export default function Home() {
       )}
 
       {/* Charts & Tasks Grid */}
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-4">
         <PipelineChart data={pipelineData} />
         <MonthlyTrendChart data={monthlyData} />
+        <CategoryChart parcels={parcels} />
         <TaskWidget />
       </div>
 
