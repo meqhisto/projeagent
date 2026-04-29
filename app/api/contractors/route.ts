@@ -33,23 +33,33 @@ export async function GET(request: Request) {
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
+                    }
+                },
+                ratings: {
+                    select: {
+                        reliability: true,
+                        quality: true,
+                        communication: true,
+                        pricing: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
+        // Her firma için ortalama puan hesapla ve kullanılmayan array verilerini (ratings vb.) temizle
         const contractorsWithAvg = contractors.map(c => {
             const avgScore = c.ratings.length > 0
                 ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
                 : null;
-            return { ...c, averageScore: avgScore };
+
+            // İstemciye ratings array'ini göndermeye gerek yok (_count içerisinden uzunluklarına erişilecek)
+            const { ratings, ...rest } = c;
+            return { ...rest, averageScore: avgScore };
         });
 
         return NextResponse.json(contractorsWithAvg);
