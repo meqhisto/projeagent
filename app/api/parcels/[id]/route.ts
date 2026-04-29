@@ -25,7 +25,8 @@ export async function GET(
                 zoning: true,
                 notes: {
                     orderBy: { createdAt: 'desc' }
-                }
+                },
+                shares: { where: { userId } }
             },
         });
 
@@ -33,12 +34,12 @@ export async function GET(
             return NextResponse.json({ error: "Parcel not found" }, { status: 404 });
         }
 
-        // Ownership check - user must be owner, assigned, or admin
         const isOwner = parcel.ownerId === userId;
         const isAssigned = parcel.assignedTo === userId;
         const isUserAdmin = isAdmin((user as any).role as string);
+        const isShared = parcel.shares.length > 0;
 
-        if (!isOwner && !isAssigned && !isUserAdmin) {
+        if (!isOwner && !isAssigned && !isUserAdmin && !isShared) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
@@ -70,7 +71,11 @@ export async function PATCH(
         // Verify ownership before update
         const parcel = await prisma.parcel.findUnique({
             where: { id: parcelId },
-            select: { ownerId: true, assignedTo: true }
+            select: {
+                ownerId: true,
+                assignedTo: true,
+                shares: { where: { userId, permission: "EDIT" } }
+            }
         });
 
         if (!parcel) {
@@ -80,8 +85,9 @@ export async function PATCH(
         const isOwner = parcel.ownerId === userId;
         const isAssigned = parcel.assignedTo === userId;
         const isUserAdmin = isAdmin((user as any).role as string);
+        const isSharedWithEdit = parcel.shares.length > 0;
 
-        if (!isOwner && !isAssigned && !isUserAdmin) {
+        if (!isOwner && !isAssigned && !isUserAdmin && !isSharedWithEdit) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
