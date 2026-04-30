@@ -33,24 +33,46 @@ export async function GET(request: Request) {
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
-        const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
-            return { ...c, averageScore: avgScore };
+        const contractorIds = contractors.map(c => c.id);
+
+        const ratingAverages = await prisma.contractorRating.groupBy({
+            by: ['contractorId'],
+            where: { contractorId: { in: contractorIds } },
+            _avg: {
+                reliability: true,
+                quality: true,
+                communication: true,
+                pricing: true
+            }
         });
+
+        const averagesMap = new Map(
+            ratingAverages.map(r => {
+                const avgScore = (
+                    (r._avg.reliability || 0) +
+                    (r._avg.quality || 0) +
+                    (r._avg.communication || 0) +
+                    (r._avg.pricing || 0)
+                ) / 4;
+                return [r.contractorId, avgScore];
+            })
+        );
+
+        // Her firma için ortalama puan ekle
+        const contractorsWithAvg = contractors.map(c => ({
+            ...c,
+            averageScore: averagesMap.get(c.id) || null
+        }));
 
         return NextResponse.json(contractorsWithAvg);
     } catch (error) {
