@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
+import { requireAuth, resolveUserId, isAdmin } from "@/lib/auth/roleCheck";
 
 export async function GET(
     request: Request,
@@ -9,7 +9,7 @@ export async function GET(
     try {
         // Auth check
         const user = await requireAuth();
-        const userId = parseInt(user.id || "0");
+        const userId = await resolveUserId(user);
 
         const { id } = await params;
         const parcelId = parseInt(id);
@@ -63,7 +63,7 @@ export async function PATCH(
     try {
         // Auth check
         const user = await requireAuth();
-        const userId = parseInt(user.id || "0");
+        const userId = await resolveUserId(user);
 
         const { id } = await params;
         const parcelId = parseInt(id);

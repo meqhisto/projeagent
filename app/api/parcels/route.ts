@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
+import { requireAuth, resolveUserId, isAdmin } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 import { ParcelCreateSchema, validateSchema } from "@/lib/validations";
 import { logger } from "@/lib/logger";
@@ -10,7 +10,7 @@ import { PARCEL_STATUS } from "@/lib/constants";
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();
-        const userId = parseInt(user.id || "0");
+        const userId = await resolveUserId(user);
 
         const { searchParams } = new URL(request.url);
         const island = searchParams.get("island");
