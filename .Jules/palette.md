@@ -1,0 +1,3 @@
+## 2026-04-26 - Notification Bell Accessibility Refactoring
+**Learning:** Dropdowns managed by custom components require explicitly setting `aria-expanded` based on state and `aria-haspopup` on the trigger button. When refactoring `<div onClick>` list items into `<li><button>`, applying `block w-full text-left` styling allows the button to perfectly inherit the old block-level visual footprint while gaining native keyboard accessibility.
+**Action:** Use this semantic list and button combination as a standard pattern when converting custom interactive dropdown lists for keyboard/screen reader accessibility without visual regressions.
