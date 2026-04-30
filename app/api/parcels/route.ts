@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { requireAuth, resolveUserId, isAdmin } from "@/lib/auth/roleCheck";
+import { requireAuth, resolveUserId, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 import { ParcelCreateSchema, validateSchema } from "@/lib/validations";
 import { logger } from "@/lib/logger";
