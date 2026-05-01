@@ -13,7 +13,8 @@ export async function GET(request: Request) {
         const specialty = searchParams.get("specialty") || "";
 
         // Build where clause based on role
-        const baseWhere: any = isAdmin((user as any).role as string)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const baseWhere: any = isAdmin((user as any).role)
             ? {} // Admin sees all contractors
             : { ownerId: userId }; // Users see only their own contractors
 
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
                     select: { matches: true, ratings: true }
                 },
                 ratings: {
-                    select: { reliability: true, quality: true, communication: true, pricing: true }
+                    select: { id: true, reliability: true, quality: true, communication: true, pricing: true }
                 }
             },
             orderBy: { createdAt: "desc" }
@@ -53,6 +54,7 @@ export async function GET(request: Request) {
                 : null;
 
             // ⚡ Bolt Optimization: Omit the eagerly fetched 'ratings' array from the response to save network payload size
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { ratings, ...rest } = c;
             return { ...rest, averageScore: avgScore };
         });

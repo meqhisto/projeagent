@@ -4,3 +4,6 @@
 ## 2024-04-26 - API List Endpoint Overfetching & Prisma _count
 **Learning:** Found a performance bottleneck in `app/api/contractors/route.ts` where fetching a list of contractors eager-loaded complete nested relational structures (`matches` including their deeply nested `parcel` and `customer` objects, and the full `ratings` arrays) just to count lengths or calculate averages. This drastically increased database memory and network payload transfer latency.
 **Action:** In list endpoints, always use Prisma's `_count` aggregate inside the `include` block to fetch relationship counts without loading full object arrays. Restrict data fetched for calculation (like `ratings`) to only the required columns, and strip these intermediate arrays from the JSON response before returning it to the frontend. Ensure frontend UI types use `_count` appropriately.
+## 2024-04-26 - Prisma Select Includes ID
+**Learning:** Found an issue where using Prisma's `select` without selecting the relational `id` property can cause edge runtime or Next.js build compilation problems due to broken client-side caching or types expectations when the relations are partially fetched.
+**Action:** Always include the primary key (`id: true`) when using a `select` block inside a Prisma `include` or top-level query, especially for UI hydration and frontend caching consistency.
