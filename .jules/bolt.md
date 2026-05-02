@@ -1,3 +1,6 @@
 ## 2024-04-25 - Analytics Database Query Overfetching Anti-Pattern
 **Learning:** Found an anti-pattern in `app/api/analytics/*` routes where `new PrismaClient()` is improperly instantiated and `findMany()` is used to fetch all records into Node.js memory just for aggregate counts, leading to potential memory bloat, high latency, and DB connection exhaustion.
 **Action:** Always import the shared singleton `import { prisma } from '@/lib/prisma';`. Use database-level aggregations like `prisma.parcel.groupBy()` with `_count: { _all: true }` and accumulate mapped fallback keys in memory to minimize database transfer latency and Node.js memory footprint.
+## 2024-04-26 - API Route Overfetching via Include Associations
+**Learning:** Found an anti-pattern in list endpoints (like `app/api/contractors/route.ts`) where fetching deep relations via `include: { ratings: true, matches: { include: ... } }` causes severe N+1 memory bloat and massive network payloads, just to compute `length` and average scores.
+**Action:** Replace nested array includes with `_count: { select: { ... } }` to fetch array lengths directly via SQL. To compute aggregates like averages, use a separate `prisma...groupBy({ _avg })` mapped against the IDs, ensuring O(1) DB calls instead of O(N) memory reductions.
