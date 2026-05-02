@@ -30,14 +30,22 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ Bolt Optimization: Use _count to avoid overfetching `matches` and nested objects
+        // that are only needed for their length. Only fetch specific `ratings` fields needed for calculating averages.
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                ratings: {
+                    select: {
+                        reliability: true,
+                        quality: true,
+                        communication: true,
+                        pricing: true,
+                    }
+                },
+                _count: {
+                    select: {
+                        matches: true
                     }
                 }
             },
