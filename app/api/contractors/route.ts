@@ -30,25 +30,51 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // Optimizasyon: N+1 problemini ve gereksiz veri çekimini önlemek için
+        // ilişkili kayıtların tamamını çekmek yerine sadece sayılarını (count) istiyoruz.
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
+        const contractorIds = contractors.map(c => c.id);
+
+        // Ortalama hesaplamalarını veritabanı seviyesinde (SQL) yapıyoruz.
+        const ratingsAgg = contractorIds.length > 0 ? await prisma.contractorRating.groupBy({
+            by: ['contractorId'],
+            where: {
+                contractorId: { in: contractorIds }
+            },
+            _avg: {
+                reliability: true,
+                quality: true,
+                communication: true,
+                pricing: true,
+                overallScore: true
+            }
+        }) : [];
+
+        // DB'den gelen ortalamaları in-memory Map ile eşleştiriyoruz. O(N) karmaşıklığı.
+        const ratingsMap = new Map(ratingsAgg.map(r => [r.contractorId, r]));
+
         const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
+            const agg = ratingsMap.get(c.id);
+            let avgScore = null;
+            if (agg && agg._avg) {
+                // Güvenilirlik, kalite, iletişim ve fiyat ortalamalarının genel ortalaması
+                const r = agg._avg;
+                if (r.reliability != null && r.quality != null && r.communication != null && r.pricing != null) {
+                   avgScore = (r.reliability + r.quality + r.communication + r.pricing) / 4;
+                }
+            }
             return { ...c, averageScore: avgScore };
         });
 
