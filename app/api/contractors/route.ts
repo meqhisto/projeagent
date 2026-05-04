@@ -30,26 +30,51 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ Bolt Optimization: Use _count to prevent fetching full relation objects (ratings, matches).
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
+        // ⚡ Bolt Optimization: Calculate average rating using database aggregation instead of in-memory maps.
+        const contractorIds = contractors.map(c => c.id);
+
+        let ratingAverages: any[] = [];
+        if (contractorIds.length > 0) {
+            ratingAverages = await prisma.contractorRating.groupBy({
+                by: ['contractorId'],
+                where: {
+                    contractorId: { in: contractorIds }
+                },
+                _avg: {
+                    reliability: true,
+                    quality: true,
+                    communication: true,
+                    pricing: true
+                }
+            });
+        }
+
+        // Map aggregated scores back to contractors
         const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
-            return { ...c, averageScore: avgScore };
+            const avg = ratingAverages.find(r => r.contractorId === c.id);
+            let calculatedAvg = null;
+            if (avg && avg._avg) {
+                const sums = (avg._avg.reliability || 0) + (avg._avg.quality || 0) + (avg._avg.communication || 0) + (avg._avg.pricing || 0);
+                calculatedAvg = sums / 4;
+            }
+            return {
+                ...c,
+                averageScore: calculatedAvg
+            };
         });
 
         return NextResponse.json(contractorsWithAvg);
