@@ -30,14 +30,23 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ Bolt: Optimize query by removing heavy 'matches' join and fetching only needed rating fields.
+        // Also included _count for counts required by the frontend list view.
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        matches: true,
+                        ratings: true,
+                    }
+                },
+                ratings: {
+                    select: {
+                        reliability: true,
+                        quality: true,
+                        communication: true,
+                        pricing: true,
                     }
                 }
             },
@@ -45,11 +54,13 @@ export async function GET(request: Request) {
         });
 
         // Her firma için ortalama puan hesapla
+        // ⚡ Bolt: Strip out the 'ratings' array from the final payload to reduce network size.
         const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
+            const { ratings, ...rest } = c;
+            const avgScore = ratings.length > 0
+                ? ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / ratings.length
                 : null;
-            return { ...c, averageScore: avgScore };
+            return { ...rest, averageScore: avgScore };
         });
 
         return NextResponse.json(contractorsWithAvg);
