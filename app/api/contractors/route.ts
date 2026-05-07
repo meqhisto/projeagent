@@ -13,6 +13,7 @@ export async function GET(request: Request) {
         const specialty = searchParams.get("specialty") || "";
 
         // Build where clause based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const baseWhere: any = isAdmin((user as any).role as string)
             ? {} // Admin sees all contractors
             : { ownerId: userId }; // Users see only their own contractors
@@ -33,11 +34,19 @@ export async function GET(request: Request) {
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                // Optimization: Fetch only needed rating fields to compute average
+                ratings: {
+                    select: {
+                        reliability: true,
+                        quality: true,
+                        communication: true,
+                        pricing: true
+                    }
+                },
+                // Optimization: Use _count instead of fetching all nested relations for matches
+                _count: {
+                    select: {
+                        matches: true
                     }
                 }
             },
