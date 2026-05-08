@@ -12,16 +12,32 @@ export async function GET() {
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
-        // Get all properties with related data
+        // ⚡ Bolt Optimization: Removed memory-intensive nested relational fetch.
+        // Selecting only required numeric/status fields vastly improves query speed and minimizes Node.js RAM footprint.
         const properties = await prisma.property.findMany({
             where: propertyWhere,
-            include: {
-                units: true,
+            select: {
+                currentValue: true,
+                purchasePrice: true,
+                status: true,
+                type: true,
+                city: true,
+                monthlyRent: true,
+                units: {
+                    select: {
+                        status: true,
+                        monthlyRent: true
+                    }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
+                    },
+                    select: {
+                        type: true,
+                        amount: true
                     }
                 }
             }

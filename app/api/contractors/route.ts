@@ -30,14 +30,23 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ Bolt Optimization: Removed fetching full relation arrays into memory.
+        // Used _count to efficiently get lengths, and selected only the required fields from ratings.
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                ratings: {
+                    select: {
+                        reliability: true,
+                        quality: true,
+                        communication: true,
+                        pricing: true
+                    }
+                },
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true
                     }
                 }
             },
@@ -49,7 +58,11 @@ export async function GET(request: Request) {
             const avgScore = c.ratings.length > 0
                 ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
                 : null;
-            return { ...c, averageScore: avgScore };
+
+            // ⚡ Bolt Optimization: Exclude the ratings array from the returned response
+            // to drastically reduce JSON payload size and save network bandwidth.
+            const { ratings, ...rest } = c;
+            return { ...rest, averageScore: avgScore };
         });
 
         return NextResponse.json(contractorsWithAvg);
