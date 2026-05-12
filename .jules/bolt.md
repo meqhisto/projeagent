@@ -1,3 +1,6 @@
 ## 2024-04-25 - Analytics Database Query Overfetching Anti-Pattern
 **Learning:** Found an anti-pattern in `app/api/analytics/*` routes where `new PrismaClient()` is improperly instantiated and `findMany()` is used to fetch all records into Node.js memory just for aggregate counts, leading to potential memory bloat, high latency, and DB connection exhaustion.
 **Action:** Always import the shared singleton `import { prisma } from '@/lib/prisma';`. Use database-level aggregations like `prisma.parcel.groupBy()` with `_count: { _all: true }` and accumulate mapped fallback keys in memory to minimize database transfer latency and Node.js memory footprint.
+## 2024-05-12 - Prevent Prisma findMany Over-fetching with select
+**Learning:** In routes like `app/api/properties/stats/route.ts` where we only need specific fields for calculations (e.g. `status`, `amount`, `monthlyRent`), using `include` pulls the entire record and all nested relationships into Node.js memory. This leads to massive memory overhead when dealing with large datasets or wide tables.
+**Action:** When fetching records primarily for mapping or reducing aggregates in-memory, strictly use Prisma's `select` to specify exactly which fields and nested relational properties are needed, discarding large text columns or unused relations.
