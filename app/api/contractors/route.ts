@@ -13,6 +13,7 @@ export async function GET(request: Request) {
         const specialty = searchParams.get("specialty") || "";
 
         // Build where clause based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const baseWhere: any = isAdmin((user as any).role as string)
             ? {} // Admin sees all contractors
             : { ownerId: userId }; // Users see only their own contractors
@@ -30,26 +31,55 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // ⚡ Bolt Optimization: Use _count to avoid fetching full related arrays
+        // Impact: Reduces API payload size and memory usage by preventing N+1 array serialization
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
+        const contractorIds = contractors.map(c => c.id);
+
+        // ⚡ Bolt Optimization: Push aggregate calculation to database
+        // Impact: Replaces O(N*M) in-memory array iteration with a single O(1) DB round-trip
+        const aggregations = await prisma.contractorRating.groupBy({
+            by: ['contractorId'],
+            where: {
+                contractorId: {
+                    in: contractorIds
+                }
+            },
+            _avg: {
+                reliability: true,
+                quality: true,
+                communication: true,
+                pricing: true
+            }
+        });
+
+        const averagesMap = new Map(aggregations.map(agg => {
+            const avgScore = (
+                (agg._avg.reliability || 0) +
+                (agg._avg.quality || 0) +
+                (agg._avg.communication || 0) +
+                (agg._avg.pricing || 0)
+            ) / 4;
+            return [agg.contractorId, avgScore];
+        }));
+
         const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
-            return { ...c, averageScore: avgScore };
+            return {
+                ...c,
+                averageScore: c._count.ratings > 0 ? averagesMap.get(c.id) : null
+            };
         });
 
         return NextResponse.json(contractorsWithAvg);
