@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - Tüm firmaları listele
 export async function GET(request: Request) {
     try {
@@ -13,6 +15,7 @@ export async function GET(request: Request) {
         const specialty = searchParams.get("specialty") || "";
 
         // Build where clause based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const baseWhere: any = isAdmin((user as any).role as string)
             ? {} // Admin sees all contractors
             : { ownerId: userId }; // Users see only their own contractors
@@ -30,27 +33,38 @@ export async function GET(request: Request) {
             baseWhere.specialties = { contains: specialty, mode: "insensitive" };
         }
 
+        // Optimization: Prevent overfetching of relationships and calculate aggregates in database
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
-        const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
-            return { ...c, averageScore: avgScore };
-        });
+        // Batch aggregate average scores natively via database
+        const contractorIds = contractors.map(c => c.id);
+        const ratingAggregates = contractorIds.length > 0
+            ? await prisma.contractorRating.groupBy({
+                by: ['contractorId'],
+                _avg: { overallScore: true },
+                where: { contractorId: { in: contractorIds } }
+            })
+            : [];
+
+        const avgScoreMap = Object.fromEntries(
+            ratingAggregates.map(r => [r.contractorId, r._avg.overallScore])
+        );
+
+        const contractorsWithAvg = contractors.map(c => ({
+            ...c,
+            averageScore: avgScoreMap[c.id] || null
+        }));
 
         return NextResponse.json(contractorsWithAvg);
     } catch (error) {
