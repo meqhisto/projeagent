@@ -1,3 +1,7 @@
 ## 2024-04-25 - Analytics Database Query Overfetching Anti-Pattern
 **Learning:** Found an anti-pattern in `app/api/analytics/*` routes where `new PrismaClient()` is improperly instantiated and `findMany()` is used to fetch all records into Node.js memory just for aggregate counts, leading to potential memory bloat, high latency, and DB connection exhaustion.
 **Action:** Always import the shared singleton `import { prisma } from '@/lib/prisma';`. Use database-level aggregations like `prisma.parcel.groupBy()` with `_count: { _all: true }` and accumulate mapped fallback keys in memory to minimize database transfer latency and Node.js memory footprint.
+
+## 2024-05-18 - Prevent Prisma Overfetching and Lockfile Pollution
+**Learning:** Found an N+1-like data explosion in `app/api/contractors/route.ts` where all related `ratings` and `matches` (including nested records) were fetched just to compute aggregate counts and averages. Also learned that running `pnpm install` locally to fix TS/Prisma environment issues can modify `pnpm-lock.yaml`, which violates boundaries if committed.
+**Action:** Use Prisma's `_count` to get relationship counts natively. For computing averages in-memory, use `select` to fetch only the required numeric fields. Always destructure and omit intermediate relationship arrays from the final API payload using `// eslint-disable-next-line @typescript-eslint/no-unused-vars`. ALWAYS run `git checkout -- pnpm-lock.yaml` if `pnpm install` was run to ensure the lockfile stays pristine.
