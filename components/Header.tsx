@@ -49,6 +49,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={onMenuClick}
+                            aria-label="Menüyü Aç"
                             className="lg:hidden p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
                         >
                             <Menu className="h-5 w-5" />
@@ -57,6 +58,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         {/* Search Trigger - Apple Style */}
                         <button
                             onClick={() => setSearchOpen(true)}
+                            aria-label="Arama Yap"
                             className="flex items-center gap-3 px-4 py-2 bg-white/60 hover:bg-white border border-black/[0.04] hover:border-black/[0.08] rounded-xl transition-all group shadow-sm w-full sm:w-64"
                         >
                             <Search className="h-4 w-4 text-[#86868b] group-hover:text-[#6e6e73]" />
