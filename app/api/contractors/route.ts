@@ -13,6 +13,7 @@ export async function GET(request: Request) {
         const specialty = searchParams.get("specialty") || "";
 
         // Build where clause based on role
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const baseWhere: any = isAdmin((user as any).role as string)
             ? {} // Admin sees all contractors
             : { ownerId: userId }; // Users see only their own contractors
@@ -33,24 +34,47 @@ export async function GET(request: Request) {
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
-        const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
-            return { ...c, averageScore: avgScore };
+        const contractorIds = contractors.map(c => c.id);
+
+        const ratingsAverages = await prisma.contractorRating.groupBy({
+            by: ['contractorId'],
+            where: {
+                contractorId: {
+                    in: contractorIds
+                }
+            },
+            _avg: {
+                reliability: true,
+                quality: true,
+                communication: true,
+                pricing: true,
+            }
         });
+
+        const ratingMap = new Map(
+            ratingsAverages.map(r => {
+                const totalAvg = r._avg.reliability !== null && r._avg.quality !== null && r._avg.communication !== null && r._avg.pricing !== null
+                    ? (r._avg.reliability + r._avg.quality + r._avg.communication + r._avg.pricing) / 4
+                    : null;
+                return [r.contractorId, totalAvg];
+            })
+        );
+
+        // Her firma için ortalama puan hesapla
+        const contractorsWithAvg = contractors.map(c => ({
+            ...c,
+            averageScore: ratingMap.get(c.id) ?? null
+        }));
 
         return NextResponse.json(contractorsWithAvg);
     } catch (error) {
