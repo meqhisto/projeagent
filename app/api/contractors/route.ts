@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - Tüm firmaları listele
 export async function GET(request: Request) {
     try {
