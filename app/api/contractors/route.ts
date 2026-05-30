@@ -33,22 +33,37 @@ export async function GET(request: Request) {
         const contractors = await prisma.contractor.findMany({
             where: baseWhere,
             include: {
-                ratings: true,
-                matches: {
-                    include: {
-                        parcel: true,
-                        customer: true,
+                _count: {
+                    select: {
+                        ratings: true,
+                        matches: true,
                     }
                 }
             },
             orderBy: { createdAt: "desc" }
         });
 
-        // Her firma için ortalama puan hesapla
+        // Get contractor IDs to fetch aggregated ratings
+        const contractorIds = contractors.map(c => c.id);
+
+        let ratingAverages: Array<{ contractorId: number; _avg: { overallScore: number | null } }> = [];
+        if (contractorIds.length > 0) {
+            const result = await prisma.contractorRating.groupBy({
+                by: ['contractorId'],
+                where: { contractorId: { in: contractorIds } },
+                _avg: { overallScore: true }
+            });
+            ratingAverages = result as unknown as Array<{ contractorId: number; _avg: { overallScore: number | null } }>;
+        }
+
+        // Create a map for fast lookup
+        const avgScoreMap = new Map(
+            ratingAverages.map(ra => [ra.contractorId, ra._avg.overallScore])
+        );
+
+        // Her firma için ortalama puan hesapla (DB'den alınan ile)
         const contractorsWithAvg = contractors.map(c => {
-            const avgScore = c.ratings.length > 0
-                ? c.ratings.reduce((sum, r) => sum + ((r.reliability + r.quality + r.communication + r.pricing) / 4), 0) / c.ratings.length
-                : null;
+            const avgScore = avgScoreMap.get(c.id) ?? null;
             return { ...c, averageScore: avgScore };
         });
 
