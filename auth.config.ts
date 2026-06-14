@@ -35,7 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     if (passwordsMatch) {
                         console.log("Password verified successfully.");
                         return {
-                            id: user.id,
+                            id: String(user.id),
                             name: user.name,
                             email: user.email,
                             role: user.role,
