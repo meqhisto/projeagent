@@ -51,7 +51,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
                             onClick={onMenuClick}
                             aria-label="Menüyü Aç"
                             className="lg:hidden p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
-                            aria-label="Menüyü Aç"
                         >
                             <Menu className="h-5 w-5" />
                         </button>
