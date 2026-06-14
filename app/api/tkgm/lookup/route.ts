@@ -78,6 +78,7 @@ export async function GET(request: NextRequest) {
             district: props.ilceAd ?? null,
             neighborhood: props.mahalleAd ?? null,
             nitelik: props.nitelik ?? null,
+            geometry: geom ? JSON.stringify(geom) : null,
         });
 
     } catch (err: any) {

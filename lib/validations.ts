@@ -22,14 +22,14 @@ export const ParcelCreateSchema = z.object({
     neighborhood: z.string().min(2, "Mahalle en az 2 karakter olmalı").max(100),
     island: z.string().min(1, "Ada numarası gerekli").max(20),
     parsel: z.string().min(1, "Parsel numarası gerekli").max(20),
-    area: z.union([z.string(), z.number()]).optional().transform(val =>
-        val ? parseFloat(String(val)) : null
+    area: z.union([z.string(), z.number(), z.null()]).optional().transform(val =>
+        (val !== null && val !== undefined && val !== "") ? parseFloat(String(val)) : null
     ),
-    latitude: z.union([z.string(), z.number()]).optional().transform(val =>
-        val ? parseFloat(String(val)) : null
+    latitude: z.union([z.string(), z.number(), z.null()]).optional().transform(val =>
+        (val !== null && val !== undefined && val !== "") ? parseFloat(String(val)) : null
     ),
-    longitude: z.union([z.string(), z.number()]).optional().transform(val =>
-        val ? parseFloat(String(val)) : null
+    longitude: z.union([z.string(), z.number(), z.null()]).optional().transform(val =>
+        (val !== null && val !== undefined && val !== "") ? parseFloat(String(val)) : null
     ),
     category: z.enum(PARCEL_CATEGORIES).optional().default("UNCATEGORIZED"),
     tags: z.string().max(500, "Etiketler en fazla 500 karakter olabilir").optional().nullable(),

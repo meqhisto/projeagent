@@ -84,6 +84,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
     const [tkgmIlId, setTkgmIlId] = useState<number | null>(null);
     const [tkgmIlceId, setTkgmIlceId] = useState<number | null>(null);
     const [tkgmMahalleId, setTkgmMahalleId] = useState<number | null>(null);
+    const [tkgmGeometry, setTkgmGeometry] = useState<string | null>(null);
     const [ilceList, setIlceList] = useState<TkgmItem[]>([]);
     const [mahalleList, setMahalleList] = useState<TkgmItem[]>([]);
     const [ilceLoading, setIlceLoading] = useState(false);
@@ -211,9 +212,11 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 latitude: data.latitude != null ? String(data.latitude) : prev.latitude,
                 longitude: data.longitude != null ? String(data.longitude) : prev.longitude,
             }));
+            setTkgmGeometry(data.geometry ?? null);
 
             const nitelik = data.nitelik ? ` (${data.nitelik})` : "";
-            toast.success("TKGM Verisi Alındı", `Alan ve koordinatlar dolduruldu${nitelik}.`);
+            const geoNote = data.geometry ? " Geometri kaydedildi." : "";
+            toast.success("TKGM Verisi Alındı", `Alan ve koordinatlar dolduruldu${nitelik}.${geoNote}`);
         } catch (err: any) {
             setError(err.message);
             toast.error("TKGM Hatası", err.message);
@@ -241,6 +244,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 longitude: formData.longitude ? parseFloat(formData.longitude) : null,
                 category: formData.category || "UNCATEGORIZED",
                 tags: formData.tags.trim() || null,
+                geometry: tkgmGeometry ?? null,
             };
 
             const res = await fetch("/api/parcels", {
@@ -276,7 +280,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 category: "UNCATEGORIZED",
                 tags: "",
             });
-            setTkgmIlId(null); setTkgmIlceId(null); setTkgmMahalleId(null);
+            setTkgmIlId(null); setTkgmIlceId(null); setTkgmMahalleId(null); setTkgmGeometry(null);
             setIlceList([]); setMahalleList([]);
 
             onSuccess();
