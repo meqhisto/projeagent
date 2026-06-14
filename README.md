@@ -1,429 +1,211 @@
-# 🏗️ ParselMonitor - İnşaat Arsa Yönetim Sistemi
+# ParselMonitor
 
-**Version:** 1.1.0  
-**Status:** Production Ready  
-**License:** MIT  
-**Last Updated:** 17 Aralık 2025
-
-Modern, güvenli ve kullanıcı dostu **arsa takip ve analiz platformu**. Gayrimenkul profesyonelleri için tasarlanmış, tam özellikli CRM ve fizibilite analiz sistemi.
-
-## 🆕 Yeni Özellikler (v1.1.0)
-
-- ✅ **Self-Service Şifre Değiştirme:** Kullanıcılar artık kendi şifrelerini değiştirebiliyor
-- ✅ **Sekmeli Parsel Detay:** 4 sekme ile organize görünüm (Genel, Müteahhit, CRM, Dökümanlar)
-- ✅ **Müşteri Detay Sayfası:** Kapsamlı müşteri profilleri ve görüşme geçmişi
-- ✅ **Geliştirilmiş CRM:** Tıklanabilir müşteri kartları ve timeline görünümü
+Türkiye gayrimenkul piyasasına yönelik kapsamlı arsa ve parsel yönetim platformu. TKGM MEGSİS entegrasyonu, interaktif harita, CRM pipeline, müteahhit fizibilite hesaplayıcı ve yatırımcı sunum sistemi içerir.
 
 ---
 
-## 🎯 Özellikler
+## Özellikler
 
-### 🏘️ Parsel Yönetimi
-- **Detaylı Parsel Kartları:** Ada, parsel, mahalle, şehir, yüz ölçümü
-- **İmar Bilgileri:** KAKS (emsal), TAKS, kat adedi, irtifa
-- **Görsel Yönetim:** Çoklu görsel yükleme, varsayılan görsel seçimi
-- **Doküman Yökleme:** PDF, Word, Excel vb. dosya desteği
-- **Google Maps Entegrasyonu:** Konum görüntüleme ve arama
+### Parsel Yönetimi
+- TKGM MEGSİS v3.1 API üzerinden **İl → İlçe → Mahalle** kademeli dropdown ile otomatik koordinat, alan ve GeoJSON geometri çekme
+- Ada / Parsel bazlı kayıt; kategori, etiket, imar bilgisi (KAKS, TAKS, Hmax), durum ve CRM aşaması takibi
+- JSON / GeoJSON toplu içe aktarma
+- Parsel bazlı belge ve fotoğraf yönetimi
+- Emsal analizi (bölge bazlı fiyat karşılaştırması)
 
-### 📊 CRM & Pipeline Yönetimi
-- **Satış Boru Hattı:** Drag & drop kanban board
-- **CRM Aşamaları:**
-  - 🆕 Yeni Fırsat (NEW_LEAD)
-  - 📞 Görüşülüyor (CONTACTED)
-  - 🔍 Analiz Yapıldı (ANALYSIS)
-  - 📝 Teklif Verildi (OFFER_SENT)
-  - ✅ Sözleşme/Kapora (CONTRACT)
-  - ❌ Kaybedildi (LOST)
-- **Hot Leads:** Yüksek öncelikli fırsatlar
-- **Müşteri Takibi:** Detaylı müşteri profilleri
+### Harita
+- **Leaflet + React-Leaflet** tabanlı interaktif harita
+- TKGM'den çekilen GeoJSON poligon geometrisini doğrudan haritada gösterme
+- Kümelenmiş pin görünümü (MarkerCluster)
+- Koordinatlı parseller için anlık konum pini
 
-### 📈 Analiz & Raporlama
-- **Fizibilite Hesaplama:**
-  - Kat karşılığı simülasyonu
-  - Maliyet-gelir analizi
-  - ROI hesaplama
-  - Nakit akış projeksiyonu
-  - Şerefiye optimizasyonu
-- **Dashboard KPI'lar:**
-  - Toplam parsel sayısı
-  - Aktif fırsatlar
-  - Dönüşüm oranı
-  - Ortalama ROI
-  - Aylık bazda ekleme trendi
-- **Grafikler:**
-  - Pipeline dağılımı (pasta grafik)
-  - Aylık trend (çizgi grafik)
-- **PDF Rapor İhracı:** Detaylı parsel raporları
+### CRM & Pipeline
+- Kanban tahtası: `Yeni Lead → İletişim → Analiz → Teklif → Sözleşme → Kaybedildi`
+- Müşteri / paydaş yönetimi (arsa sahibi, yatırımcı, danışman)
+- Görev ve hatırlatma sistemi (öncelik, vade tarihi, atama)
+- Etkileşim geçmişi (arama, toplantı, teklif, not)
 
-### 🗺️ Görselleştirme
-- **İnteraktif Harita:** Leaflet.js ile marker bazlı görünüm
-- **Kanban Board:** Satış aşamalarına göre görselleştirme
-- **Filtreleme & Arama:**
-  - Şehir, ilçe, mahalle
-  - Alan aralığı (min-max)
-  - CRM aşaması
-  - İmar durumu
+### Müteahhit Fizibilite Hesaplayıcı
+- **Kat Karşılığı İnşaat** modeli için tam hesap motoru (TypeScript, ek backend gerektirmez)
+- Girdi: arsa m², emsal, kat karşılığı oranı, daire büyüklüğü, inşaat / satış m² fiyatı
+- Çıktı: toplam / müteahhit / arsa sahibi daire dağılımı, net kâr, ROI, şerefiye optimizasyonu, 18 aylık nakit akış simülasyonu, arsa sahibi teklif metni
+- Hesaplama geçmişi ve karşılaştırma
 
-### 🔐 Güvenlik & Auth
-- **NextAuth.js:** Güvenli kimlik doğrulama
-- **Rol Bazlı Yetkilendirme:** Admin, Agent, Viewer
-- **Bcrypt:** Şifre hashleme
-- **Self-Service Şifre Değiştirme:** Kullanıcılar kendi şifrelerini güncelleyebilir
-- **Password Strength Meter:** Gerçek zamanlı şifre gücü göstergesi
-- **CORS Koruması:** Whitelist bazlı
-- **Health Check Endpoints:** Sistem durumu izleme
+### Gayrimenkul Portföyü
+- Daire, villa, ofis, dükkan ve arsa mülk yönetimi
+- Alt birim (daire / ofis) takibi ve kiracı bağlantısı
+- Finansal işlemler: kira geliri, gider, bakım, vergi
+- Değerleme geçmişi
 
-### 🎨 Modern UI/UX
-- **Responsive Design:** Mobil, tablet, desktop
-- **Dark Mode Ready:** Premium tasarım
-- **Animasyonlar:** Smooth transitions
-- **Accessibility:** ARIA labels, keyboard navigation
+### Müteahhit Defteri
+- Firma kartı: yetkili, iletişim, vergi no, uzmanlık alanları
+- Güvenilirlik / kalite / iletişim / fiyat bazında puanlama sistemi
+- Parsel–firma eşleştirme ve müzakere aşaması takibi
+
+### Yatırımcı Sunum Sistemi
+- Parsel bazlı profesyonel sunum oluşturma
+- Token tabanlı, süre sınırlı paylaşılabilir bağlantı
+- Görüntülenme sayacı
+
+### Yönetim Paneli
+- Kullanıcı yönetimi (rol: USER / ADMIN)
+- Tüm sistem genelinde parsel görünümü
+- Audit log: giriş, CRUD işlemleri, export, başarısız oturum denemeleri
 
 ---
 
-## 🛠️ Teknoloji Stack
+## Teknoloji Yığını
 
-### Frontend
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Styling:** TailwindCSS 3
-- **State Management:** React Hooks
-- **Maps:** Leaflet.js
-- **Charts:** Recharts
-- **Drag & Drop:** @hello-pangea/dnd
-- **Authentication:** NextAuth.js v5
-
-### Backend
-- **Framework:** FastAPI (Python 3.9)
-- **Database:** SQLite (dev) / PostgreSQL (prod)
-- **ORM:** Prisma
-- **API:** RESTful
-- **Health Checks:** Built-in monitoring
-
-### DevOps
-- **Containerization:** Docker, Docker Compose
-- **Reverse Proxy:** Nginx Proxy Manager
-- **SSL:** Let's Encrypt (auto-renewal)
-- **CI/CD:** GitHub Actions ready
+| Katman | Teknoloji |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, Tailwind CSS v4, Lucide React |
+| Harita | Leaflet, React-Leaflet, Leaflet MarkerCluster |
+| Grafik | Recharts |
+| ORM | Prisma 5.22 |
+| Veritabanı | PostgreSQL |
+| Auth | NextAuth.js v5 (credentials) |
+| Validasyon | Zod v4 |
+| Test | Vitest, Playwright |
+| Deployment | Docker, Docker Compose |
 
 ---
 
-## 📦 Kurulum
+## Hızlı Başlangıç
 
 ### Gereksinimler
+
 - Node.js 20+
-- Python 3.9+
-- Docker & Docker Compose (production)
-- Git
+- pnpm
+- PostgreSQL 15+
 
-### 1. Projeyi Klonlayın
-```bash
-git clone https://github.com/meqhisto/projeagent.git
-cd projeagent
-```
+### Kurulum
 
-### 2. Environment Variables
 ```bash
-# .env dosyasını oluşturun
+# Bağımlılıkları yükle
+pnpm install
+
+# Ortam değişkenlerini ayarla
 cp .env.example .env
+# .env dosyasını düzenle
 
-# Gerekli değerleri doldurun:
-# - AUTH_SECRET (openssl rand -hex 32)
-# - NEXTAUTH_SECRET (openssl rand -hex 32)
-# - DATABASE_URL
-```
-
-### 3a. Local Development
-```bash
-# Frontend
-npm install
-npx prisma generate
+# Veritabanı şemasını oluştur
 npx prisma db push
-npm run dev
 
-# Backend (ayrı terminal)
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+# (İsteğe bağlı) Örnek veri yükle
+pnpm seed
+
+# Geliştirme sunucusunu başlat
+pnpm dev
 ```
 
-**Erişim:**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-
-### 3b. Docker Production Deployment
-```bash
-# Tek komutla başlat
-./setup.sh
-
-# Veya manuel:
-docker compose up -d --build
-```
-
-**Container'lar:**
-- `parselmonitor-frontend` → Port 3000
-- `parselmonitor-backend` → Port 8000
+Uygulama `http://localhost:3000` adresinde çalışır.
 
 ---
 
-## 🚀 Production Deployment
+## Ortam Değişkenleri
 
-### Nginx Proxy Manager ile SSL Setup
+```env
+# Veritabanı
+DATABASE_URL="postgresql://kullanici:sifre@localhost:5432/parselmonitor"
 
-1. **Container'ları Başlatın:**
+# NextAuth
+NEXTAUTH_SECRET="guclu-bir-gizli-anahtar"
+NEXTAUTH_URL="http://localhost:3000"
+
+# (İsteğe bağlı) Docker içi backend URL
+INTERNAL_BACKEND_URL="http://localhost:8888"
+```
+
+---
+
+## Docker ile Deployment
+
 ```bash
+# Tüm servisleri ayağa kaldır
 docker compose up -d
+
+# Logları takip et
+docker compose logs -f frontend
 ```
 
-2. **Nginx Network Bağlantısı:**
+`docker-compose.yml` içindeki servisler:
+
+| Servis | Port | Açıklama |
+|---|---|---|
+| `frontend` | 3000 | Next.js uygulaması |
+| `backend` | 8000 | Python FastAPI (opsiyonel ek hesaplama servisi) |
+
+> Müteahhit fizibilite hesaplayıcı (`/api/calculate/strict`) artık doğrudan Next.js içinde TypeScript olarak çalışmaktadır; Python backend zorunlu değildir.
+
+---
+
+## Proje Yapısı
+
+```
+├── app/
+│   ├── api/
+│   │   ├── calculate/strict/   # Müteahhit fizibilite hesap motoru (TS)
+│   │   ├── parcels/            # Parsel CRUD + hesaplama geçmişi
+│   │   ├── tkgm/               # TKGM MEGSİS proxy (il/ilçe/mahalle/lookup)
+│   │   └── proxy/              # Python backend proxy
+│   ├── map/                    # Harita sayfası
+│   ├── parcels/                # Parsel liste ve detay sayfaları
+│   ├── pipeline/               # CRM Kanban tahtası
+│   ├── contractors/            # Müteahhit yönetimi
+│   ├── customers/              # Müşteri yönetimi
+│   ├── properties/             # Gayrimenkul portföyü
+│   ├── tasks/                  # Görev yönetimi
+│   └── admin/                  # Yönetim paneli
+├── components/                 # Yeniden kullanılabilir UI bileşenleri
+├── prisma/
+│   ├── schema.prisma           # Veritabanı şeması
+│   └── seed.ts                 # Örnek veri
+├── lib/                        # Yardımcı fonksiyonlar, validasyon şemaları
+├── types/                      # TypeScript tip tanımlamaları
+└── backend/                    # Python FastAPI (opsiyonel)
+    └── app/
+        ├── main.py
+        └── calculator.py
+```
+
+---
+
+## TKGM Entegrasyonu
+
+TKGM MEGSİS v3.1 API'si WAF korumalı olduğundan tüm istekler Next.js API route'ları üzerinden proxy'lenir:
+
+| Endpoint | Açıklama |
+|---|---|
+| `GET /api/tkgm/ilceler/[ilId]` | Seçilen ile ait ilçe listesi |
+| `GET /api/tkgm/mahalleler/[ilceId]` | Seçilen ilçeye ait mahalle listesi |
+| `GET /api/tkgm/lookup` | Parsel alanı, koordinat ve GeoJSON geometrisi |
+
+Parsel eklenirken TKGM'den çekilen GeoJSON poligonu veritabanına kaydedilir ve haritada doğrudan render edilir.
+
+---
+
+## Kullanışlı Komutlar
+
 ```bash
-docker network connect projeagent_parselmonitor-network nginx-proxy-manager
-```
+# Şifre sıfırlama
+pnpm reset-password
 
-3. **Nginx Proxy Manager Paneli:**
-   - URL: `http://your-server-ip:8100`
-   - Login: `admin@example.com` / `changeme`
+# Veritabanı yedeği
+pnpm backup
 
-4. **Proxy Host Ekleyin:**
-   - Domain: `yourdomain.com`
-   - Forward Hostname: `parselmonitor-frontend`
-   - Forward Port: `3000`
-   - SSL: Request Let's Encrypt Certificate ✅
+# Birim testleri
+pnpm test
 
-5. **Test:**
-```bash
-curl https://yourdomain.com
-```
+# E2E testleri (Playwright)
+pnpm test:e2e
 
----
-
-## 📖 Kullanım
-
-### İlk Giriş
-1. Ana sayfada kayıt olun veya giriş yapın
-2. Dashboard'da genel istatistikleri görün
-3. "Yeni Parsel Ekle" butonuyla ilk parseli oluşturun
-
-### Parsel Ekleme
-1. **Parsel Bilgileri:** Ada, parsel, şehir, ilçe, mahalle
-2. **İmar Durumu:** KAKS, TAKS, kat adedi (opsiyonel)
-3. **Görseller:** Drag & drop ile yükleyin
-4. **Dokümanlar:** İlgili evrakları ekleyin
-
-### Fizibilite Analizi
-1. Parsel detay sayfasına gidin
-2. "Müteahhit Hesabı (Kat Karşılığı)" bölümünü genişletin
-3. Parametreleri girin:
-   - Arsa m²
-   - Emsal (KAKS)
-   - Kat karşılığı oranı (örn: 0.50 = %50)
-   - Daire brütü
-   - İnşaat maliyeti/m²
-   - Satış fiyatı/m²
-4. "Hesapla" butonuna tıklayın
-5. Detaylı raporu görüntüleyin:
-   - Fiziksel özet
-   - Finansal tablo
-   - Şerefiye analizi
-   - Nakit akış simülasyonu
-
-### CRM Yönetimi
-1. **Pipeline View:** Satış aşamalarını görüntüleyin
-2. **Drag & Drop:** Kartları aşamalar arasında sürükleyin
-3. **Hot Leads:** Yüksek değerli fırsatları takip edin
-4. **Kanban Board:** Organize görünüm
-
----
-
-## 🔧 API Endpoints
-
-### Frontend (Next.js API Routes)
-- `GET /api/parcels` - Tüm parselleri listele
-- `POST /api/parcels` - Yeni parsel ekle
-- `GET /api/parcels/[id]` - Parsel detayları
-- `PATCH /api/parcels/[id]` - Parsel güncelle
-- `DELETE /api/parcels/[id]` - Parsel sil
-- `GET /api/analytics/kpis` - Dashboard KPI'lar
-- `GET /api/analytics/pipeline` - Pipeline verileri
-- `GET /api/health` - Health check
-
-### Backend (FastAPI)
-- `GET /health` - Health check
-- `POST /calculate/basic` - Basit hesaplama (alan x emsal)
-- `POST /calculate/strict` - Kat karşılığı analizi
-- `GET /docs` - Swagger API documentation
-
----
-
-## 📁 Proje Yapısı
-
-```
-projeagent/
-├── app/                      # Next.js app directory
-│   ├── api/                  # API routes
-│   ├── parcels/              # Parsel sayfaları
-│   ├── pipeline/             # CRM pipeline
-│   ├── map/                  # Harita görünümü
-│   └── kanban/               # Kanban board
-├── components/               # React komponenler
-│   ├── AddParcelModal.tsx
-│   ├── FeasibilitySection.tsx
-│   ├── ProcessTimeline.tsx
-│   └── ...
-├── lib/                      # Utilities
-│   └── logger.ts
-├── prisma/                   # Database schema
-│   └── schema.prisma
-├── backend/                  # FastAPI backend
-│   └── app/
-│       ├── main.py           # FastAPI app
-│       └── calculator.py     # Fizibilite engine
-├── public/                   # Static assets
-├── docker-compose.yml        # Docker orchestration
-├── Dockerfile                # Frontend container
-├── backend/Dockerfile        # Backend container
-└── setup.sh                  # Quick setup script
+# Kapsam raporu
+pnpm test:coverage
 ```
 
 ---
 
-## 🐳 Docker Configuration
+## Lisans
 
-### Container Names
-- **Frontend:** `parselmonitor-frontend`
-- **Backend:** `parselmonitor-backend`
-
-### Networks
-- **Internal:** `projeagent_parselmonitor-network`
-- **Nginx Integration:** Manually connect nginx to internal network
-
-### Volumes
-- `node_modules` - Frontend dependencies (persistent)
-
-### Health Checks
-- Frontend: `curl http://localhost:3000/api/health`
-- Backend: `curl http://localhost:8000/health`
-
----
-
-## 🔒 Security Best Practices
-
-### ✅ Implemented
-- [x] Environment-based secrets (no hardcoded credentials)
-- [x] CORS whitelist (not wildcard)
-- [x] Bcrypt password hashing
-- [x] NextAuth.js session management
-- [x] Health check endpoints
-- [x] Docker container isolation
-
-### 🎯 Recommended for Production
-- [ ] Rate limiting on API endpoints
-- [ ] Security headers (CSP, X-Frame-Options)
-- [ ] PostgreSQL database (instead of SQLite)
-- [ ] Regular backup automation
-- [ ] SSL/TLS encryption (via Nginx Proxy Manager)
-- [ ] Monitoring & logging (e.g., Sentry)
-
----
-
-## 📊 Performance
-
-### Build Time
-- **Frontend:** ~2-3 minutes
-- **Backend:** ~30 seconds (minimal dependencies)
-- **Total Docker Build:** ~3-4 minutes
-
-### Bundle Size
-- **Frontend:** ~400 KB (gzipped)
-- **Backend Image:** ~150 MB
-
-### Response Time
-- **API Average:** <100ms
-- **Page Load:** <1s (after initial load)
-
----
-
-## 🐛 Troubleshooting
-
-### Docker 502 Bad Gateway
-```bash
-# Nginx container'ını ParselMonitor network'üne bağlayın
-docker network connect projeagent_parselmonitor-network nginx-proxy-manager
-```
-
-### Database Migration Errors
-```bash
-# Prisma client'ı yeniden generate edin
-npx prisma generate
-npx prisma db push
-```
-
-### Port Already in Use
-```bash
-# Çakışan process'i bulun ve durdurun
-lsof -ti:3000 | xargs kill -9  # Frontend
-lsof -ti:8000 | xargs kill -9  # Backend
-```
-
-### Build Fails (Disk Space)
-```bash
-# Docker cache'i temizleyin
-docker system prune -a --volumes -f
-```
-
----
-
-## 🗺️ Roadmap
-
-### v1.1.0 (Planned)
-- [ ] PostgreSQL migration guide
-- [ ] Advanced filtering & search
-- [ ] Email notifications
-- [ ] Export to Excel/CSV
-
-### v1.2.0 (Future)
-- [ ] Multi-language support (EN, TR)
-- [ ] Mobile app (React Native)
-- [ ] AI-powered price predictions
-- [ ] Integration with Turkish Land Registry API
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 👨‍💻 Developer
-
-**Developed by:** Altan Barış Cömert  
-**GitHub:** [@meqhisto](https://github.com/meqhisto)  
-**Version:** 1.0.1  
-**Last Updated:** December 2024
-
----
-
-## 📞 Support
-
-For issues and questions:
-- **GitHub Issues:** [Create an issue](https://github.com/meqhisto/projeagent/issues)
-- **Documentation:** See `/docs` folder (coming soon)
-
----
-
-**⭐ Star this repository** if you find it useful!
-
-Built with ❤️ using Next.js, FastAPI, and Docker.
+Bu proje özel kullanım içindir.
