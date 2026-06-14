@@ -1,5 +1,11 @@
+// Import necessary modules at the top if not already present
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const prisma = new PrismaClient();
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     secret: process.env.NEXTAUTH_SECRET,
@@ -11,27 +17,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
             async authorize(credentials) {
                 console.log("Authorize called with:", credentials?.email);
-                if (!credentials?.email || !credentials?.password) {
-                    return null;
+
+                const parsedCredentials = z
+                    .object({ email: z.string().email(), password: z.string().min(6) })
+                    .safeParse(credentials);
+
+                if (parsedCredentials.success) {
+                    const { email, password } = parsedCredentials.data;
+                    const user = await prisma.user.findUnique({ where: { email } });
+
+                    if (!user) {
+                        console.log("User not found during authorization.");
+                        return null;
+                    }
+
+                    const passwordsMatch = await bcrypt.compare(password, user.password);
+                    if (passwordsMatch) {
+                        console.log("Password verified successfully.");
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            role: user.role,
+                        };
+                    }
+                    console.log("Password verification failed.");
+                } else {
+                    console.log("Invalid credentials format.");
                 }
 
-                // Call API endpoint for password verification
-                console.log("Fetching verify endpoint...");
-                const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/verify`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: credentials.email,
-                        password: credentials.password,
-                    }),
-                });
-
-                if (!res.ok) {
-                    return null;
-                }
-
-                const user = await res.json();
-                return user;
+                return null;
             },
         }),
     ],
