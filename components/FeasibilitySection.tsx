@@ -116,7 +116,7 @@ export default function FeasibilitySection({
 
         setLoading(true);
         try {
-            const res = await fetch("/api/proxy/calculate/strict", {
+            const res = await fetch("/api/calculate/strict", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

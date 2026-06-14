@@ -108,6 +108,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                                                     ? "bg-[#0071e3]/10 text-[#0071e3]"
                                                     : "text-[#1d1d1f] hover:bg-black/[0.04]"
                                             )}
+                                            aria-current={isActive ? "page" : undefined}
                                         >
                                             <Icon className={clsx("h-[18px] w-[18px]", isActive ? "text-[#0071e3]" : "text-[#86868b]")} />
                                             <span>{item.name}</span>
@@ -163,8 +164,8 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                             </div>
                             <button
                                 onClick={handleSignOut}
-                                className="p-2 text-[#86868b] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10 rounded-lg transition-all"
-                                title="Çıkış Yap"
+                                className="p-2 text-[#6e6e73] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10 rounded-lg transition-colors"
+                                aria-label="Çıkış Yap"
                             >
                                 <LogOut className="h-4 w-4" />
                             </button>

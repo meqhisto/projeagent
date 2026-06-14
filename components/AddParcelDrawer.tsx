@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { X, Upload, Check, AlertCircle, Loader2, FileJson, FormInput, Tag, Folder } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { X, Upload, Check, AlertCircle, Loader2, FileJson, FormInput, DatabaseZap, ChevronDown } from "lucide-react";
 import { createNotification } from "@/lib/notifications";
 import { useToast } from "@/components/ui/Toast";
 import { PARCEL_CATEGORIES } from "@/lib/validations";
 import clsx from "clsx";
+
+interface TkgmItem { id: number; text: string; }
+
+const IL_LIST: TkgmItem[] = [{"text":"Adana","id":23},{"text":"Adıyaman","id":24},{"text":"Afyonkarahisar","id":25},{"text":"Ağrı","id":26},{"text":"Amasya","id":27},{"text":"Ankara","id":28},{"text":"Antalya","id":29},{"text":"Artvin","id":30},{"text":"Aydın","id":31},{"text":"Balıkesir","id":32},{"text":"Bilecik","id":33},{"text":"Bingöl","id":34},{"text":"Bitlis","id":35},{"text":"Bolu","id":36},{"text":"Burdur","id":37},{"text":"Bursa","id":38},{"text":"Çanakkale","id":39},{"text":"Çankırı","id":40},{"text":"Çorum","id":41},{"text":"Denizli","id":42},{"text":"Diyarbakır","id":43},{"text":"Edirne","id":44},{"text":"Elazığ","id":45},{"text":"Erzincan","id":46},{"text":"Erzurum","id":47},{"text":"Eskişehir","id":48},{"text":"Gaziantep","id":49},{"text":"Giresun","id":50},{"text":"Gümüşhane","id":51},{"text":"Hakkari","id":52},{"text":"Hatay","id":53},{"text":"Isparta","id":54},{"text":"Mersin","id":55},{"text":"İstanbul","id":56},{"text":"İzmir","id":57},{"text":"Kars","id":58},{"text":"Kastamonu","id":59},{"text":"Kayseri","id":60},{"text":"Kırklareli","id":61},{"text":"Kırşehir","id":62},{"text":"Kocaeli","id":63},{"text":"Konya","id":64},{"text":"Kütahya","id":65},{"text":"Malatya","id":66},{"text":"Manisa","id":67},{"text":"Kahramanmaraş","id":68},{"text":"Mardin","id":69},{"text":"Muğla","id":70},{"text":"Muş","id":71},{"text":"Nevşehir","id":72},{"text":"Niğde","id":73},{"text":"Ordu","id":74},{"text":"Rize","id":75},{"text":"Sakarya","id":76},{"text":"Samsun","id":77},{"text":"Siirt","id":78},{"text":"Sinop","id":79},{"text":"Sivas","id":80},{"text":"Tekirdağ","id":81},{"text":"Tokat","id":82},{"text":"Trabzon","id":83},{"text":"Tunceli","id":84},{"text":"Şanlıurfa","id":85},{"text":"Uşak","id":86},{"text":"Van","id":87},{"text":"Yozgat","id":88},{"text":"Zonguldak","id":89},{"text":"Aksaray","id":90},{"text":"Bayburt","id":91},{"text":"Karaman","id":92},{"text":"Kırıkkale","id":93},{"text":"Batman","id":94},{"text":"Şırnak","id":95},{"text":"Bartın","id":96},{"text":"Ardahan","id":97},{"text":"Iğdır","id":98},{"text":"Yalova","id":99},{"text":"Karabük","id":100},{"text":"Kilis","id":101},{"text":"Osmaniye","id":102},{"text":"Düzce","id":103}].sort((a,b)=>a.text.localeCompare(b.text,"tr"));
 
 interface AddParcelModalProps {
     isOpen: boolean;
@@ -47,6 +51,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
     const [mode, setMode] = useState<InputMode>("manual");
     const [jsonInput, setJsonInput] = useState("");
     const [loading, setLoading] = useState(false);
+    const [tkgmLoading, setTkgmLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -76,6 +81,14 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
         category: "UNCATEGORIZED",
         tags: "",
     });
+    const [tkgmIlId, setTkgmIlId] = useState<number | null>(null);
+    const [tkgmIlceId, setTkgmIlceId] = useState<number | null>(null);
+    const [tkgmMahalleId, setTkgmMahalleId] = useState<number | null>(null);
+    const [tkgmGeometry, setTkgmGeometry] = useState<string | null>(null);
+    const [ilceList, setIlceList] = useState<TkgmItem[]>([]);
+    const [mahalleList, setMahalleList] = useState<TkgmItem[]>([]);
+    const [ilceLoading, setIlceLoading] = useState(false);
+    const [mahalleLoading, setMahalleLoading] = useState(false);
 
     if (!isOpen && !isVisible) return null;
 
@@ -140,6 +153,78 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
         return true;
     };
 
+    const canFetchTKGM = tkgmMahalleId != null && formData.island.trim() && formData.parsel.trim();
+
+    const onIlChange = async (ilId: number, ilText: string) => {
+        setTkgmIlId(ilId);
+        setTkgmIlceId(null);
+        setTkgmMahalleId(null);
+        setIlceList([]);
+        setMahalleList([]);
+        setFormData(prev => ({ ...prev, city: ilText, district: "", neighborhood: "" }));
+        setIlceLoading(true);
+        try {
+            const res = await fetch(`/api/tkgm/ilceler/${ilId}`);
+            const data = await res.json();
+            setIlceList(Array.isArray(data) ? data : []);
+        } catch { setIlceList([]); }
+        finally { setIlceLoading(false); }
+    };
+
+    const onIlceChange = async (ilceId: number, ilceText: string) => {
+        setTkgmIlceId(ilceId);
+        setTkgmMahalleId(null);
+        setMahalleList([]);
+        setFormData(prev => ({ ...prev, district: ilceText, neighborhood: "" }));
+        setMahalleLoading(true);
+        try {
+            const res = await fetch(`/api/tkgm/mahalleler/${ilceId}`);
+            const data = await res.json();
+            setMahalleList(Array.isArray(data) ? data : []);
+        } catch { setMahalleList([]); }
+        finally { setMahalleLoading(false); }
+    };
+
+    const onMahalleChange = (mahalleId: number, mahalleText: string) => {
+        setTkgmMahalleId(mahalleId);
+        setFormData(prev => ({ ...prev, neighborhood: mahalleText }));
+    };
+
+    const fetchFromTKGM = async () => {
+        if (!tkgmMahalleId) return;
+        setTkgmLoading(true);
+        setError(null);
+        try {
+            const params = new URLSearchParams({
+                mahalleId: String(tkgmMahalleId),
+                ada: formData.island.trim(),
+                parsel: formData.parsel.trim(),
+            });
+
+            const res = await fetch(`/api/tkgm/lookup?${params}`);
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || "TKGM sorgusu başarısız");
+
+            setFormData(prev => ({
+                ...prev,
+                area: data.area != null ? String(data.area) : prev.area,
+                latitude: data.latitude != null ? String(data.latitude) : prev.latitude,
+                longitude: data.longitude != null ? String(data.longitude) : prev.longitude,
+            }));
+            setTkgmGeometry(data.geometry ?? null);
+
+            const nitelik = data.nitelik ? ` (${data.nitelik})` : "";
+            const geoNote = data.geometry ? " Geometri kaydedildi." : "";
+            toast.success("TKGM Verisi Alındı", `Alan ve koordinatlar dolduruldu${nitelik}.${geoNote}`);
+        } catch (err: any) {
+            setError(err.message);
+            toast.error("TKGM Hatası", err.message);
+        } finally {
+            setTkgmLoading(false);
+        }
+    };
+
     const handleManualSubmit = async () => {
         if (!validateManualForm()) return;
 
@@ -159,6 +244,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 longitude: formData.longitude ? parseFloat(formData.longitude) : null,
                 category: formData.category || "UNCATEGORIZED",
                 tags: formData.tags.trim() || null,
+                geometry: tkgmGeometry ?? null,
             };
 
             const res = await fetch("/api/parcels", {
@@ -194,6 +280,8 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 category: "UNCATEGORIZED",
                 tags: "",
             });
+            setTkgmIlId(null); setTkgmIlceId(null); setTkgmMahalleId(null); setTkgmGeometry(null);
+            setIlceList([]); setMahalleList([]);
 
             onSuccess();
             onClose();
@@ -395,34 +483,60 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1.5">İl</label>
-                                        <input
-                                            type="text"
-                                            value={formData.city}
-                                            onChange={(e) => handleFormChange("city", e.target.value)}
-                                            placeholder="İstanbul"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
-                                        />
+                                        <div className="relative">
+                                            <select
+                                                value={tkgmIlId ?? ""}
+                                                onChange={e => {
+                                                    const id = Number(e.target.value);
+                                                    const il = IL_LIST.find(i => i.id === id);
+                                                    if (il) onIlChange(il.id, il.text);
+                                                }}
+                                                className="w-full appearance-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50 pr-8"
+                                            >
+                                                <option value="">İl seçin</option>
+                                                {IL_LIST.map(il => <option key={il.id} value={il.id}>{il.text}</option>)}
+                                            </select>
+                                            <ChevronDown className="absolute right-2 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1.5">İlçe</label>
-                                        <input
-                                            type="text"
-                                            value={formData.district}
-                                            onChange={(e) => handleFormChange("district", e.target.value)}
-                                            placeholder="Kadıköy"
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
-                                        />
+                                        <div className="relative">
+                                            <select
+                                                value={tkgmIlceId ?? ""}
+                                                onChange={e => {
+                                                    const id = Number(e.target.value);
+                                                    const ilce = ilceList.find(i => i.id === id);
+                                                    if (ilce) onIlceChange(ilce.id, ilce.text);
+                                                }}
+                                                disabled={!tkgmIlId || ilceLoading}
+                                                className="w-full appearance-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50 pr-8 disabled:opacity-50"
+                                            >
+                                                <option value="">{ilceLoading ? "Yükleniyor…" : "İlçe seçin"}</option>
+                                                {ilceList.map(i => <option key={i.id} value={i.id}>{i.text}</option>)}
+                                            </select>
+                                            {ilceLoading ? <Loader2 className="absolute right-2 top-3 h-4 w-4 text-slate-400 animate-spin" /> : <ChevronDown className="absolute right-2 top-3 h-4 w-4 text-slate-400 pointer-events-none" />}
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1.5">Mahalle</label>
-                                    <input
-                                        type="text"
-                                        value={formData.neighborhood}
-                                        onChange={(e) => handleFormChange("neighborhood", e.target.value)}
-                                        placeholder="Moda (Opsiyonel)"
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
-                                    />
+                                    <div className="relative">
+                                        <select
+                                            value={tkgmMahalleId ?? ""}
+                                            onChange={e => {
+                                                const id = Number(e.target.value);
+                                                const m = mahalleList.find(i => i.id === id);
+                                                if (m) onMahalleChange(m.id, m.text);
+                                            }}
+                                            disabled={!tkgmIlceId || mahalleLoading}
+                                            className="w-full appearance-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50 pr-8 disabled:opacity-50"
+                                        >
+                                            <option value="">{mahalleLoading ? "Yükleniyor…" : "Mahalle seçin"}</option>
+                                            {mahalleList.map(m => <option key={m.id} value={m.id}>{m.text}</option>)}
+                                        </select>
+                                        {mahalleLoading ? <Loader2 className="absolute right-2 top-3 h-4 w-4 text-slate-400 animate-spin" /> : <ChevronDown className="absolute right-2 top-3 h-4 w-4 text-slate-400 pointer-events-none" />}
+                                    </div>
                                 </div>
                             </div>
 
@@ -451,6 +565,30 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                                             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors bg-slate-50/50"
                                         />
                                     </div>
+                                </div>
+                                <div className="rounded-xl border border-[#0071e3]/20 bg-[#0071e3]/5 p-3 space-y-2.5">
+                                    <p className="text-xs font-semibold text-[#0071e3] flex items-center gap-1.5">
+                                        <DatabaseZap className="h-3.5 w-3.5" />
+                                        TKGM'den Otomatik Doldur
+                                    </p>
+                                    {tkgmMahalleId ? (
+                                        <p className="text-[11px] text-[#0071e3]/80 bg-[#0071e3]/10 rounded-lg px-2.5 py-1.5">
+                                            Mahalle seçildi. Ada ve Parsel numarasını girin, ardından sorgulayın.
+                                        </p>
+                                    ) : (
+                                        <p className="text-[11px] text-slate-500">
+                                            Yukarıdan İl → İlçe → Mahalle seçin, ardından ada/parsel girerek alan ve koordinatları otomatik doldurun.
+                                        </p>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={fetchFromTKGM}
+                                        disabled={!canFetchTKGM || tkgmLoading}
+                                        className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#0071e3] px-3 py-2 text-xs font-medium text-white hover:bg-[#0077ed] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        {tkgmLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <DatabaseZap className="h-3.5 w-3.5" />}
+                                        {tkgmLoading ? "Sorgulanıyor..." : "Alan / Koordinat Getir"}
+                                    </button>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1.5">Alan (m²)</label>
