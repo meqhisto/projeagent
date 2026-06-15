@@ -9,6 +9,7 @@ export interface ImarSorguSonucu {
   kullanimAmaci?: string | null;
   yapiNizami?: string | null;
   notlar?: string | null;
+  planGorselUrl?: string | null; // URL of the imar plan map image
   sourceUrl: string;
   hammadde?: Record<string, unknown>;
 }

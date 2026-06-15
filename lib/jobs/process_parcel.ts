@@ -30,6 +30,21 @@ export async function processParcelInBackground(parcelId: number) {
 
         if (imarData) {
             console.log(`[process_parcel] İmar verisi alındı: ${parcel.city} - ${parcel.island}/${parcel.parsel}`);
+
+            // Save imar plan image if URL was found in the detail page
+            if (imarData.planGorselUrl) {
+                await prisma.image.upsert({
+                    where: { parcelId_type: { parcelId: parcel.id, type: "IMAR_PLAN" } } as never,
+                    create: { parcelId: parcel.id, url: imarData.planGorselUrl, type: "IMAR_PLAN", source: "AUTO" },
+                    update: { url: imarData.planGorselUrl },
+                }).catch(() => {
+                    // upsert may fail if unique constraint doesn't exist — fall back to create
+                    prisma.image.create({
+                        data: { parcelId: parcel.id, url: imarData.planGorselUrl!, type: "IMAR_PLAN", source: "AUTO" }
+                    }).catch(console.warn);
+                });
+            }
+
             const existingZoning = await prisma.zoningInfo.findUnique({ where: { parcelId: parcel.id } });
 
             if (existingZoning) {
