@@ -47,17 +47,21 @@ export async function processParcelInBackground(parcelId: number) {
 
             const existingZoning = await prisma.zoningInfo.findUnique({ where: { parcelId: parcel.id } });
 
+            const notesLines = [
+                imarData.mahalleAdi ? `Mahalle: ${imarData.mahalleAdi}` : null,
+                imarData.yapiNizami ? `Yapı Nizamı: ${imarData.yapiNizami}` : null,
+                imarData.notlar ? `Not: ${imarData.notlar}` : null,
+            ].filter(Boolean).join("\n") || null;
+
             if (existingZoning) {
                 await prisma.zoningInfo.update({
                     where: { parcelId: parcel.id },
                     data: {
                         ks: imarData.kaks ?? existingZoning.ks,
                         taks: imarData.taks ?? existingZoning.taks,
-                        notes: [
-                            imarData.mahalleAdi ? `Mahalle: ${imarData.mahalleAdi}` : null,
-                            imarData.kullanimAmaci ? `Kullanım: ${imarData.kullanimAmaci}` : null,
-                            imarData.yapiNizami ? `Yapı Nizamı: ${imarData.yapiNizami}` : null,
-                        ].filter(Boolean).join("\n") || existingZoning.notes,
+                        maxHeight: imarData.hmax ?? existingZoning.maxHeight,
+                        zoningType: imarData.kullanimAmaci ?? existingZoning.zoningType,
+                        notes: notesLines ?? existingZoning.notes,
                         sourceUrl: imarData.sourceUrl,
                     }
                 });
@@ -67,11 +71,9 @@ export async function processParcelInBackground(parcelId: number) {
                         parcelId: parcel.id,
                         ks: imarData.kaks ?? null,
                         taks: imarData.taks ?? null,
-                        notes: [
-                            imarData.mahalleAdi ? `Mahalle: ${imarData.mahalleAdi}` : null,
-                            imarData.kullanimAmaci ? `Kullanım: ${imarData.kullanimAmaci}` : null,
-                            imarData.yapiNizami ? `Yapı Nizamı: ${imarData.yapiNizami}` : null,
-                        ].filter(Boolean).join("\n") || null,
+                        maxHeight: imarData.hmax ?? null,
+                        zoningType: imarData.kullanimAmaci ?? null,
+                        notes: notesLines,
                         sourceUrl: imarData.sourceUrl,
                     }
                 });

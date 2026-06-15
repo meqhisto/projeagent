@@ -78,6 +78,15 @@ export default function ParcelDetailPage() {
         }
     }, [params.id, fetchParcel]);
 
+    // Poll while parcel is being researched (imar/zoning background job)
+    useEffect(() => {
+        if (parcel?.status !== "RESEARCHING") return;
+        const timer = setInterval(() => {
+            fetchParcel();
+        }, 4000);
+        return () => clearInterval(timer);
+    }, [parcel?.status, fetchParcel]);
+
     const handleStageChange = async (newStage: string) => {
         // ... (stage logic same)
         setProcessStage(newStage);
@@ -347,7 +356,13 @@ export default function ParcelDetailPage() {
                                         <div className="flex items-center justify-between mb-4">
                                             <h3 className="font-semibold text-gray-900 flex items-center">
                                                 <Info className="mr-2 h-4 w-4 text-[#0071e3]" />
-                                                Manuel İmar Verisi
+                                                İmar Bilgileri
+                                                {parcel.status === "RESEARCHING" && (
+                                                    <span className="ml-2 flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                        Araştırılıyor
+                                                    </span>
+                                                )}
                                             </h3>
                                             <button
                                                 onClick={() => setIsZoningModalOpen(true)}
@@ -356,6 +371,13 @@ export default function ParcelDetailPage() {
                                                 Düzenle
                                             </button>
                                         </div>
+
+                                        {parcel.status === "RESEARCHING" && !parcel.zoning && (
+                                            <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-100 text-xs text-amber-700 mb-3">
+                                                <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+                                                Belediye imar sitesinden veriler çekiliyor, birkaç saniye bekleyin…
+                                            </div>
+                                        )}
 
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
@@ -380,6 +402,17 @@ export default function ParcelDetailPage() {
                                                 <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs text-yellow-800 italic">
                                                     "{parcel.zoning.notes}"
                                                 </div>
+                                            )}
+                                            {parcel.zoning?.sourceUrl && (
+                                                <a
+                                                    href={parcel.zoning.sourceUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 text-[10px] text-[#0071e3] hover:underline mt-1"
+                                                >
+                                                    <ExternalLink className="h-3 w-3" />
+                                                    Kaynak: Belediye İmar Servisi
+                                                </a>
                                             )}
                                         </div>
                                     </div>

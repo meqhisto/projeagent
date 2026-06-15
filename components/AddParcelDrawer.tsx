@@ -264,7 +264,7 @@ export default function AddParcelDrawer({ isOpen, onClose, onSuccess }: AddParce
                 message: `${formData.city} - ${formData.district} parseli başarıyla eklendi ve araştırma başlatıldı.`,
             });
 
-            toast.success("Parsel Eklendi", `${formData.city} - ${formData.district} parseli başarıyla eklendi.`);
+            toast.success("Parsel Eklendi", `${formData.city} - ${formData.district} parseli eklendi. İmar durumu araştırılıyor…`);
 
             // Reset form
             setFormData({
