@@ -1,5 +1,6 @@
 import { fetchVisualData } from "@/lib/agents/visual_fetcher";
 import { researchZoningInfo } from "@/lib/agents/zoning_researcher";
+import { fetchImarDurumu } from "@/lib/agents/imar/registry";
 import { prisma } from "@/lib/prisma";
 
 export async function processParcelInBackground(parcelId: number) {
@@ -17,29 +18,71 @@ export async function processParcelInBackground(parcelId: number) {
             await prisma.image.create({
                 data: {
                     parcelId: parcel.id,
-                    url: visualData.imageUrl, // In a real app, upload this to S3/Cloudinary. Here we use base64 data URI temporarily or assuming local blob support if small enough.
+                    url: visualData.imageUrl,
                     type: "MAP_SCREENSHOT"
                 }
             });
         }
 
-        // 2. Research Zoning (Emsal)
-        console.log("Researching zoning info...");
-        const zoningData = await researchZoningInfo(parcel.city, parcel.district, parcel.island, parcel.parsel);
+        // 2. Belediye WebGIS'ten imar durumu çek (desteklenen şehirler için)
+        console.log("Belediye WebGIS'ten imar durumu sorgulanıyor...");
+        const imarData = await fetchImarDurumu(parcel.city, parcel.island, parcel.parsel);
 
-        if (zoningData) {
-            await prisma.zoningInfo.create({
-                data: {
-                    parcelId: parcel.id,
-                    ks: zoningData.ks,
-                    taks: zoningData.taks,
-                    notes: zoningData.notes,
-                    sourceUrl: zoningData.sourceUrl
+        if (imarData) {
+            console.log(`[process_parcel] İmar verisi alındı: ${parcel.city} - ${parcel.island}/${parcel.parsel}`);
+            const existingZoning = await prisma.zoningInfo.findUnique({ where: { parcelId: parcel.id } });
+
+            if (existingZoning) {
+                await prisma.zoningInfo.update({
+                    where: { parcelId: parcel.id },
+                    data: {
+                        ks: imarData.kaks ?? existingZoning.ks,
+                        taks: imarData.taks ?? existingZoning.taks,
+                        notes: [
+                            imarData.mahalleAdi ? `Mahalle: ${imarData.mahalleAdi}` : null,
+                            imarData.kullanimAmaci ? `Kullanım: ${imarData.kullanimAmaci}` : null,
+                            imarData.yapiNizami ? `Yapı Nizamı: ${imarData.yapiNizami}` : null,
+                        ].filter(Boolean).join("\n") || existingZoning.notes,
+                        sourceUrl: imarData.sourceUrl,
+                    }
+                });
+            } else {
+                await prisma.zoningInfo.create({
+                    data: {
+                        parcelId: parcel.id,
+                        ks: imarData.kaks ?? null,
+                        taks: imarData.taks ?? null,
+                        notes: [
+                            imarData.mahalleAdi ? `Mahalle: ${imarData.mahalleAdi}` : null,
+                            imarData.kullanimAmaci ? `Kullanım: ${imarData.kullanimAmaci}` : null,
+                            imarData.yapiNizami ? `Yapı Nizamı: ${imarData.yapiNizami}` : null,
+                        ].filter(Boolean).join("\n") || null,
+                        sourceUrl: imarData.sourceUrl,
+                    }
+                });
+            }
+        } else {
+            // 3. Desteklenmeyen şehir — Google araması ile dene
+            console.log("Belediye servisi yok, Google araması deneniyor...");
+            const zoningData = await researchZoningInfo(parcel.city, parcel.district, parcel.island, parcel.parsel);
+
+            if (zoningData) {
+                const existingZoning = await prisma.zoningInfo.findUnique({ where: { parcelId: parcel.id } });
+                if (!existingZoning) {
+                    await prisma.zoningInfo.create({
+                        data: {
+                            parcelId: parcel.id,
+                            ks: zoningData.ks,
+                            taks: zoningData.taks,
+                            notes: zoningData.notes,
+                            sourceUrl: zoningData.sourceUrl
+                        }
+                    });
                 }
-            });
+            }
         }
 
-        // 3. Update Status
+        // 4. Update Status
         await prisma.parcel.update({
             where: { id: parcel.id },
             data: { status: "COMPLETED" }
@@ -49,6 +92,5 @@ export async function processParcelInBackground(parcelId: number) {
 
     } catch (error) {
         console.error(`Error processing parcel ${parcelId}:`, error);
-        // Optionally update status to FAILED
     }
 }
