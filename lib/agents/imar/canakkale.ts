@@ -18,15 +18,12 @@ async function getNonce(): Promise<string | null> {
     headers: HEADERS_BASE,
     timeout: 10_000,
   });
-
   const setCookieHeader = res.headers["set-cookie"];
   if (!setCookieHeader) return null;
-
   const nonceCookie = setCookieHeader.find((c: string) =>
     c.startsWith("svc_nonce=")
   );
   if (!nonceCookie) return null;
-
   return nonceCookie.split("=")[1].split(";")[0];
 }
 
@@ -35,7 +32,6 @@ async function sorguAdaParsel(
   nonce: string
 ): Promise<Record<string, unknown>[] | null> {
   const url = `${SVC_URL}?type=adaparsel&adaparsel=${encodeURIComponent(adaparsel)}`;
-
   const res = await axios.get(url, {
     headers: {
       ...HEADERS_BASE,
@@ -49,7 +45,6 @@ async function sorguAdaParsel(
     },
     timeout: 15_000,
   });
-
   if (!Array.isArray(res.data) || res.data.length === 0) return null;
   return res.data;
 }
@@ -59,14 +54,15 @@ interface ImarDetay {
   planGorselUrl: string | null;
 }
 
-// Fetches imar.aspx?parselid={objectId}, parses HTML table rows,
-// and extracts the map token for the plan image.
+// Çanakkale WebGIS imar.aspx'i standart <table> değil, div-based custom grid kullanır:
+//   .divTableCellLabel  →  alan adı
+//   .divTableContent    →  değer
+// Ayrıca #htmlOutput içinde tüm çıktı birleşik olarak yer alır.
 async function sorguImarDetay(
   objectId: number,
   nonce: string
 ): Promise<ImarDetay | null> {
   const imarUrl = `${BASE_URL}/imar.aspx?parselid=${objectId}`;
-
   try {
     const res = await axios.get(imarUrl, {
       headers: {
@@ -82,34 +78,43 @@ async function sorguImarDetay(
     const $ = cheerio.load(res.data as string);
     const alanlar: Record<string, string> = {};
 
-    // Extract key-value pairs from all table rows
-    $("table tr").each((_, row) => {
-      const hucre = $(row).find("td");
-      if (hucre.length >= 2) {
-        const anahtar = $(hucre[0]).text().trim().replace(/:$/, "");
-        const deger = $(hucre[1]).text().trim();
-        if (anahtar && deger) {
-          alanlar[anahtar] = deger;
-        }
+    // Primary: div-based table (.divTableCellLabel / .divTableContent)
+    $(".divTableRow").each((_, row) => {
+      const label = $(row).find(".divTableCellLabel").first().text().trim().replace(/:$/, "");
+      const value = $(row).find(".divTableContent").first().text().trim();
+      if (label && value && value !== "-") {
+        alanlar[label] = value;
+      } else if (label && value) {
+        // Keep "-" values too so we know the field exists
+        alanlar[label] = value;
       }
     });
 
-    // Also check definition lists (<dl><dt>/<dd>) used by some municipalities
+    // Fallback: standard <table tr td> (for other municipalities reusing this code)
+    $("table tr").each((_, row) => {
+      const cells = $(row).find("td");
+      if (cells.length >= 2) {
+        const label = $(cells[0]).text().trim().replace(/:$/, "");
+        const value = $(cells[1]).text().trim();
+        if (label && value && !alanlar[label]) alanlar[label] = value;
+      }
+    });
+
+    // dl/dt/dd fallback
     $("dl").each((_, dl) => {
       const dts = $(dl).find("dt");
       const dds = $(dl).find("dd");
       dts.each((i, dt) => {
-        const anahtar = $(dt).text().trim().replace(/:$/, "");
-        const deger = $(dds[i])?.text().trim() ?? "";
-        if (anahtar && deger) alanlar[anahtar] = deger;
+        const label = $(dt).text().trim().replace(/:$/, "");
+        const value = $(dds[i])?.text().trim() ?? "";
+        if (label && value && !alanlar[label]) alanlar[label] = value;
       });
     });
 
-    // Extract map token from script tags or data attributes
-    // Pattern: mapservice.aspx?token=<uuid>
+    // Map token from script/src attributes
     let planGorselUrl: string | null = null;
     const html = res.data as string;
-    const tokenMatch = html.match(/mapservice\.aspx\?token=([a-f0-9-]{36})/i);
+    const tokenMatch = html.match(/mapservice\.aspx\?token=([a-f0-9-]{30,40})/i);
     if (tokenMatch) {
       planGorselUrl = `${MAP_SVC_URL}?token=${tokenMatch[1]}&maptype=plan&level=0&bbox=`;
     }
@@ -121,17 +126,38 @@ async function sorguImarDetay(
   }
 }
 
+// Sayısal değer çevirir.
+// "24.50" → 24.5
+// "- (2.40)" → 2.40  (parantez içindeki ikincil değer)
+// "-" → null
 function parseNumber(val: string | undefined): number | null {
-  if (!val) return null;
-  const n = parseFloat(val.replace(",", "."));
-  return isNaN(n) ? null : n;
+  if (!val || val.trim() === "-") return null;
+  const direct = parseFloat(val.replace(",", "."));
+  if (!isNaN(direct)) return direct;
+  // Parenthesized secondary value: "- (2.40)"
+  const m = val.match(/\(\s*([0-9]+[.,][0-9]*)\s*\)/);
+  if (m) return parseFloat(m[1].replace(",", "."));
+  return null;
 }
 
-// Tries multiple Turkish field name variants for a given concept.
+// Alan adına göre alanlar dict'inden değer arar (büyük/küçük harf ve Türkçe duyarsız).
 function bul(alanlar: Record<string, string>, ...anahtarlar: string[]): string | null {
   for (const k of anahtarlar) {
     for (const [key, val] of Object.entries(alanlar)) {
-      if (key.toLowerCase().includes(k.toLowerCase()) && val) return val;
+      if (key.toLowerCase().includes(k.toLowerCase()) && val && val !== "-") {
+        return val;
+      }
+    }
+  }
+  return null;
+}
+
+// K.A.K.S için özel arama: önce direkt değer, yoksa parantezli form dener.
+function bulKaks(alanlar: Record<string, string>): number | null {
+  for (const [key, val] of Object.entries(alanlar)) {
+    if (/k\.?a\.?k\.?s|emsal/i.test(key)) {
+      const parsed = parseNumber(val);
+      if (parsed !== null) return parsed;
     }
   }
   return null;
@@ -176,12 +202,19 @@ export const canakkaleScraper: ImarScraper = {
 
     const { alanlar, planGorselUrl } = detay;
 
-    sonuc.kaks = parseNumber(bul(alanlar, "kaks", "emsal") ?? undefined);
-    sonuc.taks = parseNumber(bul(alanlar, "taks") ?? undefined);
-    sonuc.hmax = parseNumber(bul(alanlar, "hmax", "yükseklik", "yukseklik") ?? undefined);
-    sonuc.kullanimAmaci = bul(alanlar, "kullanım", "kullanim", "imar durumu", "imardurumu", "fonksiyon");
-    sonuc.yapiNizami = bul(alanlar, "yapı nizamı", "yapi nizami", "nizam");
-    sonuc.notlar = bul(alanlar, "not", "açıklama", "aciklama");
+    // Çanakkale WebGIS gerçek alan adları (imar.aspx divTableCellLabel):
+    //   "Bina Yüksekliği"  → Hmax
+    //   "T.A.K.S"          → TAKS
+    //   "K.A.K.S (Emsal)"  → KAKS (değer "-" ise parantez içi 2.40 kullanılır)
+    //   "Fonksiyon"        → Kullanım amacı (Konut Alanı, Ticari Alan, vb.)
+    //   "İnşaat Nizamı"    → Yapı nizamı
+    //   "Açıklama"         → Notlar
+    sonuc.kaks = bulKaks(alanlar);
+    sonuc.taks = parseNumber(bul(alanlar, "T.A.K.S", "taks") ?? undefined);
+    sonuc.hmax = parseNumber(bul(alanlar, "Bina Yüksekliği", "yükseklik", "hmax", "h maks") ?? undefined);
+    sonuc.kullanimAmaci = bul(alanlar, "Fonksiyon", "kullanım amacı", "kullanim amaci", "imar durumu", "fonk");
+    sonuc.yapiNizami = bul(alanlar, "İnşaat Nizamı", "insaat nizami", "yapı nizamı", "yapi nizami", "nizam");
+    sonuc.notlar = bul(alanlar, "Açıklama", "aciklama", "not");
     sonuc.planGorselUrl = planGorselUrl;
     sonuc.hammadde = { ...kayit, ...alanlar };
 
