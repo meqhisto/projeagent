@@ -5,11 +5,15 @@ import { X, Upload, MapPin, Building2, DollarSign, Settings2 } from "lucide-reac
 import {
     PropertyType,
     PropertyStatus,
+    PropertyCrmStage,
     RoomType,
     PropertyTypeLabels,
     PropertyStatusLabels,
+    PropertyCrmStageLabels,
     RoomTypeLabels,
-    PropertyFormData
+    PropertyFormData,
+    KONUT_TYPES,
+    TICARI_TYPES,
 } from "@/types/property";
 
 interface AddPropertyModalProps {
@@ -35,6 +39,7 @@ export default function AddPropertyModal({
         title: "",
         type: "APARTMENT",
         status: "AVAILABLE",
+        crmStage: "LISTING",
         city: "",
         district: "",
         neighborhood: "",
@@ -50,6 +55,13 @@ export default function AddPropertyModal({
         hasElevator: false,
         hasParking: false,
         heatingType: "",
+        bathroomCount: undefined,
+        balconyCount: undefined,
+        isFurnished: false,
+        monthlyDues: undefined,
+        hasOccupancyCertificate: false,
+        usageType: "",
+        commonAreaRatio: undefined,
         purchasePrice: undefined,
         purchaseDate: "",
         currentValue: undefined,
@@ -65,6 +77,7 @@ export default function AddPropertyModal({
                 title: editProperty.title || "",
                 type: editProperty.type || "APARTMENT",
                 status: editProperty.status || "AVAILABLE",
+                crmStage: editProperty.crmStage || "LISTING",
                 city: editProperty.city || "",
                 district: editProperty.district || "",
                 neighborhood: editProperty.neighborhood || "",
@@ -80,6 +93,13 @@ export default function AddPropertyModal({
                 hasElevator: editProperty.hasElevator || false,
                 hasParking: editProperty.hasParking || false,
                 heatingType: editProperty.heatingType || "",
+                bathroomCount: editProperty.bathroomCount || undefined,
+                balconyCount: editProperty.balconyCount || undefined,
+                isFurnished: editProperty.isFurnished || false,
+                monthlyDues: editProperty.monthlyDues || undefined,
+                hasOccupancyCertificate: editProperty.hasOccupancyCertificate || false,
+                usageType: editProperty.usageType || "",
+                commonAreaRatio: editProperty.commonAreaRatio || undefined,
                 purchasePrice: editProperty.purchasePrice || undefined,
                 purchaseDate: editProperty.purchaseDate?.split('T')[0] || "",
                 currentValue: editProperty.currentValue || undefined,
@@ -90,6 +110,9 @@ export default function AddPropertyModal({
             });
         }
     }, [editProperty]);
+
+    const isKonut = KONUT_TYPES.includes(formData.type as PropertyType);
+    const isTicari = TICARI_TYPES.includes(formData.type as PropertyType);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -211,6 +234,19 @@ export default function AddPropertyModal({
                                         className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
                                     >
                                         {Object.entries(PropertyStatusLabels).map(([value, label]) => (
+                                            <option key={value} value={value}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-slate-400 mb-1">CRM Aşaması</label>
+                                    <select
+                                        value={formData.crmStage || "LISTING"}
+                                        onChange={(e) => handleChange('crmStage', e.target.value as PropertyCrmStage)}
+                                        className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
+                                    >
+                                        {Object.entries(PropertyCrmStageLabels).map(([value, label]) => (
                                             <option key={value} value={value}>{label}</option>
                                         ))}
                                     </select>
@@ -409,7 +445,7 @@ export default function AddPropertyModal({
                                     </select>
                                 </div>
 
-                                <div className="col-span-2 flex gap-6">
+                                <div className="col-span-2 flex flex-wrap gap-4">
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input
                                             type="checkbox"
@@ -419,7 +455,6 @@ export default function AddPropertyModal({
                                         />
                                         <span className="text-slate-300">Asansör</span>
                                     </label>
-
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <input
                                             type="checkbox"
@@ -430,6 +465,129 @@ export default function AddPropertyModal({
                                         <span className="text-slate-300">Otopark</span>
                                     </label>
                                 </div>
+
+                                {/* Konut-specific */}
+                                {isKonut && (
+                                    <>
+                                        <div className="col-span-2 pt-2 border-t border-slate-700">
+                                            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3">Konut Özellikleri</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Banyo Sayısı</label>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                value={formData.bathroomCount || ""}
+                                                onChange={(e) => handleChange('bathroomCount', e.target.value ? parseInt(e.target.value) : undefined)}
+                                                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
+                                                placeholder="1"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Balkon Sayısı</label>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                value={formData.balconyCount || ""}
+                                                onChange={(e) => handleChange('balconyCount', e.target.value ? parseInt(e.target.value) : undefined)}
+                                                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
+                                                placeholder="1"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Aylık Aidat (₺)</label>
+                                            <input
+                                                type="number"
+                                                value={formData.monthlyDues || ""}
+                                                onChange={(e) => handleChange('monthlyDues', e.target.value ? parseFloat(e.target.value) : undefined)}
+                                                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
+                                                placeholder="500"
+                                            />
+                                        </div>
+                                        <div className="flex items-end pb-1 gap-4">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isFurnished || false}
+                                                    onChange={(e) => handleChange('isFurnished', e.target.checked)}
+                                                    className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-[#0071e3] focus:ring-[#0071e3]"
+                                                />
+                                                <span className="text-slate-300">Mobilyalı</span>
+                                            </label>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.hasOccupancyCertificate || false}
+                                                    onChange={(e) => handleChange('hasOccupancyCertificate', e.target.checked)}
+                                                    className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-[#0071e3] focus:ring-[#0071e3]"
+                                                />
+                                                <span className="text-slate-300">İskan Belgesi</span>
+                                            </label>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Ticari-specific */}
+                                {isTicari && (
+                                    <>
+                                        <div className="col-span-2 pt-2 border-t border-slate-700">
+                                            <p className="text-xs font-semibold text-orange-400 uppercase tracking-wider mb-3">Ticari Özellikler</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Kullanım Türü</label>
+                                            <select
+                                                value={formData.usageType || ""}
+                                                onChange={(e) => handleChange('usageType', e.target.value)}
+                                                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
+                                            >
+                                                <option value="">Seçiniz</option>
+                                                <option value="Ofis">Ofis</option>
+                                                <option value="Market / Bakkal">Market / Bakkal</option>
+                                                <option value="Restoran / Kafe">Restoran / Kafe</option>
+                                                <option value="Banka / Finans">Banka / Finans</option>
+                                                <option value="Eczane">Eczane</option>
+                                                <option value="Depo / Antrepo">Depo / Antrepo</option>
+                                                <option value="Üretim / Atölye">Üretim / Atölye</option>
+                                                <option value="Showroom">Showroom</option>
+                                                <option value="Diğer">Diğer</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Ortak Alan Oranı (%)</label>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                max={100}
+                                                step={0.1}
+                                                value={formData.commonAreaRatio || ""}
+                                                onChange={(e) => handleChange('commonAreaRatio', e.target.value ? parseFloat(e.target.value) : undefined)}
+                                                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
+                                                placeholder="15"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Aylık Aidat (₺)</label>
+                                            <input
+                                                type="number"
+                                                value={formData.monthlyDues || ""}
+                                                onChange={(e) => handleChange('monthlyDues', e.target.value ? parseFloat(e.target.value) : undefined)}
+                                                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-[#0071e3] focus:outline-none"
+                                                placeholder="2000"
+                                            />
+                                        </div>
+                                        <div className="flex items-end pb-1">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.hasOccupancyCertificate || false}
+                                                    onChange={(e) => handleChange('hasOccupancyCertificate', e.target.checked)}
+                                                    className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-[#0071e3] focus:ring-[#0071e3]"
+                                                />
+                                                <span className="text-slate-300">Yapı Kullanım İzni (YKİ)</span>
+                                            </label>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
 

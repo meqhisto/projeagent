@@ -391,10 +391,23 @@ model Property {
   ownerId Int
   owner   User @relation("OwnedProperties", fields: [ownerId], references: [id])
 
+  // CRM Pipeline
+  crmStage String @default("LISTING") // LISTING, SHOWING, NEGOTIATING, CONTRACT, CLOSED, CANCELLED
+
+  // Konut/Ticari Özel Alanlar
+  bathroomCount           Int?     // Banyo sayısı (konut)
+  balconyCount            Int?     // Balkon sayısı (konut)
+  isFurnished             Boolean  @default(false) // Mobilyalı mı?
+  monthlyDues             Float?   // Aylık aidat (₺)
+  hasOccupancyCertificate Boolean  @default(false) // İskan belgesi var mı?
+  usageType               String?  // Ticari kullanım türü (Ofis, Market, Restoran, vb.)
+  commonAreaRatio         Float?   // Ortak alan oranı (%)
+
   units         Unit[] // Bina ise daireler
   transactions  Transaction[]
   valuations    Valuation[]
   images        PropertyImage[]
+  documents     PropertyDocument[]
   demandMatches  DemandMatch[]   @relation("PropertyDemandMatches")
   accessRequests AccessRequest[] @relation("PropertyAccessRequests")
 
@@ -407,6 +420,24 @@ model Property {
   @@index([parcelId])
   @@index([type])
   @@index([status])
+  @@index([crmStage])
+}
+
+// Gayrimenkul Belgeleri
+model PropertyDocument {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  docType    String   @default("OTHER") // TITLE_DEED, LEASE_CONTRACT, APPRAISAL, PERMIT, FLOOR_PLAN, INSURANCE, TAX, OTHER
+  name       String   // Belge adı
+  url        String?  // URL veya dosya yolu
+  expiryDate DateTime? // Son geçerlilik tarihi (sigorta, aidat, vb.)
+  notes      String?
+
+  createdAt DateTime @default(now())
+
+  @@index([propertyId])
 }
 
 // Gayrimenkul Görselleri

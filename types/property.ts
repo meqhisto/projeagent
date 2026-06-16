@@ -1,5 +1,57 @@
 // TypeScript types for Real Estate Portfolio System
 
+export type PropertyCrmStage =
+    | "LISTING"
+    | "SHOWING"
+    | "NEGOTIATING"
+    | "CONTRACT"
+    | "CLOSED"
+    | "CANCELLED";
+
+export const PropertyCrmStageLabels: Record<PropertyCrmStage, string> = {
+    LISTING:     "İlan Aşamasında",
+    SHOWING:     "Gösterim Yapılıyor",
+    NEGOTIATING: "Görüşme / Müzakere",
+    CONTRACT:    "Sözleşme Aşaması",
+    CLOSED:      "Kapandı",
+    CANCELLED:   "İptal",
+};
+
+export const PropertyCrmStageColors: Record<PropertyCrmStage, string> = {
+    LISTING:     "bg-blue-50 text-blue-700 border-blue-200",
+    SHOWING:     "bg-amber-50 text-amber-700 border-amber-200",
+    NEGOTIATING: "bg-purple-50 text-purple-700 border-purple-200",
+    CONTRACT:    "bg-emerald-50 text-emerald-700 border-emerald-200",
+    CLOSED:      "bg-gray-100 text-gray-600 border-gray-200",
+    CANCELLED:   "bg-red-50 text-red-600 border-red-200",
+};
+
+export type DocType =
+    | "TITLE_DEED"
+    | "LEASE_CONTRACT"
+    | "APPRAISAL"
+    | "PERMIT"
+    | "FLOOR_PLAN"
+    | "INSURANCE"
+    | "TAX"
+    | "OTHER";
+
+export const DocTypeLabels: Record<DocType, string> = {
+    TITLE_DEED:     "Tapu Senedi",
+    LEASE_CONTRACT: "Kira Sözleşmesi",
+    APPRAISAL:      "Ekspertiz Raporu",
+    PERMIT:         "İzin / Ruhsat",
+    FLOOR_PLAN:     "Mimari Plan",
+    INSURANCE:      "Sigorta Poliçesi",
+    TAX:            "Vergi / Beyan",
+    OTHER:          "Diğer",
+};
+
+// Konut: APARTMENT, VILLA, DETACHED, BUILDING
+// Ticari: OFFICE, SHOP, COMMERCIAL, WAREHOUSE
+export const KONUT_TYPES: PropertyType[] = ["APARTMENT", "VILLA", "DETACHED", "BUILDING"];
+export const TICARI_TYPES: PropertyType[] = ["OFFICE", "SHOP", "COMMERCIAL", "WAREHOUSE"];
+
 // Enums matching Prisma schema
 export type PropertyType =
     | "APARTMENT"
@@ -112,11 +164,23 @@ export interface PropertyImage {
     createdAt: string;
 }
 
+export interface PropertyDocument {
+    id: number;
+    propertyId: number;
+    docType: DocType;
+    name: string;
+    url?: string | null;
+    expiryDate?: string | null;
+    notes?: string | null;
+    createdAt: string;
+}
+
 export interface Property {
     id: number;
     title: string;
     type: PropertyType;
     status: PropertyStatus;
+    crmStage: PropertyCrmStage;
     city: string;
     district: string;
     neighborhood: string;
@@ -132,6 +196,15 @@ export interface Property {
     hasElevator: boolean;
     hasParking: boolean;
     heatingType?: string | null;
+    // Konut/Ticari özel
+    bathroomCount?: number | null;
+    balconyCount?: number | null;
+    isFurnished: boolean;
+    monthlyDues?: number | null;
+    hasOccupancyCertificate: boolean;
+    usageType?: string | null;
+    commonAreaRatio?: number | null;
+    // Finansal
     purchasePrice?: number | null;
     purchaseDate?: string | null;
     currentValue?: number | null;
@@ -143,6 +216,7 @@ export interface Property {
     createdAt: string;
     updatedAt: string;
     images?: PropertyImage[];
+    documents?: PropertyDocument[];
     parcel?: {
         id: number;
         island: string;
@@ -207,6 +281,7 @@ export interface PropertyFormData {
     title: string;
     type: PropertyType;
     status: PropertyStatus;
+    crmStage?: PropertyCrmStage;
     city: string;
     district: string;
     neighborhood: string;
@@ -222,6 +297,13 @@ export interface PropertyFormData {
     hasElevator?: boolean;
     hasParking?: boolean;
     heatingType?: string;
+    bathroomCount?: number;
+    balconyCount?: number;
+    isFurnished?: boolean;
+    monthlyDues?: number;
+    hasOccupancyCertificate?: boolean;
+    usageType?: string;
+    commonAreaRatio?: number;
     purchasePrice?: number;
     purchaseDate?: string;
     currentValue?: number;

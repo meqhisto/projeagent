@@ -15,7 +15,10 @@ import {
     Wallet,
     FileText,
     ChevronRight,
-    Plus
+    Plus,
+    FileCheck,
+    ExternalLink,
+    AlertCircle,
 } from "lucide-react";
 import AddPropertyModal from "@/components/AddPropertyModal";
 import AddUnitModal from "@/components/AddUnitModal";
@@ -26,7 +29,13 @@ import {
     PropertyTypeLabels,
     PropertyStatusLabels,
     PropertyStatusColors,
-    RoomTypeLabels
+    PropertyCrmStageLabels,
+    PropertyCrmStageColors,
+    DocTypeLabels,
+    DocType,
+    RoomTypeLabels,
+    KONUT_TYPES,
+    TICARI_TYPES,
 } from "@/types/property";
 
 export default function PropertyDetailPage({
@@ -41,7 +50,12 @@ export default function PropertyDetailPage({
     const [error, setError] = useState<string | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [activeTab, setActiveTab] = useState<'overview' | 'units' | 'finances' | 'history'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'units' | 'finances' | 'history' | 'documents'>('overview');
+
+    // Document states
+    const [showDocModal, setShowDocModal] = useState(false);
+    const [docForm, setDocForm] = useState({ docType: "OTHER" as DocType, name: "", url: "", expiryDate: "", notes: "" });
+    const [savingDoc, setSavingDoc] = useState(false);
 
     // Unit modal states
     const [showUnitModal, setShowUnitModal] = useState(false);
@@ -102,6 +116,42 @@ export default function PropertyDetailPage({
         }
     };
 
+    const handleCrmStageChange = async (stage: string) => {
+        try {
+            await fetch(`/api/properties/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ crmStage: stage }),
+            });
+            fetchProperty();
+        } catch { /* silent */ }
+    };
+
+    const handleAddDocument = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSavingDoc(true);
+        try {
+            const res = await fetch(`/api/properties/${id}/documents`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(docForm),
+            });
+            if (res.ok) {
+                setShowDocModal(false);
+                setDocForm({ docType: "OTHER", name: "", url: "", expiryDate: "", notes: "" });
+                fetchProperty();
+            }
+        } finally {
+            setSavingDoc(false);
+        }
+    };
+
+    const handleDeleteDocument = async (docId: number) => {
+        if (!confirm("Bu belgeyi silmek istiyor musunuz?")) return;
+        await fetch(`/api/properties/${id}/documents/${docId}`, { method: "DELETE" });
+        fetchProperty();
+    };
+
     const handleDeleteTransaction = async () => {
         if (!deleteTransaction) return;
         try {
@@ -159,11 +209,15 @@ export default function PropertyDetailPage({
         || property.images?.[0]?.url
         || null;
 
+    const isKonut = KONUT_TYPES.includes(property.type);
+    const isTicari = TICARI_TYPES.includes(property.type);
+
     const tabs = [
         { id: 'overview', label: 'Genel Bakış', icon: FileText },
         { id: 'units', label: `Birimler (${property.units?.length || 0})`, icon: Building2 },
         { id: 'finances', label: 'Finansal', icon: Wallet },
         { id: 'history', label: 'Değerleme', icon: TrendingUp },
+        { id: 'documents', label: `Belgeler (${property.documents?.length || 0})`, icon: FileCheck },
     ] as const;
 
     return (
@@ -220,6 +274,20 @@ export default function PropertyDetailPage({
                             )}
                         </div>
                     </div>
+                </div>
+
+                {/* CRM Stage Selector */}
+                <div className="flex items-center gap-3 mb-3">
+                    <span className="text-sm text-gray-500">CRM Aşaması:</span>
+                    <select
+                        value={property.crmStage || "LISTING"}
+                        onChange={(e) => handleCrmStageChange(e.target.value)}
+                        className={`text-sm font-medium px-3 py-1.5 rounded-lg border cursor-pointer focus:outline-none ${PropertyCrmStageColors[property.crmStage as keyof typeof PropertyCrmStageColors] || "bg-blue-50 text-blue-700 border-blue-200"}`}
+                    >
+                        {Object.entries(PropertyCrmStageLabels).map(([v, l]) => (
+                            <option key={v} value={v}>{l}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="flex gap-3">
@@ -291,37 +359,81 @@ export default function PropertyDetailPage({
                     {/* Details */}
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Detaylar</h3>
-                        <div className="space-y-4">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Yapım Yılı</span>
-                                <span className="text-gray-900">{property.buildYear || '-'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Brüt Alan</span>
-                                <span className="text-gray-900">{property.grossArea ? `${property.grossArea} m²` : '-'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Net Alan</span>
-                                <span className="text-gray-900">{property.netArea ? `${property.netArea} m²` : '-'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Kat</span>
-                                <span className="text-gray-900">
-                                    {property.floorNumber || '-'} / {property.totalFloors || '-'}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Isıtma</span>
-                                <span className="text-gray-900">{property.heatingType || '-'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Asansör</span>
-                                <span className="text-gray-900">{property.hasElevator ? 'Var' : 'Yok'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Otopark</span>
-                                <span className="text-gray-900">{property.hasParking ? 'Var' : 'Yok'}</span>
-                            </div>
+                        <div className="space-y-3">
+                            {[
+                                { label: "Yapım Yılı", value: property.buildYear },
+                                { label: "Brüt Alan", value: property.grossArea ? `${property.grossArea} m²` : null },
+                                { label: "Net Alan", value: property.netArea ? `${property.netArea} m²` : null },
+                                { label: "Kat", value: (property.floorNumber || property.totalFloors) ? `${property.floorNumber ?? '-'} / ${property.totalFloors ?? '-'}` : null },
+                                { label: "Isıtma", value: property.heatingType },
+                                { label: "Asansör", value: property.hasElevator ? 'Var' : 'Yok' },
+                                { label: "Otopark", value: property.hasParking ? 'Var' : 'Yok' },
+                            ].map(({ label, value }) => value != null && (
+                                <div key={label} className="flex justify-between py-1 border-b border-gray-50 last:border-0">
+                                    <span className="text-gray-500 text-sm">{label}</span>
+                                    <span className="text-gray-900 text-sm font-medium">{String(value)}</span>
+                                </div>
+                            ))}
+
+                            {/* Konut özel */}
+                            {isKonut && (
+                                <>
+                                    {property.bathroomCount != null && (
+                                        <div className="flex justify-between py-1 border-b border-gray-50">
+                                            <span className="text-gray-500 text-sm">Banyo</span>
+                                            <span className="text-gray-900 text-sm font-medium">{property.bathroomCount}</span>
+                                        </div>
+                                    )}
+                                    {property.balconyCount != null && (
+                                        <div className="flex justify-between py-1 border-b border-gray-50">
+                                            <span className="text-gray-500 text-sm">Balkon</span>
+                                            <span className="text-gray-900 text-sm font-medium">{property.balconyCount}</span>
+                                        </div>
+                                    )}
+                                    {property.monthlyDues != null && (
+                                        <div className="flex justify-between py-1 border-b border-gray-50">
+                                            <span className="text-gray-500 text-sm">Aidat</span>
+                                            <span className="text-gray-900 text-sm font-medium">{formatCurrency(property.monthlyDues)}/ay</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between py-1 border-b border-gray-50">
+                                        <span className="text-gray-500 text-sm">Mobilyalı</span>
+                                        <span className={`text-sm font-medium ${property.isFurnished ? 'text-green-600' : 'text-gray-500'}`}>{property.isFurnished ? 'Evet' : 'Hayır'}</span>
+                                    </div>
+                                    <div className="flex justify-between py-1 border-b border-gray-50">
+                                        <span className="text-gray-500 text-sm">İskan Belgesi</span>
+                                        <span className={`text-sm font-medium ${property.hasOccupancyCertificate ? 'text-green-600' : 'text-orange-500'}`}>{property.hasOccupancyCertificate ? 'Var' : 'Yok'}</span>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Ticari özel */}
+                            {isTicari && (
+                                <>
+                                    {property.usageType && (
+                                        <div className="flex justify-between py-1 border-b border-gray-50">
+                                            <span className="text-gray-500 text-sm">Kullanım Türü</span>
+                                            <span className="text-gray-900 text-sm font-medium">{property.usageType}</span>
+                                        </div>
+                                    )}
+                                    {property.commonAreaRatio != null && (
+                                        <div className="flex justify-between py-1 border-b border-gray-50">
+                                            <span className="text-gray-500 text-sm">Ortak Alan</span>
+                                            <span className="text-gray-900 text-sm font-medium">%{property.commonAreaRatio}</span>
+                                        </div>
+                                    )}
+                                    {property.monthlyDues != null && (
+                                        <div className="flex justify-between py-1 border-b border-gray-50">
+                                            <span className="text-gray-500 text-sm">Aidat</span>
+                                            <span className="text-gray-900 text-sm font-medium">{formatCurrency(property.monthlyDues)}/ay</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between py-1 border-b border-gray-50">
+                                        <span className="text-gray-500 text-sm">YKİ (Yapı Kullanım İzni)</span>
+                                        <span className={`text-sm font-medium ${property.hasOccupancyCertificate ? 'text-green-600' : 'text-orange-500'}`}>{property.hasOccupancyCertificate ? 'Var' : 'Yok'}</span>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -535,6 +647,151 @@ export default function PropertyDetailPage({
                         <div className="text-center py-12">
                             <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                             <p className="text-gray-500">Henüz değerleme kaydı yok</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {activeTab === 'documents' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Belgeler</h3>
+                        <button
+                            onClick={() => setShowDocModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#0077ed] transition-colors"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Belge Ekle
+                        </button>
+                    </div>
+
+                    {property.documents?.length > 0 ? (
+                        <div className="space-y-3">
+                            {property.documents.map((doc: any) => {
+                                const isExpired = doc.expiryDate && new Date(doc.expiryDate) < new Date();
+                                const expiringSoon = doc.expiryDate && !isExpired && new Date(doc.expiryDate) < new Date(Date.now() + 30 * 86400000);
+                                return (
+                                    <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isExpired ? 'bg-red-100' : expiringSoon ? 'bg-orange-100' : 'bg-blue-100'}`}>
+                                                <FileCheck className={`w-5 h-5 ${isExpired ? 'text-red-600' : expiringSoon ? 'text-orange-600' : 'text-blue-600'}`} />
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-900 font-medium text-sm">{doc.name}</p>
+                                                <p className="text-gray-500 text-xs">
+                                                    {DocTypeLabels[doc.docType as DocType] || doc.docType}
+                                                    {doc.expiryDate && (
+                                                        <span className={`ml-2 ${isExpired ? 'text-red-500' : expiringSoon ? 'text-orange-500' : 'text-gray-400'}`}>
+                                                            {isExpired ? '• Süresi dolmuş' : expiringSoon ? '• 30 gün içinde doluyor' : `• Son: ${formatDate(doc.expiryDate)}`}
+                                                        </span>
+                                                    )}
+                                                </p>
+                                                {doc.notes && <p className="text-gray-400 text-xs mt-0.5">{doc.notes}</p>}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {isExpired && <AlertCircle className="w-4 h-4 text-red-500" />}
+                                            {doc.url && (
+                                                <a href={doc.url} target="_blank" rel="noopener noreferrer"
+                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </a>
+                                            )}
+                                            <button
+                                                onClick={() => handleDeleteDocument(doc.id)}
+                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <FileCheck className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                            <p className="text-gray-500 mb-3">Henüz belge eklenmemiş</p>
+                            <button
+                                onClick={() => setShowDocModal(true)}
+                                className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                            >
+                                İlk Belgeyi Ekle
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Add Document Modal */}
+                    {showDocModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/50" onClick={() => setShowDocModal(false)} />
+                            <form onSubmit={handleAddDocument} className="relative bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Belge Ekle</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Belge Türü</label>
+                                        <select
+                                            value={docForm.docType}
+                                            onChange={e => setDocForm(f => ({ ...f, docType: e.target.value as DocType }))}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                                        >
+                                            {Object.entries(DocTypeLabels).map(([v, l]) => (
+                                                <option key={v} value={v}>{l}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Belge Adı *</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={docForm.name}
+                                            onChange={e => setDocForm(f => ({ ...f, name: e.target.value }))}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                                            placeholder="Örn: 2024 Tapu Fotokopisi"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">URL / Link (opsiyonel)</label>
+                                        <input
+                                            type="url"
+                                            value={docForm.url}
+                                            onChange={e => setDocForm(f => ({ ...f, url: e.target.value }))}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                                            placeholder="https://drive.google.com/..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Son Geçerlilik Tarihi (opsiyonel)</label>
+                                        <input
+                                            type="date"
+                                            value={docForm.expiryDate}
+                                            onChange={e => setDocForm(f => ({ ...f, expiryDate: e.target.value }))}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Not (opsiyonel)</label>
+                                        <input
+                                            type="text"
+                                            value={docForm.notes}
+                                            onChange={e => setDocForm(f => ({ ...f, notes: e.target.value }))}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                                            placeholder="Kısa not..."
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex gap-2 mt-5">
+                                    <button type="button" onClick={() => setShowDocModal(false)}
+                                        className="flex-1 px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">
+                                        İptal
+                                    </button>
+                                    <button type="submit" disabled={savingDoc}
+                                        className="flex-1 px-4 py-2 text-sm bg-[#0071e3] text-white rounded-xl hover:bg-[#0077ed] disabled:opacity-50">
+                                        {savingDoc ? "Kaydediliyor..." : "Kaydet"}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     )}
                 </div>

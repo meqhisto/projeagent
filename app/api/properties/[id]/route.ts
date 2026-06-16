@@ -17,6 +17,7 @@ export async function GET(
             where: { id: propertyId },
             include: {
                 images: true,
+                documents: { orderBy: { createdAt: "desc" } },
                 parcel: {
                     include: {
                         images: true,
@@ -140,20 +141,24 @@ export async function PATCH(
         // Filter updateable fields
         const updateData: any = {};
         const allowedFields = [
-            'title', 'type', 'status', 'city', 'district', 'neighborhood',
+            'title', 'type', 'status', 'crmStage', 'city', 'district', 'neighborhood',
             'address', 'latitude', 'longitude', 'grossArea', 'netArea',
             'roomType', 'floorNumber', 'totalFloors', 'buildYear',
-            'hasElevator', 'hasParking', 'heatingType', 'purchasePrice',
-            'purchaseDate', 'currentValue', 'monthlyRent', 'listingPrice',
+            'hasElevator', 'hasParking', 'heatingType',
+            'bathroomCount', 'balconyCount', 'isFurnished', 'monthlyDues',
+            'hasOccupancyCertificate', 'usageType', 'commonAreaRatio',
+            'purchasePrice', 'purchaseDate', 'currentValue', 'monthlyRent', 'listingPrice',
             'parcelId', 'notes'
         ];
 
         for (const field of allowedFields) {
             if (body[field] !== undefined) {
                 if (['latitude', 'longitude', 'grossArea', 'netArea',
-                    'purchasePrice', 'currentValue', 'monthlyRent', 'listingPrice'].includes(field)) {
+                    'purchasePrice', 'currentValue', 'monthlyRent', 'listingPrice',
+                    'monthlyDues', 'commonAreaRatio'].includes(field)) {
                     updateData[field] = body[field] ? parseFloat(body[field]) : null;
-                } else if (['floorNumber', 'totalFloors', 'buildYear', 'parcelId'].includes(field)) {
+                } else if (['floorNumber', 'totalFloors', 'buildYear', 'parcelId',
+                    'bathroomCount', 'balconyCount'].includes(field)) {
                     updateData[field] = body[field] ? parseInt(body[field]) : null;
                 } else if (field === 'purchaseDate') {
                     updateData[field] = body[field] ? new Date(body[field]) : null;
