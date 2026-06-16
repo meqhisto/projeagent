@@ -60,6 +60,7 @@ model Parcel {
   presentationShares PresentationShare[] // Sunum paylaşım linkleri
   precedents         ParcelPrecedent[] // Emsal veriler
   shares             ParcelShare[] // Danışmanlarla paylaşım
+  demandMatches      DemandMatch[]     @relation("ParcelDemandMatches")
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
   @@index([ownerId])
@@ -155,6 +156,7 @@ model Customer {
   interactions      Interaction[]
   units             Unit[] // Kiracı olduğu daireler
   contractorMatches ContractorParcelMatch[]
+  demands           DemandRequest[]         @relation("CustomerDemands")
   createdAt         DateTime                @default(now())
 }
 
@@ -246,6 +248,9 @@ model User {
 
   sessions  Session[]
   auditLogs AuditLog[]
+
+  // Talep sistemi
+  createdDemands DemandRequest[] @relation("CreatedDemands")
 }
 
 model Session {
@@ -381,10 +386,11 @@ model Property {
   ownerId Int
   owner   User @relation("OwnedProperties", fields: [ownerId], references: [id])
 
-  units        Unit[] // Bina ise daireler
-  transactions Transaction[]
-  valuations   Valuation[]
-  images       PropertyImage[]
+  units         Unit[] // Bina ise daireler
+  transactions  Transaction[]
+  valuations    Valuation[]
+  images        PropertyImage[]
+  demandMatches DemandMatch[] @relation("PropertyDemandMatches")
 
   notes String? // Notlar
 
@@ -611,6 +617,95 @@ model PresentationShare {
   isActive  Boolean   @default(true)
 
   createdAt DateTime @default(now())
+}
+
+// ==========================================
+// TALEP & PORTFÖY EŞLEŞTİRME SİSTEMİ
+// ==========================================
+
+enum DemandType {
+  PARCEL   // Arsa arıyor
+  PROPERTY // Gayrimenkul arıyor
+  BOTH     // Her ikisi
+}
+
+enum DemandStatus {
+  OPEN      // Açık
+  MATCHED   // Eşleşme bulundu
+  CLOSED    // Kapatıldı
+  CANCELLED // İptal edildi
+}
+
+model DemandRequest {
+  id    Int    @id @default(autoincrement())
+  title String // Talep başlığı
+
+  type   DemandType   @default(BOTH)
+  status DemandStatus @default(OPEN)
+
+  // Kim oluşturdu / hangi müşteri için
+  createdById Int
+  createdBy   User      @relation("CreatedDemands", fields: [createdById], references: [id])
+  customerId  Int?
+  customer    Customer? @relation("CustomerDemands", fields: [customerId], references: [id])
+
+  // Konum kriterleri
+  city         String?
+  district     String?
+  neighborhood String?
+
+  // Ortak kriterler
+  minPrice Float?
+  maxPrice Float?
+  minArea  Float?
+  maxArea  Float?
+  notes    String?
+  deadline DateTime?
+
+  // Arsa kriterleri
+  parcelCategory String? // ParcelCategory değeri
+  minKAKS        Float?
+  maxKAKS        Float?
+  zoningType     String?
+
+  // Gayrimenkul kriterleri
+  propertyType String? // PropertyType değeri
+  roomType     String? // RoomType değeri
+  hasElevator  Boolean?
+  hasParking   Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  matches DemandMatch[]
+
+  @@index([createdById])
+  @@index([customerId])
+  @@index([status])
+}
+
+model DemandMatch {
+  id       Int           @id @default(autoincrement())
+  demandId Int
+  demand   DemandRequest @relation(fields: [demandId], references: [id], onDelete: Cascade)
+
+  parcelId   Int?
+  parcel     Parcel?   @relation("ParcelDemandMatches", fields: [parcelId], references: [id], onDelete: Cascade)
+  propertyId Int?
+  property   Property? @relation("PropertyDemandMatches", fields: [propertyId], references: [id], onDelete: Cascade)
+
+  score  Float  // 0-100
+  status String @default("SUGGESTED") // SUGGESTED, VIEWED, PRESENTED, ACCEPTED, REJECTED
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([demandId, parcelId])
+  @@unique([demandId, propertyId])
+  @@index([demandId])
+  @@index([parcelId])
+  @@index([propertyId])
 }
 
 model ParcelPrecedent {

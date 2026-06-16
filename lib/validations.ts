@@ -127,6 +127,49 @@ export const ValuationQuerySchema = z.object({
 });
 
 /**
+ * Demand / Talep Validation Schemas
+ */
+const numericOptional = z.union([z.string(), z.number(), z.null()]).optional().transform(val =>
+    (val !== null && val !== undefined && val !== "") ? parseFloat(String(val)) : null
+);
+
+export const DemandCreateSchema = z.object({
+    title: z.string().min(2, "Başlık en az 2 karakter olmalı").max(200),
+    type: z.enum(["PARCEL", "PROPERTY", "BOTH"]).optional().default("BOTH"),
+    customerId: z.number().int().positive().optional().nullable(),
+
+    // Konum
+    city: z.string().max(50).optional().nullable(),
+    district: z.string().max(50).optional().nullable(),
+    neighborhood: z.string().max(100).optional().nullable(),
+
+    // Ortak fiyat/alan kriterleri
+    minPrice: numericOptional,
+    maxPrice: numericOptional,
+    minArea: numericOptional,
+    maxArea: numericOptional,
+
+    // Arsa kriterleri
+    parcelCategory: z.string().max(50).optional().nullable(),
+    minKAKS: numericOptional,
+    maxKAKS: numericOptional,
+    zoningType: z.string().max(50).optional().nullable(),
+
+    // Gayrimenkul kriterleri
+    propertyType: z.string().max(50).optional().nullable(),
+    roomType: z.string().max(50).optional().nullable(),
+    hasElevator: z.boolean().optional().nullable(),
+    hasParking: z.boolean().optional().nullable(),
+
+    notes: z.string().max(2000).optional().nullable(),
+    deadline: z.string().datetime().optional().nullable(),
+});
+
+export const DemandUpdateSchema = DemandCreateSchema.partial().extend({
+    status: z.enum(["OPEN", "MATCHED", "CLOSED", "CANCELLED"]).optional(),
+});
+
+/**
  * Utility function to validate and return formatted errors
  */
 export function validateSchema<T>(schema: z.ZodSchema<T>, data: unknown): {

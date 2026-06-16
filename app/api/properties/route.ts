@@ -148,6 +148,11 @@ export async function POST(request: Request) {
             }
         });
 
+        // Yeni gayrimenkulü açık taleplere karşı eşleştir
+        import("@/lib/demands/matchDemand").then(({ runMatchForAllOpenDemands }) => {
+            runMatchForAllOpenDemands().catch(() => null);
+        });
+
         return NextResponse.json(newProperty, { status: 201 });
     } catch (error: any) {
         console.error("POST /api/properties Error:", error);

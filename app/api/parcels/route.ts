@@ -116,9 +116,13 @@ export async function POST(request: Request) {
         logger.debug("POST /api/parcels - Created:", newParcel.id);
 
         // Trigger background research job
-        // We don't await this to keep the API fast
         import("@/lib/jobs/process_parcel").then(({ processParcelInBackground }) => {
             processParcelInBackground(newParcel.id);
+        });
+
+        // Yeni parseli açık taleplere karşı eşleştir
+        import("@/lib/demands/matchDemand").then(({ runMatchForAllOpenDemands }) => {
+            runMatchForAllOpenDemands().catch(() => null);
         });
 
         return NextResponse.json(newParcel, { status: 201 });

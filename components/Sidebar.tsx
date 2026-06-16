@@ -18,6 +18,7 @@ import {
     HardHat,
     Shield,
     FolderOpen,
+    ClipboardList,
 } from "lucide-react";
 
 const allNavigation = [
@@ -29,6 +30,7 @@ const allNavigation = [
     { name: "Müşteriler", href: "/customers", icon: Users, roles: ["USER", "ADMIN"] },
     { name: "Gayrimenkuller", href: "/properties", icon: Building2, roles: ["USER", "ADMIN"] },
     { name: "Müteahhitler", href: "/contractors", icon: HardHat, roles: ["USER", "ADMIN"] },
+    { name: "Talepler", href: "/demands", icon: ClipboardList, roles: ["USER", "ADMIN"] },
     { name: "Ayarlar", href: "/settings", icon: Settings, roles: ["USER", "ADMIN"] },
     // Admin only
     { name: "Parsel Yönetimi", href: "/admin/parcels", icon: FolderOpen, roles: ["ADMIN"], adminSection: true },

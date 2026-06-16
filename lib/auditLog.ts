@@ -29,6 +29,7 @@ export type AuditResource =
     | "documents"
     | "presentations"
     | "contractors"
+    | "demands"
     | "auth";
 
 export interface AuditLogInput {
