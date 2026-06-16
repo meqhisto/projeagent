@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Search, Loader2 } from "lucide-react";
+import { Plus, Search, Loader2, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import ParcelCard from "@/components/ParcelCard";
 import AdvancedFilterPanel from "@/components/AdvancedFilterPanel";
 import ExportButton from "@/components/ExportButton";
+import ParcelCompareModal from "@/components/ParcelCompareModal";
 import { Parcel } from "@/types";
 
 export default function ParcelsPage() {
     const [parcels, setParcels] = useState<Parcel[]>([]);
     const [loading, setLoading] = useState(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [filters, setFilters] = useState<any>({});
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [compareOpen, setCompareOpen] = useState(false);
 
     const fetchParcels = async () => {
         try {
@@ -33,7 +35,6 @@ export default function ParcelsPage() {
         fetchParcels();
     }, []);
 
-    // Apply filters
     const filteredParcels = useMemo(() => {
         return parcels.filter(p => {
             if (filters.city && p.city !== filters.city) return false;
@@ -53,8 +54,19 @@ export default function ParcelsPage() {
         return Array.from(new Set(parcels.map(p => p.city))).sort();
     }, [parcels]);
 
+    const toggleSelect = (id: number) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else if (next.size < 5) next.add(id);
+            return next;
+        });
+    };
+
+    const selectedParcels = parcels.filter(p => selectedIds.has(p.id));
+
     return (
-        <div className="space-y-8 animate-fade-in pb-10">
+        <div className="space-y-8 animate-fade-in pb-24">
             {/* Header */}
             <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                 <div>
@@ -86,6 +98,12 @@ export default function ParcelsPage() {
                 </div>
             </div>
 
+            {selectedIds.size > 0 && (
+                <div className="text-xs text-[#6e6e73] -mt-4">
+                    {selectedIds.size} parsel seçildi · en fazla 5 seçebilirsiniz
+                </div>
+            )}
+
             {/* Content */}
             {loading ? (
                 <div className="flex h-64 w-full items-center justify-center">
@@ -94,19 +112,35 @@ export default function ParcelsPage() {
             ) : filteredParcels.length > 0 ? (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredParcels.map((parcel) => (
-                        <ParcelCard
-                            key={parcel.id}
-                            id={parcel.id}
-                            city={parcel.city}
-                            district={parcel.district}
-                            island={parcel.island}
-                            parcel={parcel.parsel}
-                            status={parcel.status}
-                            imageUrl={parcel.images && parcel.images.length > 0 ? parcel.images[0].url : undefined}
-                            zoning={parcel.zoning}
-                            category={parcel.category}
-                            tags={parcel.tags}
-                        />
+                        <div key={parcel.id} className="relative group">
+                            {/* Checkbox overlay */}
+                            <button
+                                onClick={() => toggleSelect(parcel.id)}
+                                className={`absolute top-3 left-3 z-10 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                    selectedIds.has(parcel.id)
+                                        ? "bg-[#0071e3] border-[#0071e3]"
+                                        : "bg-white/80 border-gray-300 opacity-0 group-hover:opacity-100"
+                                }`}
+                            >
+                                {selectedIds.has(parcel.id) && (
+                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                )}
+                            </button>
+                            <ParcelCard
+                                id={parcel.id}
+                                city={parcel.city}
+                                district={parcel.district}
+                                island={parcel.island}
+                                parcel={parcel.parsel}
+                                status={parcel.status}
+                                imageUrl={parcel.images && parcel.images.length > 0 ? parcel.images[0].url : undefined}
+                                zoning={parcel.zoning}
+                                category={parcel.category}
+                                tags={parcel.tags}
+                            />
+                        </div>
                     ))}
                 </div>
             ) : (
@@ -125,6 +159,33 @@ export default function ParcelsPage() {
                         Filtreleri Temizle
                     </button>
                 </div>
+            )}
+
+            {/* Sticky compare bar */}
+            {selectedIds.size >= 2 && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 bg-[#1d1d1f] text-white px-6 py-3.5 rounded-2xl shadow-2xl shadow-black/30 animate-slide-up">
+                    <span className="text-sm font-semibold">{selectedIds.size} parsel seçildi</span>
+                    <button
+                        onClick={() => setCompareOpen(true)}
+                        className="flex items-center gap-2 bg-[#0071e3] hover:bg-[#0077ed] px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                    >
+                        <ArrowUpDown className="h-4 w-4" />
+                        Karşılaştır
+                    </button>
+                    <button
+                        onClick={() => setSelectedIds(new Set())}
+                        className="text-xs text-gray-400 hover:text-white transition-colors"
+                    >
+                        Temizle
+                    </button>
+                </div>
+            )}
+
+            {compareOpen && (
+                <ParcelCompareModal
+                    parcels={selectedParcels}
+                    onClose={() => setCompareOpen(false)}
+                />
             )}
         </div>
     );

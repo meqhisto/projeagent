@@ -16,6 +16,7 @@ import DocumentUploadSection from "@/components/DocumentUploadSection";
 import ParcelTaskList from "@/components/ParcelTaskList";
 import PrecedentManager from "@/components/PrecedentManager";
 import ValuationSection from "@/components/ValuationSection";
+import FeasibilityQuickCard from "@/components/FeasibilityQuickCard";
 
 export default function ParcelDetailPage() {
     const params = useParams();
@@ -416,6 +417,32 @@ export default function ParcelDetailPage() {
                                             )}
                                         </div>
                                     </div>
+
+                                    {/* Hızlı Fizibilite Kartı */}
+                                    {parcel.zoning?.ks && parcel.area && (
+                                        <FeasibilityQuickCard
+                                            area={parcel.area}
+                                            ks={parcel.zoning.ks}
+                                            taks={parcel.zoning.taks}
+                                            maxHeight={parcel.zoning.maxHeight}
+                                            zoningType={parcel.zoning.zoningType}
+                                            askingPrice={parcel.askingPrice}
+                                        />
+                                    )}
+
+                                    {/* İmar Planı Görüntüle (Item 5) */}
+                                    {parcel.zoning?.sourceUrl && (
+                                        <a
+                                            href={parcel.zoning.sourceUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-[#0071e3]/30 text-[#0071e3] text-sm font-semibold hover:bg-[#0071e3]/5 transition-colors"
+                                        >
+                                            <Layers className="h-4 w-4" />
+                                            İmar Planı Haritasını Görüntüle
+                                            <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+                                        </a>
+                                    )}
 
                                     {/* Precedents (Emsal) - Placeholder since component is missing */}
                                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">

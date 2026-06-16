@@ -1,14 +1,13 @@
 import type { ImarScraper, ImarSorguSonucu } from "./types";
-import { canakkaleScraper } from "./canakkale";
+import { canakkaleScraper, bigaScraper, gelibolouScraper } from "./canakkale";
 
 const SCRAPERS: ImarScraper[] = [
-  canakkaleScraper,
-  // Yeni belediye scraperları buraya eklenir:
-  // istanbulScraper,
-  // izmir Scraper,
+  canakkaleScraper,  // Çanakkale Merkez — webgis.canakkale.bel.tr
+  bigaScraper,       // Biga — keos.biga.bel.tr
+  gelibolouScraper,  // Gelibolu — keos.gelibolu.bel.tr
+  // Yeni ilçe/şehir scraperları buraya eklenir
 ];
 
-// Normalize: lowercase + remove Turkish-to-ASCII for matching
 function normalize(sehir: string): string {
   return sehir
     .toLowerCase()
@@ -23,9 +22,7 @@ function normalize(sehir: string): string {
 export function getScraper(sehir: string): ImarScraper | null {
   const norm = normalize(sehir);
   return (
-    SCRAPERS.find((s) =>
-      s.sehirler.some((s2) => normalize(s2) === norm)
-    ) ?? null
+    SCRAPERS.find((s) => s.sehirler.some((s2) => normalize(s2) === norm)) ?? null
   );
 }
 
