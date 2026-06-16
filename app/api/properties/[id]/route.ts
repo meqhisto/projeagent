@@ -51,10 +51,44 @@ export async function GET(
 
         // Authorization check
         if (!isAdmin((user as any).role) && property.ownerId !== userId) {
-            return NextResponse.json(
-                { error: "Bu gayrimenkülü görüntüleme yetkiniz yok" },
-                { status: 403 }
-            );
+            // Onaylı erişim talebi var mı?
+            const accessReq = await prisma.accessRequest.findFirst({
+                where: { requesterId: userId, propertyId, status: "APPROVED" },
+            });
+
+            if (!accessReq) {
+                const pendingReq = await prisma.accessRequest.findFirst({
+                    where: { requesterId: userId, propertyId },
+                    select: { id: true, status: true },
+                });
+                return NextResponse.json(
+                    { error: "Bu gayrimenkülü görüntüleme yetkiniz yok", accessRequestStatus: pendingReq?.status ?? null },
+                    { status: 403 }
+                );
+            }
+
+            // Filtrelenmiş veri
+            const filtered: Record<string, unknown> = {
+                id: property.id,
+                title: property.title,
+                type: property.type,
+                status: property.status,
+                city: property.city,
+                district: property.district,
+                neighborhood: property.neighborhood,
+                images: property.images,
+                roomType: property.roomType,
+                _accessRequest: accessReq,
+                _isFiltered: true,
+            };
+            if (accessReq.shareArea)      { filtered.netArea = property.netArea; filtered.grossArea = property.grossArea; }
+            if (accessReq.shareZoning)    filtered.parcel = property.parcel;
+            if (accessReq.sharePrice)     { filtered.listingPrice = property.listingPrice; filtered.currentValue = property.currentValue; }
+            if (accessReq.shareNotes)     filtered.notes = property.notes;
+            if (accessReq.shareCrmStage)  filtered.status = property.status;
+            if (accessReq.shareOwnerInfo) filtered.owner = property.owner;
+
+            return NextResponse.json(filtered);
         }
 
         return NextResponse.json(property);

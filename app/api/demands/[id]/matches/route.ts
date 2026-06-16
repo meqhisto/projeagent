@@ -34,6 +34,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
                         images: { where: { isDefault: true }, take: 1 },
                     },
                 },
+                // Her eşleşme için danışmanın erişim talebi durumunu da getir
+                accessRequests: {
+                    where: { requesterId: userId },
+                    select: { id: true, status: true },
+                    take: 1,
+                },
             },
         });
 

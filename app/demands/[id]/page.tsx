@@ -4,14 +4,21 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-    ArrowLeft, ClipboardList, RefreshCw, MapPin, Building2, Star,
-    CheckCircle2, XCircle, Eye, Presentation, User, Calendar
+    ArrowLeft, ClipboardList, RefreshCw, MapPin, Building2,
+    CheckCircle2, XCircle, Eye, Presentation, User, Calendar,
+    Lock, Clock, Unlock, Send
 } from "lucide-react";
+
+interface AccessReqStatus {
+    id: number;
+    status: "PENDING" | "APPROVED" | "REJECTED";
+}
 
 interface Match {
     id: number;
     score: number;
     status: string;
+    accessRequests?: AccessReqStatus[];
     parcel?: {
         id: number;
         city: string;
@@ -110,6 +117,9 @@ export default function DemandDetailPage() {
     const [loading, setLoading] = useState(true);
     const [matching, setMatching] = useState(false);
     const [updatingMatch, setUpdatingMatch] = useState<number | null>(null);
+    const [requestingAccess, setRequestingAccess] = useState<number | null>(null);
+    const [accessMessage, setAccessMessage] = useState("");
+    const [showAccessModal, setShowAccessModal] = useState<{ matchId: number; parcelId?: number; propertyId?: number } | null>(null);
 
     const fetchDemand = useCallback(async () => {
         const res = await fetch(`/api/demands/${id}`);
@@ -126,6 +136,33 @@ export default function DemandDetailPage() {
             if (res.ok) fetchDemand();
         } finally {
             setMatching(false);
+        }
+    };
+
+    const sendAccessRequest = async () => {
+        if (!showAccessModal) return;
+        setRequestingAccess(showAccessModal.matchId);
+        try {
+            const res = await fetch("/api/access-requests", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    parcelId: showAccessModal.parcelId,
+                    propertyId: showAccessModal.propertyId,
+                    demandMatchId: showAccessModal.matchId,
+                    message: accessMessage || null,
+                }),
+            });
+            if (res.ok) {
+                setShowAccessModal(null);
+                setAccessMessage("");
+                fetchDemand();
+            } else {
+                const d = await res.json();
+                alert(d.error || "Talep gönderilemedi");
+            }
+        } finally {
+            setRequestingAccess(null);
         }
     };
 
@@ -153,6 +190,7 @@ export default function DemandDetailPage() {
     const sortedMatches = [...demand.matches].sort((a, b) => b.score - a.score);
 
     return (
+        <>
         <div className="p-6 max-w-5xl mx-auto">
             {/* Back + Header */}
             <div className="flex items-center gap-3 mb-6">
@@ -374,13 +412,54 @@ export default function DemandDetailPage() {
                                                         </button>
                                                     </>
                                                 )}
-                                                <Link
-                                                    href={isParcel ? `/parcels/${m.parcel?.id}` : `/properties/${m.property?.id}`}
-                                                    className="p-1.5 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
-                                                    title="Detay sayfasına git"
-                                                >
-                                                    <Presentation className="h-4 w-4" />
-                                                </Link>
+
+                                                {/* Erişim talebi durumu */}
+                                                {(() => {
+                                                    const ar = m.accessRequests?.[0];
+                                                    if (ar?.status === "APPROVED") {
+                                                        return (
+                                                            <Link
+                                                                href={isParcel ? `/parcels/${m.parcel?.id}` : `/properties/${m.property?.id}`}
+                                                                className="flex items-center gap-1 px-2 py-1 text-xs text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                                                                title="Onaylı erişim — detayı görüntüle"
+                                                            >
+                                                                <Unlock className="h-3.5 w-3.5" />
+                                                                Detay
+                                                            </Link>
+                                                        );
+                                                    }
+                                                    if (ar?.status === "PENDING") {
+                                                        return (
+                                                            <span className="flex items-center gap-1 px-2 py-1 text-xs text-yellow-700 bg-yellow-50 rounded-lg">
+                                                                <Clock className="h-3.5 w-3.5" />
+                                                                Beklemede
+                                                            </span>
+                                                        );
+                                                    }
+                                                    if (ar?.status === "REJECTED") {
+                                                        return (
+                                                            <span className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 bg-red-50 rounded-lg">
+                                                                <XCircle className="h-3.5 w-3.5" />
+                                                                Reddedildi
+                                                            </span>
+                                                        );
+                                                    }
+                                                    // Talep gönderilmemiş
+                                                    return (
+                                                        <button
+                                                            onClick={() => setShowAccessModal({
+                                                                matchId: m.id,
+                                                                parcelId: m.parcel?.id,
+                                                                propertyId: m.property?.id,
+                                                            })}
+                                                            className="flex items-center gap-1 px-2 py-1 text-xs text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                                                            title="Portföy sahibinden detay erişimi iste"
+                                                        >
+                                                            <Lock className="h-3.5 w-3.5" />
+                                                            Detay İste
+                                                        </button>
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
                                     </div>
@@ -391,5 +470,50 @@ export default function DemandDetailPage() {
                 </div>
             </div>
         </div>
+
+        {/* Erişim Talebi Modal */}
+        {showAccessModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Lock className="h-4 w-4 text-purple-600" />
+                        <h3 className="text-base font-semibold text-[#1d1d1f]">Detay Erişimi İste</h3>
+                    </div>
+                    <p className="text-sm text-[#6e6e73] mb-4">
+                        Bu portföyün detaylarını görmek için sahibinden izin talep edeceksiniz.
+                        Sahip hangi bilgileri paylaşacağına karar verecek.
+                    </p>
+                    <div className="mb-4">
+                        <label className="block text-xs font-medium text-[#6e6e73] mb-1">
+                            Mesajınız (opsiyonel)
+                        </label>
+                        <textarea
+                            value={accessMessage}
+                            onChange={e => setAccessMessage(e.target.value)}
+                            rows={3}
+                            placeholder="Kendinizi tanıtın veya amacınızı belirtin..."
+                            className="w-full px-3 py-2 text-sm border border-black/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400/30 resize-none"
+                        />
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => { setShowAccessModal(null); setAccessMessage(""); }}
+                            className="flex-1 py-2.5 text-sm border border-black/10 rounded-xl hover:bg-black/[0.02] transition-colors"
+                        >
+                            İptal
+                        </button>
+                        <button
+                            onClick={sendAccessRequest}
+                            disabled={requestingAccess !== null}
+                            className="flex-1 py-2.5 text-sm bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            <Send className="h-3.5 w-3.5" />
+                            Talep Gönder
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }

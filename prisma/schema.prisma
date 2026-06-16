@@ -61,6 +61,7 @@ model Parcel {
   precedents         ParcelPrecedent[] // Emsal veriler
   shares             ParcelShare[] // Danışmanlarla paylaşım
   demandMatches      DemandMatch[]     @relation("ParcelDemandMatches")
+  accessRequests     AccessRequest[]   @relation("ParcelAccessRequests")
 
   @@unique([ownerId, city, district, neighborhood, island, parsel])
   @@index([ownerId])
@@ -251,6 +252,10 @@ model User {
 
   // Talep sistemi
   createdDemands DemandRequest[] @relation("CreatedDemands")
+
+  // Portföy erişim talepleri
+  sentAccessRequests     AccessRequest[] @relation("SentAccessRequests")
+  receivedAccessRequests AccessRequest[] @relation("ReceivedAccessRequests")
 }
 
 model Session {
@@ -390,7 +395,8 @@ model Property {
   transactions  Transaction[]
   valuations    Valuation[]
   images        PropertyImage[]
-  demandMatches DemandMatch[] @relation("PropertyDemandMatches")
+  demandMatches  DemandMatch[]   @relation("PropertyDemandMatches")
+  accessRequests AccessRequest[] @relation("PropertyAccessRequests")
 
   notes String? // Notlar
 
@@ -706,6 +712,61 @@ model DemandMatch {
   @@index([demandId])
   @@index([parcelId])
   @@index([propertyId])
+
+  accessRequests AccessRequest[] @relation("MatchAccessRequests")
+}
+
+// ==========================================
+// PORTFÖY ERİŞİM TALEBİ SİSTEMİ
+// ==========================================
+
+model AccessRequest {
+  id          Int    @id @default(autoincrement())
+
+  // Talep eden danışman
+  requesterId Int
+  requester   User   @relation("SentAccessRequests", fields: [requesterId], references: [id])
+
+  // Portföy sahibi
+  ownerId     Int
+  owner       User   @relation("ReceivedAccessRequests", fields: [ownerId], references: [id])
+
+  // Hangi portföy için
+  parcelId    Int?
+  parcel      Parcel?   @relation("ParcelAccessRequests", fields: [parcelId], references: [id], onDelete: Cascade)
+  propertyId  Int?
+  property    Property? @relation("PropertyAccessRequests", fields: [propertyId], references: [id], onDelete: Cascade)
+
+  // Tetikleyen eşleşme (opsiyonel)
+  demandMatchId Int?
+  demandMatch   DemandMatch? @relation("MatchAccessRequests", fields: [demandMatchId], references: [id], onDelete: SetNull)
+
+  status      String @default("PENDING") // PENDING, APPROVED, REJECTED
+
+  // Danışmanın mesajı
+  message     String?
+  // Sahibin notu (onay/ret açıklaması)
+  ownerNote   String?
+
+  // Sahibin paylaşmayı seçtiği alanlar (APPROVED durumunda geçerli)
+  shareArea     Boolean @default(true)  // Alan (m²)
+  shareZoning   Boolean @default(true)  // İmar bilgileri (KAKS, TAKS, Hmax)
+  sharePrice    Boolean @default(false) // İlan/satış fiyatı
+  shareCrmStage Boolean @default(false) // CRM aşaması
+  shareNotes    Boolean @default(false) // Notlar
+  shareContacts Boolean @default(false) // Paydaşlar / müşteri bilgileri
+  shareOwnerInfo Boolean @default(false)// Sahibin iletişim bilgileri
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([requesterId, parcelId])
+  @@unique([requesterId, propertyId])
+  @@index([requesterId])
+  @@index([ownerId])
+  @@index([parcelId])
+  @@index([propertyId])
+  @@index([status])
 }
 
 model ParcelPrecedent {

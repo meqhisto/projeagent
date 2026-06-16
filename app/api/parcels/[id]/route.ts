@@ -40,7 +40,44 @@ export async function GET(
         const isShared = parcel.shares.length > 0;
 
         if (!isOwner && !isAssigned && !isUserAdmin && !isShared) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+            // Onaylı erişim talebi var mı?
+            const accessReq = await prisma.accessRequest.findFirst({
+                where: { requesterId: userId, parcelId, status: "APPROVED" },
+            });
+
+            if (!accessReq) {
+                // Bekleyen talep var mı bildirsin
+                const pendingReq = await prisma.accessRequest.findFirst({
+                    where: { requesterId: userId, parcelId },
+                    select: { id: true, status: true },
+                });
+                return NextResponse.json(
+                    { error: "Unauthorized", accessRequestStatus: pendingReq?.status ?? null },
+                    { status: 403 }
+                );
+            }
+
+            // Onaylı erişim: sadece izin verilen alanları döndür
+            const filtered: Record<string, unknown> = {
+                id: parcel.id,
+                city: parcel.city,
+                district: parcel.district,
+                neighborhood: parcel.neighborhood,
+                island: parcel.island,
+                parsel: parcel.parsel,
+                category: parcel.category,
+                status: parcel.status,
+                images: parcel.images,
+                _accessRequest: accessReq,
+                _isFiltered: true,
+            };
+            if (accessReq.shareArea)     filtered.area = parcel.area;
+            if (accessReq.shareZoning)   filtered.zoning = parcel.zoning;
+            if (accessReq.sharePrice)    filtered.askingPrice = parcel.askingPrice;
+            if (accessReq.shareNotes)    filtered.notes = parcel.notes;
+            if (accessReq.shareCrmStage) filtered.crmStage = parcel.crmStage;
+
+            return NextResponse.json(filtered);
         }
 
         return NextResponse.json(parcel);
