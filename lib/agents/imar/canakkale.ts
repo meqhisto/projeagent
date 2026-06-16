@@ -172,9 +172,19 @@ export function createKeosScraper(opts: {
       sonuc.kaks = bulKaks(alanlar);
       sonuc.taks = parseNumber(bul(alanlar, "T.A.K.S", "taks") ?? undefined);
       sonuc.hmax = parseNumber(bul(alanlar, "Bina Yüksekliği", "yükseklik", "hmax", "h maks") ?? undefined);
-      sonuc.kullanimAmaci = bul(alanlar, "Fonksiyon", "kullanım amacı", "kullanim amaci", "imar durumu", "fonk");
+      // kullanimAmaci: kısa (≤60 karakter) fonksiyon adı — uzun plan notlarını hariç tut
+      const fonk = bul(alanlar, "Fonksiyon", "kullanım amacı", "kullanim amaci", "imar durumu", "fonk");
+      sonuc.kullanimAmaci = fonk && fonk.length <= 60 ? fonk : null;
       sonuc.yapiNizami = bul(alanlar, "İnşaat Nizamı", "insaat nizami", "yapı nizamı", "yapi nizami", "nizam");
       sonuc.notlar = bul(alanlar, "Açıklama", "aciklama", "not");
+      // Mahalle fallback: HTML'den de dene (Biga: "Tapu Kütüğü"/"İdari Mahalle", Gelibolu: "Tapu Mahalle")
+      if (!sonuc.mahalleAdi || sonuc.mahalleAdi === "-") {
+        sonuc.mahalleAdi =
+          bul(alanlar, "Tapu Kütüğü", "tapu kutugu") ??
+          bul(alanlar, "İdari Mahalle", "idari mahalle") ??
+          bul(alanlar, "Tapu Mahalle", "tapu mahalle") ??
+          null;
+      }
       sonuc.hammadde = { ...kayit, ...alanlar };
 
       return sonuc;
