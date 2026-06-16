@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Save, Loader2, Info, Calculator } from "lucide-react";
+import { Save, Loader2, Info, Calculator, Zap, ExternalLink } from "lucide-react";
 
 interface ZoningPrecedent {
     type: string;
@@ -21,26 +21,37 @@ interface ZoningEditProps {
     onUpdate: () => void;
 }
 
+function zoningTypeToTab(zoningType?: string | null): "RESIDENTIAL" | "COMMERCIAL" | "MIXED" {
+    if (!zoningType) return "RESIDENTIAL";
+    const t = zoningType.toLowerCase();
+    if (t.includes("ticari") || t.includes("ticaret") || t.includes("commercial")) return "COMMERCIAL";
+    if (t.includes("karma") || t.includes("mixed")) return "MIXED";
+    return "RESIDENTIAL";
+}
+
 export default function ZoningEditSection({
     parcelId, city, district, neighborhood, parcelArea, initialZoning, onUpdate
 }: ZoningEditProps) {
-    const [activeTab, setActiveTab] = useState<"RESIDENTIAL" | "COMMERCIAL" | "MIXED">("RESIDENTIAL");
+    const [activeTab, setActiveTab] = useState<"RESIDENTIAL" | "COMMERCIAL" | "MIXED">(
+        () => zoningTypeToTab(initialZoning?.zoningType)
+    );
     const [loading, setLoading] = useState(false);
     const [precedents, setPrecedents] = useState<Record<string, ZoningPrecedent>>({});
+    const [precedentsLoaded, setPrecedentsLoaded] = useState(false);
 
-    // Form State
-    const [ks, setKs] = useState<string>("");
-    const [taks, setTaks] = useState<string>("");
-    const [maxHeight, setMaxHeight] = useState<string>("");
-    const [notes, setNotes] = useState<string>("");
+    // Form State — pre-fill from fetched imar data
+    const [ks, setKs] = useState<string>(initialZoning?.ks?.toString() || "");
+    const [taks, setTaks] = useState<string>(initialZoning?.taks?.toString() || "");
+    const [maxHeight, setMaxHeight] = useState<string>(initialZoning?.maxHeight?.toString() || "");
+    const [notes, setNotes] = useState<string>(initialZoning?.notes || "");
 
     useEffect(() => {
         fetchPrecedents();
     }, [city, district, neighborhood]);
 
     useEffect(() => {
-        loadTabData(activeTab);
-    }, [activeTab, precedents]);
+        if (precedentsLoaded) loadTabData(activeTab);
+    }, [activeTab, precedents, precedentsLoaded]);
 
     // Calculation Logic (Hybrid Engine)
     const [constructionArea, setConstructionArea] = useState<string | null>(null);
@@ -105,27 +116,30 @@ export default function ZoningEditSection({
             }
         } catch (e) {
             console.error("Precedent fetch error", e);
+        } finally {
+            setPrecedentsLoaded(true);
         }
     };
 
     const loadTabData = (type: string) => {
         const p = precedents[type];
         if (p) {
+            // Precedent verisi varsa kullan (daha önce kaydedilmiş mahalle hafızası)
             setKs(p.ks?.toString() || "");
             setTaks(p.taks?.toString() || "");
             setMaxHeight(p.maxHeight?.toString() || "");
             setNotes(p.notes || "");
-        } else if (initialZoning) {
-            setKs(initialZoning.ks?.toString() || "");
-            setTaks(initialZoning.taks?.toString() || "");
-            setMaxHeight(initialZoning.maxHeight?.toString() || "");
-            setNotes("");
-        } else {
-            setKs("");
-            setTaks("");
-            setMaxHeight("");
-            setNotes("");
         }
+        // Precedent yoksa initialZoning'i koruyalım (zaten state'e yüklendi)
+    };
+
+    const applyImarData = () => {
+        if (!initialZoning) return;
+        setKs(initialZoning.ks?.toString() || "");
+        setTaks(initialZoning.taks?.toString() || "");
+        setMaxHeight(initialZoning.maxHeight?.toString() || "");
+        setNotes(initialZoning.notes || "");
+        setActiveTab(zoningTypeToTab(initialZoning.zoningType));
     };
 
     const handleSave = async () => {
@@ -183,9 +197,29 @@ export default function ZoningEditSection({
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 flex items-center">
                     <Info className="mr-2 h-4 w-4 text-[#0071e3]" />
-                    Manuel İmar Verisi Girişi (Mahalle Hafızası)
+                    İmar Verisi (Mahalle Hafızası)
                 </h3>
             </div>
+
+            {/* Auto-fetched imar data banner */}
+            {initialZoning?.sourceUrl && (
+                <div className="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-emerald-800 text-xs font-medium">
+                        <Zap className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                        Belediye imar sitesinden otomatik çekildi:
+                        <span className="font-bold">
+                            {initialZoning.zoningType || "—"} · KAKS {initialZoning.ks ?? "—"} · TAKS {initialZoning.taks ?? "—"} · Hmax {initialZoning.maxHeight ?? "—"}
+                        </span>
+                    </div>
+                    <button
+                        onClick={applyImarData}
+                        className="shrink-0 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                    >
+                        <Zap className="h-3 w-3" />
+                        Forma Uygula
+                    </button>
+                </div>
+            )}
 
             {/* Tabs */}
             <div className="flex gap-2 border-b border-gray-100 mb-6">
