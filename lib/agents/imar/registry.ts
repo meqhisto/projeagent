@@ -1,10 +1,11 @@
 import type { ImarScraper, ImarSorguSonucu } from "./types";
-import { canakkaleScraper, bigaScraper, gelibolouScraper } from "./canakkale";
+import { canakkaleScraper, bigaScraper, gelibolouScraper, lapsekiScraper } from "./canakkale";
 
 const SCRAPERS: ImarScraper[] = [
   canakkaleScraper,  // Çanakkale Merkez — webgis.canakkale.bel.tr
-  bigaScraper,       // Biga — keos.biga.bel.tr
-  gelibolouScraper,  // Gelibolu — keos.gelibolu.bel.tr
+  bigaScraper,       // Biga             — keos.biga.bel.tr
+  gelibolouScraper,  // Gelibolu         — keos.gelibolu.bel.tr
+  lapsekiScraper,    // Lapseki          — 85.105.73.111 (Türk ISP gerektirir)
   // Yeni ilçe/şehir scraperları buraya eklenir
 ];
 

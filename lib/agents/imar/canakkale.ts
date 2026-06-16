@@ -209,3 +209,9 @@ export const gelibolouScraper = createKeosScraper({
   baseUrl: "https://keos.gelibolu.bel.tr/imardurumu",
   rejectTls: false,
 });
+
+// Not: Bu IP Türk ISP'lerinden erişilebilir; Avrupa sunucularından timeout verebilir.
+export const lapsekiScraper = createKeosScraper({
+  sehirler: ["lapseki"],
+  baseUrl: "http://85.105.73.111/imardurumu",
+});
