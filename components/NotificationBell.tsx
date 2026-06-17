@@ -98,6 +98,10 @@ export default function NotificationBell() {
                 aria-expanded={isOpen}
                 aria-haspopup="true"
                 className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors"
+                aria-label="Bildirimler"
+                title="Bildirimler"
+                aria-expanded={isOpen}
+                aria-haspopup="true"
             >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
@@ -126,45 +130,46 @@ export default function NotificationBell() {
                     </div>
 
                     {/* Notification List */}
-                    <div className="max-h-96 overflow-y-auto">
+                    <ul className="max-h-96 overflow-y-auto m-0 p-0" role="list">
                         {notifications.length > 0 ? (
                             notifications.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${!notification.isRead ? "bg-blue-50" : ""
-                                        }`}
-                                    onClick={() => !notification.isRead && markAsRead(notification.id)}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-2xl flex-shrink-0">
-                                            {NOTIFICATION_ICONS[notification.type] || "📢"}
-                                        </span>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-medium text-gray-900 text-sm">
-                                                {notification.title}
-                                            </h4>
-                                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                                {notification.message}
-                                            </p>
-                                            <p className="text-xs text-gray-400 mt-2">
-                                                {timeAgo(notification.createdAt)}
-                                            </p>
-                                        </div>
-                                        {!notification.isRead && (
-                                            <div className="flex-shrink-0">
-                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <li key={notification.id} className="block">
+                                    <button
+                                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer focus-visible:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset ${!notification.isRead ? "bg-blue-50" : ""
+                                            }`}
+                                        onClick={() => !notification.isRead && markAsRead(notification.id)}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-2xl flex-shrink-0">
+                                                {NOTIFICATION_ICONS[notification.type] || "📢"}
+                                            </span>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium text-gray-900 text-sm">
+                                                    {notification.title}
+                                                </h4>
+                                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                                    {notification.message}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    {timeAgo(notification.createdAt)}
+                                                </p>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
+                                            {!notification.isRead && (
+                                                <div className="flex-shrink-0">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </button>
+                                </li>
                             ))
                         ) : (
-                            <div className="p-8 text-center text-gray-400 text-sm">
+                            <li className="p-8 text-center text-gray-400 text-sm list-none">
                                 <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
                                 <p>Henüz bildirim yok</p>
-                            </div>
+                            </li>
                         )}
-                    </div>
+                    </ul>
                 </div>
             )}
         </div>
