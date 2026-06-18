@@ -9,3 +9,7 @@
 ## 2024-06-18 - Parallelizing Independent Prisma Queries
 **Learning:** Sequential `await prisma.model.findMany()` calls for completely independent data sets (e.g. searching parcels and customers separately) cause unnecessary latency. The total response time becomes the sum of both queries' durations.
 **Action:** Use `Promise.all([prisma.model1.findMany(...), prisma.model2.findMany(...)])` to run independent database queries concurrently, reducing total fetch latency to that of the slowest single query.
+
+## 2024-06-18 - Cloudflare Pages (next-on-pages) Node.js Runtime Failure
+**Learning:** Adding `export const runtime = 'nodejs'` or `export const runtime = 'edge'` to an API route when next-on-pages is complaining about missing edge runtime on ALL routes does not fix the CI build. The project is specifically not configured to use edge runtime across the board, and modifying a single API route's runtime directive causes next-on-pages to fail during the Vercel build output generation.
+**Action:** NEVER add runtime directives (like `export const runtime = 'nodejs'` or `export const runtime = 'edge'`) to Next.js API routes when implementing performance improvements unless explicitly requested or originally present. It breaks the deployment process.
