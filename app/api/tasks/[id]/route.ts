@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - Get single task
 export async function GET(
     req: Request,

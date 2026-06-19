@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, resolveUserId, isAdmin } from "@/lib/auth/roleCheck";
+
+export const runtime = "nodejs";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 
 // GET — Danışman: gönderilen talepler | Sahip: alınan talepler
