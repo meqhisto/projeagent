@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - Firma puanlarını getir
 export async function GET(
     request: Request,
