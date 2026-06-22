@@ -7,32 +7,80 @@ export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userRole = (user as any).role;
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
-        // Get all properties with related data
-        const properties = await prisma.property.findMany({
-            where: propertyWhere,
-            include: {
-                units: true,
-                transactions: {
-                    where: {
-                        date: {
-                            gte: new Date(new Date().getFullYear(), 0, 1) // This year
-                        }
-                    }
-                }
-            }
-        });
+        // Get aggregated properties data
+        // ⚡ Bolt Optimization: Replace findMany() that fetched all records and relations into memory
+        // with database-level aggregations via Promise.all. This drastically reduces Node.js memory bloat
+        // and network payload size.
 
-        // Calculate statistics
-        const totalProperties = properties.length;
-        const totalValue = properties.reduce((sum, p) => sum + (p.currentValue || 0), 0);
-        const totalPurchaseValue = properties.reduce((sum, p) => sum + (p.purchasePrice || 0), 0);
+        const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+        const incomeTypes: import("@prisma/client").TransactionType[] = ['RENT_INCOME', 'SALE', 'DEPOSIT'];
 
-        // Status counts
+        const [
+            totalProperties,
+            propertyAggregates,
+            statusGroup,
+            typeGroup,
+            cityGroup,
+            unitCount,
+            rentedUnitCount,
+            unitRentAggregates,
+            rentedUnitRentAggregates,
+            incomeAggregates,
+            expenseAggregates,
+        ] = await Promise.all([
+            prisma.property.count({ where: propertyWhere }),
+            prisma.property.aggregate({
+                where: propertyWhere,
+                _sum: { currentValue: true, purchasePrice: true, monthlyRent: true }
+            }),
+            prisma.property.groupBy({
+                by: ['status'],
+                where: propertyWhere,
+                _count: true
+            }),
+            prisma.property.groupBy({
+                by: ['type'],
+                where: propertyWhere,
+                _count: true
+            }),
+            prisma.property.groupBy({
+                by: ['city'],
+                where: propertyWhere,
+                _count: true
+            }),
+            prisma.unit.count({
+                where: { property: propertyWhere }
+            }),
+            prisma.unit.count({
+                where: { property: propertyWhere, status: 'RENTED' }
+            }),
+            prisma.unit.aggregate({
+                where: { property: propertyWhere },
+                _sum: { monthlyRent: true }
+            }),
+            prisma.unit.aggregate({
+                where: { property: propertyWhere, status: 'RENTED' },
+                _sum: { monthlyRent: true }
+            }),
+            prisma.transaction.aggregate({
+                where: { property: propertyWhere, date: { gte: startOfYear }, type: { in: incomeTypes } },
+                _sum: { amount: true }
+            }),
+            prisma.transaction.aggregate({
+                where: { property: propertyWhere, date: { gte: startOfYear }, type: { notIn: incomeTypes } },
+                _sum: { amount: true }
+            })
+        ]);
+
+        const totalValue = propertyAggregates._sum.currentValue || 0;
+        const totalPurchaseValue = propertyAggregates._sum.purchasePrice || 0;
+
         const statusCounts = {
             AVAILABLE: 0,
             RENTED: 0,
@@ -41,57 +89,44 @@ export async function GET() {
             RENOVATION: 0,
             RESERVED: 0
         };
-        properties.forEach(p => {
-            if (statusCounts[p.status as keyof typeof statusCounts] !== undefined) {
-                statusCounts[p.status as keyof typeof statusCounts]++;
+        statusGroup.forEach(group => {
+            if (statusCounts[group.status as keyof typeof statusCounts] !== undefined) {
+                statusCounts[group.status as keyof typeof statusCounts] = group._count;
             }
         });
 
-        // Type counts
         const typeCounts: Record<string, number> = {};
-        properties.forEach(p => {
-            typeCounts[p.type] = (typeCounts[p.type] || 0) + 1;
+        typeGroup.forEach(group => {
+            typeCounts[group.type] = group._count;
         });
 
-        // Unit statistics
-        const allUnits = properties.flatMap(p => p.units);
-        const totalUnits = allUnits.length;
-        const rentedUnits = allUnits.filter(u => u.status === 'RENTED').length;
+        const totalUnits = unitCount;
+        const rentedUnits = rentedUnitCount;
         const occupancyRate = totalUnits > 0 ? (rentedUnits / totalUnits) * 100 : 0;
 
-        // Financial calculations
-        const allTransactions = properties.flatMap(p => p.transactions);
+        const totalIncome = incomeAggregates._sum?.amount || 0;
+        const totalExpenses = expenseAggregates._sum?.amount || 0;
 
-        const incomeTypes = ['RENT_INCOME', 'SALE', 'DEPOSIT'];
-        const totalIncome = allTransactions
-            .filter(t => incomeTypes.includes(t.type))
-            .reduce((sum, t) => sum + t.amount, 0);
+        const propertyRentPotential = propertyAggregates._sum.monthlyRent || 0;
+        const unitRentPotential = unitRentAggregates._sum.monthlyRent || 0;
+        const monthlyRentPotential = propertyRentPotential + unitRentPotential;
 
-        const totalExpenses = allTransactions
-            .filter(t => !incomeTypes.includes(t.type))
-            .reduce((sum, t) => sum + t.amount, 0);
+        // Need property actual rent specific aggregation
+        const propertyRentedAggregates = await prisma.property.aggregate({
+             where: { ...propertyWhere, status: 'RENTED' },
+             _sum: { monthlyRent: true }
+        });
+        const propertyActualRent = propertyRentedAggregates._sum.monthlyRent || 0;
+        const unitActualRent = rentedUnitRentAggregates._sum.monthlyRent || 0;
+        const actualMonthlyRent = propertyActualRent + unitActualRent;
 
-        // Monthly rent potential
-        const monthlyRentPotential = properties.reduce((sum, p) => sum + (p.monthlyRent || 0), 0)
-            + allUnits.reduce((sum, u) => sum + (u.monthlyRent || 0), 0);
-
-        // Actual monthly rent (from rented properties/units)
-        const actualMonthlyRent = properties
-            .filter(p => p.status === 'RENTED')
-            .reduce((sum, p) => sum + (p.monthlyRent || 0), 0)
-            + allUnits
-                .filter(u => u.status === 'RENTED')
-                .reduce((sum, u) => sum + (u.monthlyRent || 0), 0);
-
-        // Value appreciation
         const valueAppreciation = totalPurchaseValue > 0
             ? ((totalValue - totalPurchaseValue) / totalPurchaseValue) * 100
             : 0;
 
-        // City distribution
         const cityDistribution: Record<string, number> = {};
-        properties.forEach(p => {
-            cityDistribution[p.city] = (cityDistribution[p.city] || 0) + 1;
+        cityGroup.forEach(group => {
+            cityDistribution[group.city] = group._count;
         });
 
         // Recent transactions (last 5)
@@ -112,6 +147,7 @@ export async function GET() {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const monthlyTrend = await prisma.transaction.groupBy({
             by: ['type'],
             where: {
@@ -159,6 +195,7 @@ export async function GET() {
             }))
         });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
