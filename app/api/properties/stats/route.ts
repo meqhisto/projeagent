@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
+import { TransactionType } from "@prisma/client";
 
 // GET - Portfolio statistics
 export async function GET() {
@@ -19,7 +20,7 @@ export async function GET() {
         // and network payload size.
 
         const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-        const incomeTypes: import("@prisma/client").TransactionType[] = ['RENT_INCOME', 'SALE', 'DEPOSIT'];
+        const incomeTypes: TransactionType[] = ['RENT_INCOME', 'SALE', 'DEPOSIT'];
 
         const [
             totalProperties,
