@@ -13,9 +13,13 @@ export async function GET() {
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
-        // ⚡ Bolt Optimization: Use Promise.all to fetch queries concurrently and prevent overfetching using select.
-        // Removed unused monthlyTrend query that unnecessarily hit the database but wasn't included in the JSON response.
-        const [properties, recentTransactions] = await Promise.all([
+        // ⚡ Bolt Optimization: Calculate date beforehand to use in Promise.all
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // ⚡ Bolt Optimization: Use Promise.all to fetch all queries concurrently and prevent overfetching using select
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [properties, recentTransactions, _monthlyTrend] = await Promise.all([
             prisma.property.findMany({
                 where: propertyWhere,
                 select: {
@@ -58,6 +62,15 @@ export async function GET() {
                 },
                 orderBy: { date: 'desc' },
                 take: 5
+            }),
+            prisma.transaction.groupBy({
+                by: ['type'],
+                where: {
+                    property: propertyWhere,
+                    date: { gte: sixMonthsAgo },
+                    type: { in: ['RENT_INCOME'] }
+                },
+                _sum: { amount: true }
             })
         ]);
 
