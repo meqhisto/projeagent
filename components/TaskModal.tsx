@@ -193,6 +193,7 @@ export default function TaskModal({ isOpen, onClose, onSuccess, taskId, defaultP
                     <button
                         onClick={handleClose}
                         className="text-gray-400 hover:text-gray-600"
+                        aria-label="Kapat"
                     >
                         <X className="h-6 w-6" />
                     </button>

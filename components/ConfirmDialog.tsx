@@ -100,6 +100,7 @@ export default function ConfirmDialog({
                         onClick={onClose}
                         disabled={isLoading}
                         className="p-1.5 text-[#86868b] hover:text-[#1d1d1f] hover:bg-black/[0.04] rounded-lg transition-colors disabled:opacity-50"
+                        aria-label="Kapat"
                     >
                         <X className="h-5 w-5" />
                     </button>
