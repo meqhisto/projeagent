@@ -9,3 +9,7 @@
 ## 2024-07-09 - Prevent DB Overfetching in Stats APIs
 **Learning:** Overfetching full relational objects (e.g., `properties`, `units`, `transactions`) with `include` just to run in-memory calculations (like counting or summing values) wastes bandwidth, memory, and database processing. This was observed in `app/api/properties/stats/route.ts`.
 **Action:** When working on analytics or statistics routes where database-level aggregation cannot be fully utilized, strictly replace `include: { relation: true }` with a targeted `select` block. Fetch only the specific fields required (e.g., `id`, `status`, `amount`, `monthlyRent`) to drastically reduce database transfer payload size and Node.js memory bloat.
+
+## 2024-07-09 - Cloudflare Pages CI Failure with explicit Node.js Runtime Directives
+**Learning:** Adding explicit `export const runtime = 'nodejs'` directives to Next.js API routes or layouts causes Cloudflare Pages (`next-on-pages`) CI builds to unconditionally fail with errors related to the Edge runtime missing.
+**Action:** Never arbitrarily add `export const runtime` directives to Next.js files if they do not already have them. The `next-on-pages` build pipeline relies on implicit detection, and explicitly forcing 'nodejs' breaks compatibility with Cloudflare Workers' build system.
