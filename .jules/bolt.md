@@ -13,3 +13,7 @@
 ## 2024-07-09 - Cloudflare Pages CI Failure with explicit Node.js Runtime Directives
 **Learning:** Adding explicit `export const runtime = 'nodejs'` directives to Next.js API routes or layouts causes Cloudflare Pages (`next-on-pages`) CI builds to unconditionally fail with errors related to the Edge runtime missing.
 **Action:** Never arbitrarily add `export const runtime` directives to Next.js files if they do not already have them. The `next-on-pages` build pipeline relies on implicit detection, and explicitly forcing 'nodejs' breaks compatibility with Cloudflare Workers' build system.
+
+## 2024-07-09 - Package Manager Lockfile Pollution in Cloudflare Pages CI
+**Learning:** If a project relies on `pnpm` (indicated by `pnpm-lock.yaml`) but an accidental `package-lock.json` is generated or checked into the repository, Cloudflare Pages (`next-on-pages` CI) will mistakenly default to `npm` for dependency resolution, causing fatal build errors (`npm error ERESOLVE unable to resolve dependency tree`).
+**Action:** Always maintain strict package manager hygiene. If a `package-lock.json` file is accidentally created in a `pnpm` repository, delete it using `rm package-lock.json` before committing to prevent conflicting dependency resolutions in the CI pipeline.
