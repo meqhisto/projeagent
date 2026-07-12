@@ -5,7 +5,3 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
-
-## 2024-06-25 - Analytics Database Memory Bloat via Eager Include
-**Learning:** Eagerly fetching full related records using `include: { units: true, transactions: true }` when calculating portfolio statistics causes immense Node.js memory bloat and transfer latency when only partial aggregate data (like unit status or transaction amount) is needed.
-**Action:** Replace `include` with targeted `select` blocks to fetch only the explicitly required fields. Execute multiple independent `findMany()` queries concurrently with `Promise.all()` to decrease overall network waiting time for analytics routes.
