@@ -5,3 +5,6 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+## 2024-07-21 - [Prevent overfetching using select]
+**Learning:** In analytics-heavy routes like `api/properties/stats`, using `include` to fetch full related models (e.g., `transactions`, `units`) pulls in vast amounts of unnecessary data, causing severe Node.js memory bloat and slow database transfer speeds.
+**Action:** Always replace `include` with targeted `select` blocks when fetching deep relations for aggregations. Combine this with `Promise.all` to run independent queries concurrently.
