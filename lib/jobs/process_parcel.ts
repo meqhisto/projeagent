@@ -53,8 +53,8 @@ export async function processParcelInBackground(parcelId: number) {
 
             // ZoningInfo alanlarını şema ile eşleştir:
             //   ks          → KAKS / Emsal
-            //   taks        → TAKS
-            //   maxHeight   → Hmax / Bina Yüksekliği  (schema field adı)
+            //   taks        → TAKS  (fiziksel kural: 0 < TAKS ≤ 1)
+            //   maxHeight   → Hmax / Bina Yüksekliği  (schema field adı, 0 geçersiz)
             //   zoningType  → Kullanım amacı / Fonksiyon
             //   notes       → Yapı nizamı + ek notlar
             const notSatirlari = [
@@ -63,17 +63,22 @@ export async function processParcelInBackground(parcelId: number) {
                 imarData.notlar ? `Not: ${imarData.notlar}` : null,
             ].filter(Boolean).join("\n") || null;
 
+            // Fiziksel geçerlilik: TAKS 0-1 arası oran, 0 veya >1 ise parse hatası
+            const gKaks = (imarData.kaks != null && imarData.kaks > 0) ? imarData.kaks : null;
+            const gTaks = (imarData.taks != null && imarData.taks > 0 && imarData.taks <= 1) ? imarData.taks : null;
+            const gHmax = (imarData.hmax != null && imarData.hmax > 0) ? imarData.hmax : null;
+
             const existingZoning = await prisma.zoningInfo.findUnique({ where: { parcelId: parcel.id } });
 
             if (existingZoning) {
                 await prisma.zoningInfo.update({
                     where: { parcelId: parcel.id },
                     data: {
-                        ks:         imarData.kaks      ?? existingZoning.ks,
-                        taks:       imarData.taks      ?? existingZoning.taks,
-                        maxHeight:  imarData.hmax      ?? existingZoning.maxHeight,
+                        ks:         gKaks ?? existingZoning.ks,
+                        taks:       gTaks ?? existingZoning.taks,
+                        maxHeight:  gHmax ?? existingZoning.maxHeight,
                         zoningType: imarData.kullanimAmaci ?? existingZoning.zoningType,
-                        notes:      notSatirlari       ?? existingZoning.notes,
+                        notes:      notSatirlari           ?? existingZoning.notes,
                         sourceUrl:  imarData.sourceUrl,
                     }
                 });
@@ -81,9 +86,9 @@ export async function processParcelInBackground(parcelId: number) {
                 await prisma.zoningInfo.create({
                     data: {
                         parcelId:   parcel.id,
-                        ks:         imarData.kaks          ?? null,
-                        taks:       imarData.taks          ?? null,
-                        maxHeight:  imarData.hmax          ?? null,
+                        ks:         gKaks,
+                        taks:       gTaks,
+                        maxHeight:  gHmax,
                         zoningType: imarData.kullanimAmaci ?? null,
                         notes:      notSatirlari,
                         sourceUrl:  imarData.sourceUrl,
