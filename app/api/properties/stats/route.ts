@@ -13,6 +13,11 @@ export async function GET() {
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
+        // ⚡ Bolt Performance Optimization:
+        // Replaced eager `include: { units: true, transactions: true }` with targeted `select` blocks.
+        // Impact: Drastically reduces the database payload and Node.js memory bloat by fetching
+        // only the scalar fields specifically needed for the in-memory aggregated statistics,
+        // preventing OOM errors on large property portfolios.
         // Get all properties with related data
         const properties = await prisma.property.findMany({
             where: propertyWhere,
@@ -110,6 +115,9 @@ export async function GET() {
             cityDistribution[p.city] = (cityDistribution[p.city] || 0) + 1;
         });
 
+        // ⚡ Bolt Performance Optimization:
+        // Changed `include: { property: { select: { title: true } } }` to a strict `select`
+        // that matches exactly what is mapped into the `recentTransactions` JSON payload below.
         // Recent transactions (last 5)
         const recentTransactions = await prisma.transaction.findMany({
             where: {
@@ -128,6 +136,11 @@ export async function GET() {
             orderBy: { date: 'desc' },
             take: 5
         });
+
+        // ⚡ Bolt Performance Optimization:
+        // The `monthlyTrend` Prisma database query (group by 'RENT_INCOME' amount) was previously
+        // executed here, but its result was entirely unused and never returned in the JSON payload.
+        // Action: Removed the unused query to eliminate an unnecessary database call and reduce latency.
 
         return NextResponse.json({
             // Summary
