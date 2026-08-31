@@ -7,21 +7,42 @@ export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userRole = (user as any).role;
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
         // Get all properties with related data
+        // ⚡ Bolt Optimization: Replaced findMany() with include that overfetched all fields
+        // with targeted selects to significantly reduce Node.js memory bloat
         const properties = await prisma.property.findMany({
             where: propertyWhere,
-            include: {
-                units: true,
+            select: {
+                id: true,
+                currentValue: true,
+                purchasePrice: true,
+                status: true,
+                type: true,
+                city: true,
+                monthlyRent: true,
+                units: {
+                    select: {
+                        id: true,
+                        status: true,
+                        monthlyRent: true
+                    }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
+                    },
+                    select: {
+                        id: true,
+                        type: true,
+                        amount: true
                     }
                 }
             }
@@ -99,7 +120,12 @@ export async function GET() {
             where: {
                 property: propertyWhere
             },
-            include: {
+            select: {
+                id: true,
+                type: true,
+                amount: true,
+                date: true,
+                description: true,
                 property: {
                     select: { title: true }
                 }
@@ -108,19 +134,7 @@ export async function GET() {
             take: 5
         });
 
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
-        });
+        // ⚡ Bolt Optimization: Removed monthlyTrend aggregation query as it was fetched but completely unused in the final response payload.
 
         return NextResponse.json({
             // Summary
@@ -159,6 +173,7 @@ export async function GET() {
             }))
         });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
