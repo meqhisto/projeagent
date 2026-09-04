@@ -9,3 +9,7 @@
 ## 2024-09-04 - Unused DB Query and Overfetching Optimization
 **Learning:** Analytics endpoints like `app/api/properties/stats/route.ts` sometimes perform full relation queries (via Prisma `include`) and fetch unused calculations (e.g. `monthlyTrend`) that never make it to the API response, severely hurting performance.
 **Action:** Always replace `include` with strict `select` blocks fetching only exactly what is needed for computations, and proactively delete unreachable database queries to save backend capacity and Node.js memory.
+
+## 2024-09-04 - Unused DB Query and Overfetching Optimization
+**Learning:** Analytics endpoints like `app/api/properties/stats/route.ts` sometimes perform full relation queries (via Prisma `include`) and fetch unused calculations (e.g. `monthlyTrend`) that never make it to the API response, severely hurting performance.
+**Action:** Always replace `include` with strict `select` blocks fetching only exactly what is needed for computations, and proactively delete unreachable database queries to save backend capacity and Node.js memory.
