@@ -5,3 +5,6 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+## 2024-06-25 - Sidebar Test Translation Mismatches
+**Learning:** The frontend test suite for `Sidebar.test.tsx` fails because it asserts Turkish translated names (e.g., "Anasayfa"), but the component currently renders English (e.g., "Dashboard").
+**Action:** These test failures are pre-existing known issues. As Bolt, I should ignore them as long as I do not introduce any new failures.
