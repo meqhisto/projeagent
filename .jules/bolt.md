@@ -8,3 +8,6 @@
 ## 2024-09-25 - Parallelize Independent Queries
 **Learning:** Sequential Prisma queries (e.g., searching parcels then customers) in API routes artificially inflate response times by blocking subsequent queries until the current one resolves.
 **Action:** Always wrap independent, sequential database queries in `Promise.all` to execute them concurrently, reducing total latency without risking structural API regressions.
+## 2024-09-25 - Cloudflare next-on-pages CI build failures
+**Learning:** Cloudflare Workers CI builds may fail complaining about `edge` vs `nodejs` runtimes due to Prisma dependencies.
+**Action:** Do NOT apply global configuration changes or attempt to fix unrelated build errors. Re-submit the PR exactly as instructed in the original request, but document in the description that the pre-existing CI issue is intentionally left unfixed to respect strict persona boundaries.
