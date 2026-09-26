@@ -66,7 +66,8 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = "md
                     <h3 className="font-display text-[17px] font-semibold text-[#1d1d1f]">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="p-2 -mr-2 text-[#86868b] hover:bg-black/[0.04] hover:text-[#1d1d1f] rounded-lg transition-all"
+                        className="p-2 -mr-2 text-[#86868b] hover:bg-black/[0.04] hover:text-[#1d1d1f] rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-[#0071e3] outline-none"
+                        aria-label="Kapat"
                     >
                         <X className="w-5 h-5" />
                     </button>

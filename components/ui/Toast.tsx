@@ -137,7 +137,8 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
             </div>
             <button
                 onClick={onClose}
-                className="p-1 hover:bg-white/20 rounded-lg transition-colors shrink-0"
+                className="p-1 hover:bg-white/20 rounded-lg transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-white outline-none"
+                aria-label="Kapat"
             >
                 <X className="h-4 w-4" />
             </button>
