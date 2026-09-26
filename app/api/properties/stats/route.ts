@@ -15,13 +15,30 @@ export async function GET() {
         // Get all properties with related data
         const properties = await prisma.property.findMany({
             where: propertyWhere,
-            include: {
-                units: true,
+            // ⚡ Bolt Optimization: Replaced `include` with `select` to prevent over-fetching
+            // We only need specific fields to compute statistics, drastically reducing memory usage.
+            select: {
+                currentValue: true,
+                purchasePrice: true,
+                status: true,
+                type: true,
+                monthlyRent: true,
+                city: true,
+                units: {
+                    select: {
+                        status: true,
+                        monthlyRent: true
+                    }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
+                    },
+                    select: {
+                        type: true,
+                        amount: true
                     }
                 }
             }
