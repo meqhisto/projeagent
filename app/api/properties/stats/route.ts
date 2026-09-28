@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
+
 // GET - Portfolio statistics
 export async function GET() {
     try {
@@ -15,11 +16,21 @@ export async function GET() {
         // Get all properties with related data
         // ⚡ Bolt Optimization: Prevented over-fetching of related records
         // by applying targeted select statements inside the include block, reducing memory usage
+        // Note: Replaced top-level include with select to maintain structural type safety and resolve memory bloat
         const properties = await prisma.property.findMany({
             where: propertyWhere,
-            include: {
+            select: {
+                id: true,
+                ownerId: true,
+                currentValue: true,
+                purchasePrice: true,
+                monthlyRent: true,
+                status: true,
+                type: true,
+                city: true,
                 units: {
                     select: {
+                        id: true,
                         status: true,
                         monthlyRent: true
                     }
@@ -31,8 +42,12 @@ export async function GET() {
                         }
                     },
                     select: {
+                        id: true,
                         type: true,
-                        amount: true
+                        amount: true,
+                        date: true,
+                        description: true,
+                        propertyId: true
                     }
                 }
             }
