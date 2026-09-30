@@ -112,15 +112,7 @@ export async function GET() {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
-        });
+        // monthlyTrend query removed as unused by Bolt
 
         return NextResponse.json({
             // Summary
