@@ -109,10 +109,6 @@ export async function GET() {
         });
 
         // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        // monthlyTrend query removed as unused by Bolt
 
         return NextResponse.json({
             // Summary
