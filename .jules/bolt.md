@@ -5,3 +5,9 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+## 2024-09-25 - Parallelize Independent Queries
+**Learning:** Sequential Prisma queries (e.g., searching parcels then customers) in API routes artificially inflate response times by blocking subsequent queries until the current one resolves.
+**Action:** Always wrap independent, sequential database queries in `Promise.all` to execute them concurrently, reducing total latency without risking structural API regressions.
+## 2024-09-25 - Cloudflare next-on-pages CI build failures
+**Learning:** Cloudflare Workers CI builds may fail complaining about `edge` vs `nodejs` runtimes due to Prisma dependencies.
+**Action:** Do NOT apply global configuration changes or attempt to fix unrelated build errors. Re-submit the PR exactly as instructed in the original request, but document in the description that the pre-existing CI issue is intentionally left unfixed to respect strict persona boundaries.
