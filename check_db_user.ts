@@ -29,8 +29,8 @@ async function main() {
         console.log("   Role:", user.role);
         console.log("   Password Hash:", user.password.substring(0, 10) + "...");
 
-        const isMatch = await bcrypt.compare("admin123", user.password);
-        console.log("   Password 'admin123' matches:", isMatch);
+        const isMatch = await bcrypt.compare(process.argv[2] ?? "", user.password);
+        console.log("   Password matches:", isMatch);
     } else {
         console.log("❌ User NOT found in DB");
     }

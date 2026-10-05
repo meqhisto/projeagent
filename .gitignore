@@ -74,3 +74,8 @@ check_db_user.ts
 reset-password-docker.js
 test-backup-remote.sh
 
+
+# Local databases (may contain personal data)
+prisma/*.db
+prisma/*.db-journal
+mimar_memory.db

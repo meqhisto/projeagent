@@ -143,12 +143,6 @@ function LoginContent() {
                             )}
                         </button>
                     </form>
-
-                    {/* Demo Info */}
-                    <div className="mt-6 p-4 bg-[#f5f5f7] rounded-xl">
-                        <p className="text-xs font-medium text-[#6e6e73] mb-2">Demo Bilgileri:</p>
-                        <p className="text-xs text-[#86868b]">admin@parselmonitor.com / admin123</p>
-                    </div>
                 </div>
 
                 {/* Footer */}

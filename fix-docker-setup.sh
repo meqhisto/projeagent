@@ -100,12 +100,15 @@ docker exec postgresql-postgres-1 psql -U mmuser -d parselmonitor -c "\dt"
 echo ""
 
 # 11. Admin Kullanıcı Oluştur
+# ADMIN_PASSWORD_HASH bcrypt hash'i ortam değişkeninden gelir, örn:
+#   export ADMIN_PASSWORD_HASH=$(node -e "console.log(require('bcryptjs').hashSync(process.argv[1],10))" 'YeniSifre')
+if [ -z "$ADMIN_PASSWORD_HASH" ]; then echo "❌ ADMIN_PASSWORD_HASH tanımlı değil"; exit 1; fi
 echo "👤 11. Admin kullanıcı oluşturuluyor..."
-docker exec postgresql-postgres-1 psql -U mmuser -d parselmonitor << 'SQLEOF'
+docker exec postgresql-postgres-1 psql -U mmuser -d parselmonitor << SQLEOF
 INSERT INTO "User" (email, password, name, role, "isActive", "createdAt")
 VALUES (
   'altanbariscomert@gmail.com',
-  '$2a$10$YMCkMhRt7SyXKz.eCO8AVuqvL0Q0pqW0fZ7W6qH0qH0qH0qH0qH0q',
+  '${ADMIN_PASSWORD_HASH}',
   'Altan Baris Comert',
   'ADMIN',
   true,
@@ -113,7 +116,7 @@ VALUES (
 )
 ON CONFLICT (email) 
 DO UPDATE SET 
-  password = '$2a$10$YMCkMhRt7SyXKz.eCO8AVuqvL0Q0pqW0fZ7W6qH0qH0qH0qH0qH0q',
+  password = '${ADMIN_PASSWORD_HASH}',
   role = 'ADMIN',
   "isActive" = true;
 SQLEOF
