@@ -1,5 +1,24 @@
 # ParselMonitor
 
+**Land and parcel management platform for the Turkish real estate market.** It covers the full land acquisition workflow: finding and recording parcels, analysing development feasibility, tracking deals and presenting opportunities to investors.
+
+## Highlights
+
+- **Land registry integration:** pulls coordinates, area and GeoJSON geometry from the national land registry API (TKGM MEGSİS) through cascading province → district → neighbourhood lookups.
+- **Interactive map:** parcels drawn as polygons on a Leaflet map with clustered markers.
+- **CRM pipeline:** Kanban board from lead to contract, stakeholder management (landowners, investors, agents), tasks and interaction history.
+- **Feasibility engine:** models land-for-flats construction deals (unit split, contractor profit, ROI, 18-month cash flow simulation) entirely in TypeScript.
+- **Investor presentations:** token-based, time-limited shareable links with view tracking.
+- **Admin & audit:** role-based access (USER / ADMIN) and an audit log of logins, CRUD actions and exports.
+
+**Stack:** Next.js (App Router), React, Tailwind CSS, Prisma, PostgreSQL, NextAuth, Zod, Leaflet, Recharts · Vitest and Playwright tests · Docker / Docker Compose deployment.
+
+> The detailed documentation below is in Turkish.
+
+---
+
+## Türkçe
+
 Türkiye gayrimenkul piyasasına yönelik kapsamlı arsa ve parsel yönetim platformu. TKGM MEGSİS entegrasyonu, interaktif harita, CRM pipeline, müteahhit fizibilite hesaplayıcı ve yatırımcı sunum sistemi içerir.
 
 ---
