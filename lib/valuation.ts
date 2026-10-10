@@ -473,7 +473,7 @@ export async function valueParcel(
     const similarities = scored.map(s => s.similarity);
 
     // Method
-    let method: ValuationMethod =
+    const method: ValuationMethod =
         usedPoints.length >= 3
             ? "comparable_sales"
             : usedPoints.length >= 1 && subject.zoning?.ks != null
