@@ -8,3 +8,7 @@
 ## 2024-05-30 - Prevent Sequential Blocking DB Queries in Search Endpoints
 **Learning:** Performing multiple independent database queries sequentially (e.g., awaiting `parcels` then awaiting `customers`) blocks the execution thread unnecessarily and significantly increases API latency.
 **Action:** Always wrap completely independent data fetching operations into a concurrent `Promise.all([query1, query2])` array to minimize total resolution time to the longest-running query rather than the sum of all queries.
+
+## 2024-05-31 - Ignoring Global Runtime Warnings
+**Learning:** Adding `export const runtime = 'nodejs';` globally or to individual routes attempting to fix Cloudflare Pages / Next.js edge runtime warnings breaks Prisma client deployments when standard Node bindings are required. Global structural configuration changes are out-of-scope for targeted optimizations.
+**Action:** Unrelated, pre-existing CI errors (like Cloudflare edge runtime config errors) should be explicitly documented in the PR submission without modifying codebase structures to resolve them.
