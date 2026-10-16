@@ -5,3 +5,7 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+
+## 2024-06-25 - Parallelize Independent Sequential Queries
+**Learning:** Found sequential `findMany` queries for unrelated models (`parcel`, `customer`) in the same endpoint (`app/api/search/route.ts`). This blocked execution unnecessarily and increased latency, especially when scaling database load.
+**Action:** Use `Promise.all` to execute independent Prisma queries concurrently, effectively halving the latency footprint of the operation.
