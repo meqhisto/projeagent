@@ -10,8 +10,10 @@ export async function GET(req: Request) {
             return NextResponse.json({ parcels: [], customers: [] });
         }
 
-        // Search parcels
-        const parcels = await prisma.parcel.findMany({
+        // ⚡ Bolt Optimization: Use Promise.all to fetch both parcels and customers concurrently
+        // instead of sequentially, reducing the total latency for search requests.
+        const [parcels, customers] = await Promise.all([
+            prisma.parcel.findMany({
             where: {
                 OR: [
                     { city: { contains: query, mode: "insensitive" } },
@@ -34,10 +36,8 @@ export async function GET(req: Request) {
             },
             take: 5,
             orderBy: { createdAt: "desc" },
-        });
-
-        // Search customers
-        const customers = await prisma.customer.findMany({
+        }),
+        prisma.customer.findMany({
             where: {
                 OR: [
                     { name: { contains: query, mode: "insensitive" } },
@@ -55,7 +55,8 @@ export async function GET(req: Request) {
             },
             take: 5,
             orderBy: { createdAt: "desc" },
-        });
+        })
+        ]);
 
         return NextResponse.json({ parcels, customers });
     } catch (error) {
