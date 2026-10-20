@@ -108,19 +108,7 @@ export async function GET() {
             take: 5
         });
 
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
-        });
+        // Monthly income trend (last 6 months) - Removed unused query for performance optimization
 
         return NextResponse.json({
             // Summary
