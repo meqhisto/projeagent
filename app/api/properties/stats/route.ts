@@ -13,15 +13,28 @@ export async function GET() {
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
         // Get all properties with related data
+        // ⚡ Bolt Optimization: Retained root-level scalar fields via include to prevent breaking downstream logic,
+        // but used explicit select on nested 'units' and 'transactions' relations to prevent massive overfetching of full objects into Node.js memory.
         const properties = await prisma.property.findMany({
             where: propertyWhere,
             include: {
-                units: true,
+                units: {
+                    select: {
+                        id: true,
+                        status: true,
+                        monthlyRent: true
+                    }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
+                    },
+                    select: {
+                        id: true,
+                        type: true,
+                        amount: true
                     }
                 }
             }
