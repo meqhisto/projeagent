@@ -5,3 +5,7 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+
+## 2026-10-22 - PrismaClient Connection Pool Exhaustion
+**Learning:** The codebase has an anti-pattern of instantiating `new PrismaClient()` directly in API route handlers. This creates multiple database connections, exhausting connection pools and degrading API response times.
+**Action:** Always import the shared singleton from `@/lib/prisma` instead of creating new instances to maintain a stable connection pool.

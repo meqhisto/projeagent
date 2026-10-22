@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { requireAuth } from "@/lib/auth/roleCheck";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
     // Rate limiting check

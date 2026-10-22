@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 import { logLogin } from "@/lib/auditLog";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
