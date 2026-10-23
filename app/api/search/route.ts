@@ -11,7 +11,7 @@ export async function GET(req: Request) {
         }
 
         // Search parcels
-        const parcels = await prisma.parcel.findMany({
+        const parcelsPromise = prisma.parcel.findMany({
             where: {
                 OR: [
                     { city: { contains: query, mode: "insensitive" } },
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
         });
 
         // Search customers
-        const customers = await prisma.customer.findMany({
+        const customersPromise = prisma.customer.findMany({
             where: {
                 OR: [
                     { name: { contains: query, mode: "insensitive" } },
@@ -57,6 +57,8 @@ export async function GET(req: Request) {
             orderBy: { createdAt: "desc" },
         });
 
+        // ⚡ Bolt: Execute independent search queries concurrently using Promise.all to reduce total response latency.
+        const [parcels, customers] = await Promise.all([parcelsPromise, customersPromise]);
         return NextResponse.json({ parcels, customers });
     } catch (error) {
         console.error("Search error:", error);
