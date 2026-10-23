@@ -5,3 +5,7 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+
+## 2023-10-24 - Do not delete unused data queries without verify usage
+**Learning:** Removing unused database queries (e.g., an unused `monthlyTrend` query) is strictly treated as a breaking removal of functionality by code reviewers, not a performance optimization.
+**Action:** Never attempt to optimize an application by arbitrarily deleting data-fetching logic. Focus on structural query improvements instead (like `Promise.all` parallelization).
