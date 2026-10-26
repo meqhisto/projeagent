@@ -12,20 +12,58 @@ export async function GET() {
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
-        // Get all properties with related data
-        const properties = await prisma.property.findMany({
-            where: propertyWhere,
-            include: {
-                units: true,
-                transactions: {
-                    where: {
-                        date: {
-                            gte: new Date(new Date().getFullYear(), 0, 1) // This year
+        // ⚡ Bolt Optimization: Use Promise.all to fetch concurrent queries, avoiding sequential wait
+        // and using targeted select instead of include to dramatically reduce memory footprint.
+        const [properties, recentTransactions] = await Promise.all([
+            prisma.property.findMany({
+                where: propertyWhere,
+                select: {
+                    id: true,
+                    currentValue: true,
+                    purchasePrice: true,
+                    status: true,
+                    type: true,
+                    monthlyRent: true,
+                    city: true,
+                    units: {
+                        select: {
+                            id: true,
+                            status: true,
+                            monthlyRent: true
+                        }
+                    },
+                    transactions: {
+                        where: {
+                            date: {
+                                gte: new Date(new Date().getFullYear(), 0, 1) // This year
+                            }
+                        },
+                        select: {
+                            id: true,
+                            type: true,
+                            amount: true
                         }
                     }
                 }
-            }
-        });
+            }),
+            prisma.transaction.findMany({
+                where: {
+                    property: propertyWhere
+                },
+                select: {
+                    id: true,
+                    type: true,
+                    amount: true,
+                    date: true,
+                    description: true,
+                    property: {
+                        select: { id: true, title: true }
+                    }
+                },
+                orderBy: { date: 'desc' },
+                take: 5
+            })
+        ]);
 
         // Calculate statistics
         const totalProperties = properties.length;
@@ -92,34 +130,6 @@ export async function GET() {
         const cityDistribution: Record<string, number> = {};
         properties.forEach(p => {
             cityDistribution[p.city] = (cityDistribution[p.city] || 0) + 1;
-        });
-
-        // Recent transactions (last 5)
-        const recentTransactions = await prisma.transaction.findMany({
-            where: {
-                property: propertyWhere
-            },
-            include: {
-                property: {
-                    select: { title: true }
-                }
-            },
-            orderBy: { date: 'desc' },
-            take: 5
-        });
-
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
         });
 
         return NextResponse.json({
