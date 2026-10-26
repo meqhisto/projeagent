@@ -167,7 +167,8 @@ export default function TaskWidget() {
                         >
                             <button
                                 onClick={() => handleToggleComplete(task.id, task.isCompleted)}
-                                className="mt-0.5"
+                                className="mt-0.5 focus-visible:ring-2 outline-none rounded-full"
+                                aria-label={task.isCompleted ? "Görevi geri al" : "Görevi tamamla"}
                             >
                                 {task.isCompleted ? (
                                     <CheckCircle2 className="h-5 w-5 text-green-600" />
