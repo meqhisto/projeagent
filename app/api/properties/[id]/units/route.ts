@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - Property'ye ait tüm birimleri listele
 export async function GET(
     request: Request,

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
+
+export const runtime = "nodejs";
 import { DemandUpdateSchema, validateSchema } from "@/lib/validations";
 import { logCrudAction } from "@/lib/auditLog";
 

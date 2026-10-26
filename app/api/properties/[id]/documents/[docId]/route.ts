@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 export async function DELETE(
     _req: Request,
     { params }: { params: Promise<{ id: string; docId: string }> }

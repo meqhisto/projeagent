@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, resolveUserId } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // PUT — Sahip onaylar veya reddeder (alan seçimiyle)
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
+
+export const runtime = "nodejs";
 import { valueParcel } from "@/lib/valuation";
 import { ValuationQuerySchema } from "@/lib/validations";
 

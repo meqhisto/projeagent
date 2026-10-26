@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - List notifications for current user
 export async function GET(request: Request) {
     try {

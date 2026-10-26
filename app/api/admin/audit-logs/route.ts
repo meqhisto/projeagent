@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
+
+export const runtime = "nodejs";
 import { getRecentAuditLogs, getSecurityLogs } from "@/lib/auditLog";
 
 export async function GET(request: Request) {

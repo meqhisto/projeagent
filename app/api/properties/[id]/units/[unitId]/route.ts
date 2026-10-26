@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - Tek bir birim detayı
 export async function GET(
     request: Request,

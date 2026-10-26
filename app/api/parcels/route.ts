@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { requireAuth, resolveUserId, getUserId, isAdmin } from "@/lib/auth/roleCheck";
+
+export const runtime = "nodejs";
 import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
 import { ParcelCreateSchema, validateSchema } from "@/lib/validations";
 import { logger } from "@/lib/logger";

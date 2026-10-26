@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, getUserId, isAdmin } from "@/lib/auth/roleCheck";
+
+export const runtime = "nodejs";
 import { runMatchForDemand } from "@/lib/demands/matchDemand";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {

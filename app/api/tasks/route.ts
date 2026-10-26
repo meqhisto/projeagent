@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/lib/auth/roleCheck";
+
+export const runtime = "nodejs";
 import { logger } from "@/lib/logger";
 import { INTERACTION_TYPE, ROLES, PRIORITY, NOTIFICATION_TYPE } from "@/lib/constants";
 
