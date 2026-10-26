@@ -5,3 +5,6 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+## 2024-05-18 - Property Stats Endpoint Memory Optimization
+**Learning:** Found an endpoint that pulled all properties, units, and transactions fully into memory via `include` just to compute statistics, which causes Node.js memory bloat. Also found a decoupled, unused `monthlyTrend` query.
+**Action:** Use targeted `select` blocks for complex in-memory aggregations to drastically reduce Node.js memory footprint, and actively trace and remove entirely unused DB queries.

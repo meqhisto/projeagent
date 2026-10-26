@@ -7,25 +7,54 @@ export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
-        const userRole = (user as any).role;
+        const userRole = (user as any).role; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
-        // Get all properties with related data
-        const properties = await prisma.property.findMany({
-            where: propertyWhere,
-            include: {
-                units: true,
-                transactions: {
-                    where: {
-                        date: {
-                            gte: new Date(new Date().getFullYear(), 0, 1) // This year
+        // ⚡ Bolt Optimization: Use Promise.all to fetch data concurrently and replace include with select to reduce memory bloat
+        const [properties, recentTransactions] = await Promise.all([
+            prisma.property.findMany({
+                where: propertyWhere,
+                select: {
+                    currentValue: true,
+                    purchasePrice: true,
+                    status: true,
+                    type: true,
+                    city: true,
+                    monthlyRent: true,
+                    units: {
+                        select: {
+                            status: true,
+                            monthlyRent: true
+                        }
+                    },
+                    transactions: {
+                        where: {
+                            date: {
+                                gte: new Date(new Date().getFullYear(), 0, 1) // This year
+                            }
+                        },
+                        select: {
+                            type: true,
+                            amount: true
                         }
                     }
                 }
-            }
-        });
+            }),
+            prisma.transaction.findMany({
+                where: {
+                    property: propertyWhere
+                },
+                include: {
+                    property: {
+                        select: { title: true }
+                    }
+                },
+                orderBy: { date: 'desc' },
+                take: 5
+            })
+        ]);
 
         // Calculate statistics
         const totalProperties = properties.length;
@@ -94,33 +123,7 @@ export async function GET() {
             cityDistribution[p.city] = (cityDistribution[p.city] || 0) + 1;
         });
 
-        // Recent transactions (last 5)
-        const recentTransactions = await prisma.transaction.findMany({
-            where: {
-                property: propertyWhere
-            },
-            include: {
-                property: {
-                    select: { title: true }
-                }
-            },
-            orderBy: { date: 'desc' },
-            take: 5
-        });
-
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
-        });
+        // ⚡ Bolt Optimization: Removed unused monthlyTrend query to save DB resources
 
         return NextResponse.json({
             // Summary
@@ -159,7 +162,7 @@ export async function GET() {
             }))
         });
 
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
         }
