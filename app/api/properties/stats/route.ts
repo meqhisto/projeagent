@@ -7,7 +7,7 @@ export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
-        const userRole = (user as any).role;
+        const userRole = (user as any).role; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
@@ -108,20 +108,6 @@ export async function GET() {
             take: 5
         });
 
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
-        });
-
         return NextResponse.json({
             // Summary
             totalProperties,
@@ -159,7 +145,7 @@ export async function GET() {
             }))
         });
 
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
         }
