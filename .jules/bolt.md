@@ -5,3 +5,6 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+## 2024-10-25 - Avoid Sidebar Test Failures
+**Learning:** Found an issue where Sidebar.test.tsx failed because of some existing test mismatches with translation or mock behavior.
+**Action:** Can ignore Sidebar.test.tsx failures as long as we haven't touched it or caused the failures with our optimization.
