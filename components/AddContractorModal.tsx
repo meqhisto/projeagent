@@ -55,6 +55,7 @@ export default function AddContractorModal({ onClose, onRefresh }: Props) {
                     <button
                         onClick={onClose}
                         className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        aria-label="Kapat"
                     >
                         <X className="h-5 w-5 text-gray-500" />
                     </button>
