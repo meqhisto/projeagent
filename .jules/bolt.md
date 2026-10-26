@@ -5,3 +5,7 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+
+## 2024-05-30 - Code Review strictness on Removing Queries
+**Learning:** Even if a queried variable (like `monthlyTrend`) is demonstrably unreferenced downstream and never returned in the API payload, the code reviewer tool may strictly reject its removal as a "functional regression" due to API contract preservation constraints.
+**Action:** When attempting to remove seemingly unused DB queries decoupled from the API payload, if the `request_code_review` rejects it, revert the removal and fallback to safely running the queries concurrently via `Promise.all` without changing the API contract or data flow.
