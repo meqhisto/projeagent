@@ -1,36 +1,123 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
+import { TransactionType } from "@prisma/client";
 
 // GET - Portfolio statistics
 export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userRole = (user as any).role;
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
-
-        // Get all properties with related data
-        const properties = await prisma.property.findMany({
-            where: propertyWhere,
-            include: {
-                units: true,
-                transactions: {
-                    where: {
-                        date: {
-                            gte: new Date(new Date().getFullYear(), 0, 1) // This year
-                        }
-                    }
-                }
+        const unitWhere = { property: propertyWhere };
+        const transactionWhere = {
+            property: propertyWhere,
+            date: {
+                gte: new Date(new Date().getFullYear(), 0, 1) // This year
             }
-        });
+        };
 
-        // Calculate statistics
-        const totalProperties = properties.length;
-        const totalValue = properties.reduce((sum, p) => sum + (p.currentValue || 0), 0);
-        const totalPurchaseValue = properties.reduce((sum, p) => sum + (p.purchasePrice || 0), 0);
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // Calculate statistics using database aggregations concurrently
+        const [
+            totalProperties,
+            propertyAggregates,
+            statusGroups,
+            typeGroups,
+            cityGroups,
+            totalUnits,
+            rentedUnits,
+            propertyRentPotential,
+            unitRentPotential,
+            rentedPropertyActual,
+            rentedUnitActual,
+            incomeTransactions,
+            expenseTransactions,
+            recentTransactions,
+            monthlyTrend
+        ] = await Promise.all([
+            prisma.property.count({ where: propertyWhere }),
+            prisma.property.aggregate({
+                where: propertyWhere,
+                _sum: {
+                    currentValue: true,
+                    purchasePrice: true,
+                }
+            }),
+            prisma.property.groupBy({
+                by: ['status'],
+                where: propertyWhere,
+                _count: { _all: true }
+            }),
+            prisma.property.groupBy({
+                by: ['type'],
+                where: propertyWhere,
+                _count: { _all: true }
+            }),
+            prisma.property.groupBy({
+                by: ['city'],
+                where: propertyWhere,
+                _count: { _all: true }
+            }),
+            prisma.unit.count({ where: unitWhere }),
+            prisma.unit.count({ where: { ...unitWhere, status: 'RENTED' } }),
+            prisma.property.aggregate({
+                where: propertyWhere,
+                _sum: { monthlyRent: true }
+            }),
+            prisma.unit.aggregate({
+                where: unitWhere,
+                _sum: { monthlyRent: true }
+            }),
+            prisma.property.aggregate({
+                where: { ...propertyWhere, status: 'RENTED' },
+                _sum: { monthlyRent: true }
+            }),
+            prisma.unit.aggregate({
+                where: { ...unitWhere, status: 'RENTED' },
+                _sum: { monthlyRent: true }
+            }),
+            prisma.transaction.aggregate({
+                where: {
+                    ...transactionWhere,
+                    type: { in: ['RENT_INCOME', 'SALE', 'DEPOSIT'] as TransactionType[] }
+                },
+                _sum: { amount: true }
+            }),
+            prisma.transaction.aggregate({
+                where: {
+                    ...transactionWhere,
+                    type: { notIn: ['RENT_INCOME', 'SALE', 'DEPOSIT'] as TransactionType[] }
+                },
+                _sum: { amount: true }
+            }),
+            prisma.transaction.findMany({
+                where: { property: propertyWhere },
+                include: {
+                    property: { select: { title: true } }
+                },
+                orderBy: { date: 'desc' },
+                take: 5
+            }),
+            prisma.transaction.groupBy({
+                by: ['type'],
+                where: {
+                    property: propertyWhere,
+                    date: { gte: sixMonthsAgo },
+                    type: { in: ['RENT_INCOME'] as TransactionType[] }
+                },
+                _sum: { amount: true }
+            })
+        ]);
+
+        const totalValue = propertyAggregates._sum.currentValue || 0;
+        const totalPurchaseValue = propertyAggregates._sum.purchasePrice || 0;
 
         // Status counts
         const statusCounts = {
@@ -41,47 +128,30 @@ export async function GET() {
             RENOVATION: 0,
             RESERVED: 0
         };
-        properties.forEach(p => {
-            if (statusCounts[p.status as keyof typeof statusCounts] !== undefined) {
-                statusCounts[p.status as keyof typeof statusCounts]++;
+        statusGroups.forEach(group => {
+            if (statusCounts[group.status as keyof typeof statusCounts] !== undefined) {
+                statusCounts[group.status as keyof typeof statusCounts] = group._count._all;
             }
         });
 
         // Type counts
         const typeCounts: Record<string, number> = {};
-        properties.forEach(p => {
-            typeCounts[p.type] = (typeCounts[p.type] || 0) + 1;
+        typeGroups.forEach(group => {
+            typeCounts[group.type] = group._count._all;
         });
 
         // Unit statistics
-        const allUnits = properties.flatMap(p => p.units);
-        const totalUnits = allUnits.length;
-        const rentedUnits = allUnits.filter(u => u.status === 'RENTED').length;
         const occupancyRate = totalUnits > 0 ? (rentedUnits / totalUnits) * 100 : 0;
 
         // Financial calculations
-        const allTransactions = properties.flatMap(p => p.transactions);
-
-        const incomeTypes = ['RENT_INCOME', 'SALE', 'DEPOSIT'];
-        const totalIncome = allTransactions
-            .filter(t => incomeTypes.includes(t.type))
-            .reduce((sum, t) => sum + t.amount, 0);
-
-        const totalExpenses = allTransactions
-            .filter(t => !incomeTypes.includes(t.type))
-            .reduce((sum, t) => sum + t.amount, 0);
+        const totalIncome = incomeTransactions._sum.amount || 0;
+        const totalExpenses = expenseTransactions._sum.amount || 0;
 
         // Monthly rent potential
-        const monthlyRentPotential = properties.reduce((sum, p) => sum + (p.monthlyRent || 0), 0)
-            + allUnits.reduce((sum, u) => sum + (u.monthlyRent || 0), 0);
+        const monthlyRentPotential = (propertyRentPotential._sum.monthlyRent || 0) + (unitRentPotential._sum.monthlyRent || 0);
 
         // Actual monthly rent (from rented properties/units)
-        const actualMonthlyRent = properties
-            .filter(p => p.status === 'RENTED')
-            .reduce((sum, p) => sum + (p.monthlyRent || 0), 0)
-            + allUnits
-                .filter(u => u.status === 'RENTED')
-                .reduce((sum, u) => sum + (u.monthlyRent || 0), 0);
+        const actualMonthlyRent = (rentedPropertyActual._sum.monthlyRent || 0) + (rentedUnitActual._sum.monthlyRent || 0);
 
         // Value appreciation
         const valueAppreciation = totalPurchaseValue > 0
@@ -90,36 +160,10 @@ export async function GET() {
 
         // City distribution
         const cityDistribution: Record<string, number> = {};
-        properties.forEach(p => {
-            cityDistribution[p.city] = (cityDistribution[p.city] || 0) + 1;
-        });
-
-        // Recent transactions (last 5)
-        const recentTransactions = await prisma.transaction.findMany({
-            where: {
-                property: propertyWhere
-            },
-            include: {
-                property: {
-                    select: { title: true }
-                }
-            },
-            orderBy: { date: 'desc' },
-            take: 5
-        });
-
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
+        cityGroups.forEach(group => {
+            if (group.city) {
+                cityDistribution[group.city] = group._count._all;
+            }
         });
 
         return NextResponse.json({
@@ -156,9 +200,12 @@ export async function GET() {
                 date: t.date,
                 description: t.description,
                 propertyTitle: t.property?.title
-            }))
+            })),
+
+            monthlyTrend
         });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
