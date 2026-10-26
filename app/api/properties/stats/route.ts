@@ -13,19 +13,55 @@ export async function GET() {
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
         // Get all properties with related data
-        const properties = await prisma.property.findMany({
+        const propertiesPromise = prisma.property.findMany({
             where: propertyWhere,
-            include: {
-                units: true,
+            select: {
+                id: true,
+                currentValue: true,
+                purchasePrice: true,
+                status: true,
+                type: true,
+                city: true,
+                monthlyRent: true,
+                units: {
+                    select: {
+                        status: true,
+                        monthlyRent: true
+                    }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
+                    },
+                    select: {
+                        type: true,
+                        amount: true
                     }
                 }
             }
         });
+
+        // Recent transactions (last 5)
+        const recentTransactionsPromise = prisma.transaction.findMany({
+            where: {
+                property: propertyWhere
+            },
+            include: {
+                property: {
+                    select: { title: true }
+                }
+            },
+            orderBy: { date: 'desc' },
+            take: 5
+        });
+
+        // Execute queries concurrently
+        const [properties, recentTransactions] = await Promise.all([
+            propertiesPromise,
+            recentTransactionsPromise
+        ]);
 
         // Calculate statistics
         const totalProperties = properties.length;
@@ -92,34 +128,6 @@ export async function GET() {
         const cityDistribution: Record<string, number> = {};
         properties.forEach(p => {
             cityDistribution[p.city] = (cityDistribution[p.city] || 0) + 1;
-        });
-
-        // Recent transactions (last 5)
-        const recentTransactions = await prisma.transaction.findMany({
-            where: {
-                property: propertyWhere
-            },
-            include: {
-                property: {
-                    select: { title: true }
-                }
-            },
-            orderBy: { date: 'desc' },
-            take: 5
-        });
-
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
         });
 
         return NextResponse.json({
