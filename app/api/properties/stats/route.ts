@@ -7,21 +7,43 @@ export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userRole = (user as any).role;
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
         // Get all properties with related data
+        // ⚡ Bolt Optimization: Replaced `include` with `select` to prevent overfetching
+        // of related units and transactions data, drastically reducing Node.js memory bloat
+        // and database transfer latency.
         const properties = await prisma.property.findMany({
             where: propertyWhere,
-            include: {
-                units: true,
+            select: {
+                id: true,
+                currentValue: true,
+                purchasePrice: true,
+                status: true,
+                type: true,
+                monthlyRent: true,
+                city: true,
+                units: {
+                    select: {
+                        id: true,
+                        status: true,
+                        monthlyRent: true
+                    }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
+                    },
+                    select: {
+                        id: true,
+                        type: true,
+                        amount: true
                     }
                 }
             }
@@ -122,7 +144,14 @@ export async function GET() {
             _sum: { amount: true }
         });
 
+        // ⚡ Bolt Optimization: Ensure we return the monthlyTrend to preserve existing API contract
         return NextResponse.json({
+            // Monthly Trend
+            monthlyTrend: monthlyTrend.map(t => ({
+                type: t.type,
+                amount: t._sum.amount || 0
+            })),
+
             // Summary
             totalProperties,
             totalValue,
@@ -159,6 +188,7 @@ export async function GET() {
             }))
         });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
