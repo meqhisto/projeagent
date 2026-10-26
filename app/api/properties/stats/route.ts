@@ -7,7 +7,7 @@ export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
-        const userRole = (user as any).role;
+        const userRole = (user as any).role; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
@@ -15,14 +15,25 @@ export async function GET() {
         // Get all properties with related data
         const properties = await prisma.property.findMany({
             where: propertyWhere,
-            include: {
-                units: true,
+            // ⚡ Bolt Optimization: Replaced over-fetching `include` with targeted `select` to minimize DB transfer and memory bloat
+            select: {
+                id: true,
+                currentValue: true,
+                purchasePrice: true,
+                status: true,
+                type: true,
+                monthlyRent: true,
+                city: true,
+                units: {
+                    select: { id: true, status: true, monthlyRent: true }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
-                    }
+                    },
+                    select: { id: true, type: true, amount: true }
                 }
             }
         });
@@ -108,19 +119,7 @@ export async function GET() {
             take: 5
         });
 
-        // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
-        });
+        // ⚡ Bolt Optimization: Removed unused `monthlyTrend` calculation to eliminate pointless database load.
 
         return NextResponse.json({
             // Summary
@@ -159,7 +158,7 @@ export async function GET() {
             }))
         });
 
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
         }
