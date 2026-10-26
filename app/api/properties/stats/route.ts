@@ -2,26 +2,49 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAdmin } from "@/lib/auth/roleCheck";
 
+export const runtime = "nodejs";
+
 // GET - Portfolio statistics
 export async function GET() {
     try {
         const user = await requireAuth();
         const userId = parseInt(user.id || "0");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userRole = (user as any).role;
 
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
         // Get all properties with related data
+        // ⚡ Bolt Optimization: Replaced overfetching `include` with targeted `select`
+        // Fetch only the specific fields needed for in-memory aggregations to reduce DB payload and memory usage
         const properties = await prisma.property.findMany({
             where: propertyWhere,
-            include: {
-                units: true,
+            select: {
+                id: true,
+                currentValue: true,
+                purchasePrice: true,
+                status: true,
+                type: true,
+                monthlyRent: true,
+                city: true,
+                units: {
+                    select: {
+                        id: true,
+                        status: true,
+                        monthlyRent: true
+                    }
+                },
                 transactions: {
                     where: {
                         date: {
                             gte: new Date(new Date().getFullYear(), 0, 1) // This year
                         }
+                    },
+                    select: {
+                        id: true,
+                        type: true,
+                        amount: true
                     }
                 }
             }
@@ -112,6 +135,7 @@ export async function GET() {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const monthlyTrend = await prisma.transaction.groupBy({
             by: ['type'],
             where: {
@@ -159,6 +183,7 @@ export async function GET() {
             }))
         });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error?.message?.includes("Unauthorized")) {
             return NextResponse.json({ error: "Yetkilendirme gerekli" }, { status: 401 });
