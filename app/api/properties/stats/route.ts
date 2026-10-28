@@ -12,20 +12,47 @@ export async function GET() {
         // Build where clause based on role
         const propertyWhere = isAdmin(userRole) ? {} : { ownerId: userId };
 
-        // Get all properties with related data
-        const properties = await prisma.property.findMany({
-            where: propertyWhere,
-            include: {
-                units: true,
-                transactions: {
-                    where: {
-                        date: {
-                            gte: new Date(new Date().getFullYear(), 0, 1) // This year
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // ⚡ Bolt Optimization: Execute independent database queries concurrently using Promise.all
+        // This significantly reduces the total response time for the API route.
+        const [properties, recentTransactions, monthlyTrend] = await Promise.all([
+            prisma.property.findMany({
+                where: propertyWhere,
+                include: {
+                    units: true,
+                    transactions: {
+                        where: {
+                            date: {
+                                gte: new Date(new Date().getFullYear(), 0, 1) // This year
+                            }
                         }
                     }
                 }
-            }
-        });
+            }),
+            prisma.transaction.findMany({
+                where: {
+                    property: propertyWhere
+                },
+                include: {
+                    property: {
+                        select: { title: true }
+                    }
+                },
+                orderBy: { date: 'desc' },
+                take: 5
+            }),
+            prisma.transaction.groupBy({
+                by: ['type'],
+                where: {
+                    property: propertyWhere,
+                    date: { gte: sixMonthsAgo },
+                    type: { in: ['RENT_INCOME'] }
+                },
+                _sum: { amount: true }
+            })
+        ]);
 
         // Calculate statistics
         const totalProperties = properties.length;
@@ -95,32 +122,10 @@ export async function GET() {
         });
 
         // Recent transactions (last 5)
-        const recentTransactions = await prisma.transaction.findMany({
-            where: {
-                property: propertyWhere
-            },
-            include: {
-                property: {
-                    select: { title: true }
-                }
-            },
-            orderBy: { date: 'desc' },
-            take: 5
-        });
+        // (Fetched concurrently above)
 
         // Monthly income trend (last 6 months)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-        const monthlyTrend = await prisma.transaction.groupBy({
-            by: ['type'],
-            where: {
-                property: propertyWhere,
-                date: { gte: sixMonthsAgo },
-                type: { in: ['RENT_INCOME'] }
-            },
-            _sum: { amount: true }
-        });
+        // (Fetched concurrently above)
 
         return NextResponse.json({
             // Summary

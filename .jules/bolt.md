@@ -5,3 +5,7 @@
 ## 2024-05-29 - Prevent DB Overfetching in List Views
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
+
+## $(date +%Y-%m-%d) - Optimization for API Route
+**Learning:** Parallelizing independent sequential queries (like property data and transactions) using Promise.all can drastically reduce the total response time for the API route.
+**Action:** Always check if multiple Prisma database queries executed in sequence within a route can be run concurrently using Promise.all to improve throughput.
