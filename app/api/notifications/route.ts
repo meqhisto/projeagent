@@ -25,21 +25,23 @@ export async function GET(request: Request) {
             whereClause.isRead = false;
         }
 
-        const notifications = await prisma.notification.findMany({
-            where: whereClause,
-            orderBy: { createdAt: "desc" },
-            take: limit,
-        });
-
-        const unreadCount = await prisma.notification.count({
-            where: {
-                OR: [
-                    { userId: userId },
-                    { userId: null }
-                ],
-                isRead: false,
-            },
-        });
+        // ⚡ Bolt Optimization: Execute notification fetch and unread count queries concurrently using Promise.all
+        const [notifications, unreadCount] = await Promise.all([
+            prisma.notification.findMany({
+                where: whereClause,
+                orderBy: { createdAt: "desc" },
+                take: limit,
+            }),
+            prisma.notification.count({
+                where: {
+                    OR: [
+                        { userId: userId },
+                        { userId: null }
+                    ],
+                    isRead: false,
+                },
+            })
+        ]);
 
         return NextResponse.json({ notifications, unreadCount });
     } catch (error: any) {
