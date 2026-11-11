@@ -6,6 +6,6 @@
 **Learning:** Overfetching full relational objects (e.g., `ratings`, `matches`) just to access their `.length` in list API endpoints (like `app/api/contractors/route.ts`) wastes bandwidth, memory, and database processing.
 **Action:** Use Prisma's `include: { _count: { select: { ratings: true } } }` to retrieve just the counts. Calculate averages via a separate `prisma.model.groupBy` query with `_avg` to keep heavy computation in the database, reducing the payload and N+1 query patterns.
 
-## $(date +%Y-%m-%d) - Parallelizing Independent Prisma Queries
+## 2026-11-11 - Parallelizing Independent Prisma Queries
 **Learning:** Found that independent, sequential Prisma queries (e.g., fetching disparate entities like parcels and customers for a unified global search response) were executed synchronously, causing the total API response time to be the sum of both query durations.
 **Action:** When multiple independent database queries must be fulfilled to construct an API response, always use `Promise.all` to execute them concurrently. This eliminates unnecessary waiting time and significantly reduces total latency.
